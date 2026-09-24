@@ -1,0 +1,6 @@
+{
+  "name": "Smart Study Tutorial Freshman",
+  "description": "Smart Study Tutorial platform for university freshman students. Features video tutorials, lecture notes, CBT exam questions, and 300 ETB CBE & Telebirr payment verification managed by admin gudurualemayehu29@gmail.com.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

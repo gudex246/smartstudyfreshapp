@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fcd34d" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded canvas -->
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad)" />
+
+  <!-- Inner border ring -->
+  <rect x="16" y="16" width="480" height="480" rx="98" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3" />
+
+  <!-- Central Graphic Group -->
+  <g filter="url(#shadow)" transform="translate(0, -10)">
+    <!-- Graduation Cap Top Diamond -->
+    <path d="M 256 120 L 416 195 L 256 270 L 96 195 Z" fill="url(#accentGrad)" stroke="#60a5fa" stroke-width="4" stroke-linejoin="round" />
+    
+    <!-- Cap Skullcap -->
+    <path d="M 160 225 L 160 300 C 160 340 352 340 352 300 L 352 225 Z" fill="#1d4ed8" opacity="0.9" />
+
+    <!-- Tassel Cord and Bob -->
+    <path d="M 256 195 Q 390 230 400 300" fill="none" stroke="url(#goldGrad)" stroke-width="6" stroke-linecap="round" />
+    <circle cx="400" cy="305" r="8" fill="url(#goldGrad)" />
+    <path d="M 396 308 L 392 345 Q 400 348 408 345 L 404 308 Z" fill="url(#goldGrad)" />
+
+    <!-- Open Book Below -->
+    <g transform="translate(0, 70)">
+      <!-- Left Page -->
+      <path d="M 256 280 C 210 260 140 260 100 270 L 100 365 C 140 355 210 355 256 375 Z" fill="#f8fafc" />
+      <!-- Right Page -->
+      <path d="M 256 280 C 302 260 372 260 412 270 L 412 365 C 372 355 302 355 256 375 Z" fill="#e2e8f0" />
+      <!-- Book spine & center line -->
+      <path d="M 256 280 L 256 375" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" />
+
+      <!-- Text lines on left page -->
+      <line x1="125" y1="295" x2="230" y2="300" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+      <line x1="125" y1="315" x2="230" y2="320" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+      <line x1="125" y1="335" x2="210" y2="340" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+
+      <!-- Text lines on right page -->
+      <line x1="282" y1="300" x2="387" y2="295" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+      <line x1="282" y1="320" x2="387" y2="315" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+      <line x1="282" y1="340" x2="357" y2="335" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+    </g>
+
+    <!-- Star / Beacon of Excellence -->
+    <g transform="translate(256, 95) scale(0.9)">
+      <polygon points="0,-18 5,-5 18,-5 8,4 12,17 0,9 -12,17 -8,4 -18,-5 -5,-5" fill="url(#goldGrad)" filter="url(#shadow)" />
+    </g>
+  </g>
+</svg>
