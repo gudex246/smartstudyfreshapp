@@ -299,63 +299,35 @@ export const SignInPage: React.FC = () => {
               </div>
             </div>
 
-            {/* University & Stream Selection */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
-              <div>
-                <label className="block font-bold text-slate-200 mb-1.5">
-                  University / Campus
-                </label>
-                <div className="relative">
-                  <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
-                  <select
-                    value={university}
-                    onChange={(e) => setUniversity(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-700 bg-[#090d16] text-white text-xs focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="Addis Ababa University (AAU)">Addis Ababa University (AAU)</option>
-                    <option value="Jimma University (JU)">Jimma University (JU)</option>
-                    <option value="Hawassa University (HU)">Hawassa University (HU)</option>
-                    <option value="Bahir Dar University (BDU)">Bahir Dar University (BDU)</option>
-                    <option value="Haramaya University">Haramaya University</option>
-                    <option value="Adama Science & Tech (ASTU)">Adama Science & Tech (ASTU)</option>
-                    <option value="Addis Ababa Science & Tech (AASTU)">AASTU</option>
-                    <option value="Arba Minch University (AMU)">Arba Minch University (AMU)</option>
-                    <option value="Wollo University">Wollo University</option>
-                    <option value="Mekelle University">Mekelle University</option>
-                    <option value="Other Ethiopian University">Other Ethiopian University</option>
-                  </select>
-                </div>
-              </div>
+            {/* Freshman Stream Selection (Natural / Social) */}
+            <div className="space-y-1.5 text-xs pt-1">
+              <label className="block font-bold text-slate-200">
+                Academic Stream
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStream('natural')}
+                  className={`py-3 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    stream === 'natural'
+                      ? 'border-indigo-500 bg-indigo-600/30 text-white shadow-sm'
+                      : 'border-slate-700 bg-[#090d16] text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <span>🔬 Natural Science</span>
+                </button>
 
-              <div>
-                <label className="block font-bold text-slate-200 mb-1.5">
-                  Freshman Stream
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setStream('natural')}
-                    className={`py-3 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                      stream === 'natural'
-                        ? 'border-indigo-500 bg-indigo-600/30 text-white'
-                        : 'border-slate-700 bg-[#090d16] text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <span>🔬 Natural</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setStream('social')}
-                    className={`py-3 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                      stream === 'social'
-                        ? 'border-indigo-500 bg-indigo-600/30 text-white'
-                        : 'border-slate-700 bg-[#090d16] text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <span>📚 Social</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setStream('social')}
+                  className={`py-3 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    stream === 'social'
+                      ? 'border-indigo-500 bg-indigo-600/30 text-white shadow-sm'
+                      : 'border-slate-700 bg-[#090d16] text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <span>📚 Social Science</span>
+                </button>
               </div>
             </div>
 

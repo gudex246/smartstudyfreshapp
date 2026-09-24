@@ -29,6 +29,7 @@ import { cleanQuestionText } from '../utils/textUtils';
 import {
   generateSyncCode,
   dispatchPaymentSubmissionToCloud,
+  updatePaymentSubmissionInCloud,
   fetchRemotePaymentSubmissions,
   subscribeToSyncEvents
 } from '../utils/cloudSync';
@@ -444,58 +445,117 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     let isMounted = true;
 
+    const applyRemoteSubmissions = (remotes: PaymentSubmission[]) => {
+      if (!isMounted || !remotes || remotes.length === 0) return;
+
+      setPaymentSubmissions(prev => {
+        const prevMap = new Map<string, PaymentSubmission>(prev.map(p => [p.id, p]));
+        let hasChanges = false;
+        for (const r of remotes) {
+          const existing = prevMap.get(r.id);
+          if (!existing) {
+            prevMap.set(r.id, r);
+            hasChanges = true;
+          } else if (
+            existing.status !== r.status ||
+            existing.verifiedAt !== r.verifiedAt ||
+            existing.adminNotes !== r.adminNotes
+          ) {
+            prevMap.set(r.id, { ...existing, ...r });
+            hasChanges = true;
+          }
+        }
+        return hasChanges ? Array.from(prevMap.values()) : prev;
+      });
+
+      // Auto-unlock current student if any submission matching their phone, email, or submissionId is verified
+      setStudentProfile(prevProfile => {
+        const currentEmail = prevProfile.email?.trim().toLowerCase();
+        const currentPhone = prevProfile.phone?.replace(/\D/g, '');
+        const currentSubId = prevProfile.submissionId;
+
+        const myVerifiedSub = remotes.find(r => {
+          if (r.status !== 'verified') return false;
+          if (currentSubId && r.id === currentSubId) return true;
+          if (currentEmail && r.studentEmail && r.studentEmail.trim().toLowerCase() === currentEmail) return true;
+          if (currentPhone && r.studentPhone && r.studentPhone.replace(/\D/g, '') === currentPhone) return true;
+          return false;
+        });
+
+        if (myVerifiedSub && !prevProfile.isUnlocked) {
+          setSampleStudentPaywallStatusState('verified');
+          safeSetItem(STORAGE_KEYS.SAMPLE_STUDENT_STATUS, 'verified');
+          return {
+            ...prevProfile,
+            isUnlocked: true,
+            unlockedAt: myVerifiedSub.verifiedAt || new Date().toISOString()
+          };
+        }
+        return prevProfile;
+      });
+    };
+
     // Listen to local broadcast channel across browser tabs/windows
     const unsubscribe = subscribeToSyncEvents(
       (incomingSub) => {
         if (isMounted && incomingSub) {
           setPaymentSubmissions(prev => {
-            if (prev.some(s => s.id === incomingSub.id)) return prev;
+            const exists = prev.some(s => s.id === incomingSub.id);
+            if (exists) {
+              return prev.map(s => s.id === incomingSub.id ? { ...s, ...incomingSub } : s);
+            }
             return [incomingSub, ...prev];
           });
         }
       },
-      () => {}
+      () => {},
+      (updateData) => {
+        if (isMounted && updateData) {
+          setPaymentSubmissions(prev =>
+            prev.map(s => s.id === updateData.id ? { ...s, ...updateData } : s)
+          );
+          if (updateData.status === 'verified') {
+            setStudentProfile(prevProfile => {
+              if (prevProfile.submissionId === updateData.id) {
+                setSampleStudentPaywallStatusState('verified');
+                safeSetItem(STORAGE_KEYS.SAMPLE_STUDENT_STATUS, 'verified');
+                return {
+                  ...prevProfile,
+                  isUnlocked: true,
+                  unlockedAt: updateData.verifiedAt || new Date().toISOString()
+                };
+              }
+              return prevProfile;
+            });
+          }
+        }
+      }
     );
 
     // Initial background fetch from cloud/serverless API
-    const initialSync = async () => {
+    const doSync = async () => {
       try {
         const remotes = await fetchRemotePaymentSubmissions();
-        if (isMounted && remotes && remotes.length > 0) {
-          setPaymentSubmissions(prev => {
-            const prevIds = new Set(prev.map(p => p.id));
-            const newItems = remotes.filter(r => !prevIds.has(r.id));
-            if (newItems.length === 0) return prev;
-            return [...newItems, ...prev];
-          });
-        }
-      } catch {
-        // silent
-      }
+        applyRemoteSubmissions(remotes);
+      } catch {}
     };
-    initialSync();
 
-    // Background polling every 10 seconds to auto-receive remote mobile submissions
-    const interval = setInterval(async () => {
-      try {
-        const remotes = await fetchRemotePaymentSubmissions();
-        if (isMounted && remotes && remotes.length > 0) {
-          setPaymentSubmissions(prev => {
-            const prevIds = new Set(prev.map(p => p.id));
-            const newItems = remotes.filter(r => !prevIds.has(r.id));
-            if (newItems.length === 0) return prev;
-            return [...newItems, ...prev];
-          });
-        }
-      } catch {
-        // silent
-      }
-    }, 10000);
+    doSync();
+
+    // Fast polling every 3.5 seconds so admin verification opens the student's app instantly
+    const interval = setInterval(doSync, 3500);
+
+    // Also sync immediately when window or tab receives focus
+    const handleFocus = () => {
+      doSync();
+    };
+    window.addEventListener('focus', handleFocus);
 
     return () => {
       isMounted = false;
       unsubscribe();
       clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
@@ -745,6 +805,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Payment verification by admin
   const verifyPaymentSubmission = (id: string, notes?: string) => {
+    const verifiedNotes = notes || `Verified by Super Admin Guduru Alemayehu (${ADMIN_EMAIL})`;
+    const verifiedTimestamp = new Date().toISOString();
+
     setPaymentSubmissions(prev =>
       prev.map(sub => {
         if (sub.id === id) {
@@ -762,13 +825,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return {
             ...sub,
             status: 'verified' as const,
-            verifiedAt: new Date().toISOString(),
-            adminNotes: notes || `Verified by Super Admin Guduru Alemayehu (${ADMIN_EMAIL})`
+            verifiedAt: verifiedTimestamp,
+            adminNotes: verifiedNotes
           };
         }
         return sub;
       })
     );
+
+    // Persist verified status across all connected student devices & cloud API
+    updatePaymentSubmissionInCloud(id, {
+      status: 'verified',
+      adminNotes: verifiedNotes,
+      verifiedAt: verifiedTimestamp
+    }).catch(e => console.warn('Cloud update failed:', e));
 
     // If verified submission matches student, unlock access
     setPaymentSubmissions(currentList => {
@@ -783,7 +853,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return {
               ...prev,
               isUnlocked: true,
-              unlockedAt: new Date().toISOString()
+              unlockedAt: verifiedTimestamp
             };
           }
           return prev;
@@ -794,18 +864,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const rejectPaymentSubmission = (id: string, reason?: string) => {
+    const rejectedReason = reason || 'Screenshot or transaction reference could not be validated. Please contact CBE/Telebirr support.';
     setPaymentSubmissions(prev =>
       prev.map(sub => {
         if (sub.id === id) {
           return {
             ...sub,
             status: 'rejected' as const,
-            adminNotes: reason || 'Screenshot or transaction reference could not be validated. Please contact CBE/Telebirr support.'
+            adminNotes: rejectedReason
           };
         }
         return sub;
       })
     );
+
+    // Persist rejection to cloud/API
+    updatePaymentSubmissionInCloud(id, {
+      status: 'rejected',
+      adminNotes: rejectedReason
+    }).catch(e => console.warn('Cloud reject failed:', e));
   };
 
   const deletePaymentSubmission = (id: string) => {
@@ -1121,13 +1198,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const isEffectiveAdmin = useMemo(() => {
-    if (isAdmin) return true;
-    if (currentAccount.role === 'super_admin' || currentAccount.role === 'admin') return true;
-    if (studentProfile.email && studentProfile.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) return true;
-    if (sessionStorage.getItem(STORAGE_KEYS.ADMIN_AUTH) === 'true') return true;
-    if (localStorage.getItem('smart_study_admin_session') === 'true') return true;
+    // The user explicitly requested: admin panel is ONLY available when the admin signs in with gudurualemayehu29@gmail.com
+    const emailMatches = Boolean(
+      studentProfile.email && studentProfile.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()
+    );
+    if (emailMatches) return true;
     return false;
-  }, [isAdmin, currentAccount.role, studentProfile.email]);
+  }, [studentProfile.email]);
 
   const isUnlockedEffective = useMemo(() => {
     // If Admin, ALL questions, past exams, solutions, and masterclasses are unconditionally 100% UNLOCKED!

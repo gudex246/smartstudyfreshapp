@@ -22,11 +22,12 @@ import {
   Share2,
   Check
 } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import { useApp, ADMIN_EMAIL } from '../context/AppContext';
 import { PaymentSubmission } from '../types';
 import {
   createTelegramDispatchUrl,
   createWhatsAppDispatchUrl,
+  createGmailWebDispatchUrl,
   createMailtoDispatchUrl,
   createSmsDispatchUrl,
   createPhoneCallUrl
@@ -215,12 +216,9 @@ export const UnlockAccessTab: React.FC = () => {
 
           <div className="pt-2 flex items-center justify-between text-xs text-emerald-800">
             <span>Student: <strong>{studentProfile.name}</strong> ({studentProfile.email})</span>
-            <button
-              onClick={toggleStudentUnlock}
-              className="text-[11px] text-emerald-700 underline hover:text-emerald-900"
-            >
-              [Testing: Toggle Lock State]
-            </button>
+            <span className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" /> 300 ETB Verified & Unlocked
+            </span>
           </div>
         </div>
       )}
@@ -275,29 +273,35 @@ export const UnlockAccessTab: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-200/80 text-[11px] text-slate-500 flex items-center justify-between">
-              <span>Admin reviewer: <strong className="text-slate-700">{adminEmail}</strong></span>
-              <span>{mySubmission.adminNotes || 'Verification usually takes under 30 minutes.'}</span>
+            <div className="pt-2 border-t border-slate-200/80 text-[11px] text-slate-500 flex flex-wrap items-center justify-between gap-1">
+              <span>Admin Reviewer: <strong className="text-slate-800">{ADMIN_EMAIL}</strong></span>
+              <span className="text-emerald-700 font-medium flex items-center gap-1">
+                <RefreshCw className="w-3 h-3 animate-spin text-emerald-600" />
+                Auto-Unlock Sync Active (Unlocks automatically upon approval)
+              </span>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs">
             <p className="text-slate-500 text-[11px]">
-              You can submit an updated screenshot or another transaction below if needed.
+              Need faster approval? Send your payment confirmation screenshot directly to admin email:
             </p>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setActiveTab('admin')}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold transition"
+              <a
+                href={createGmailWebDispatchUrl(mySubmission)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition flex items-center gap-1.5 text-xs shadow-xs"
               >
-                Go to Admin Portal to Verify
-              </button>
-              <button
-                onClick={toggleStudentUnlock}
-                className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-semibold transition shadow-xs"
+                <Send className="w-3.5 h-3.5" />
+                <span>Email {ADMIN_EMAIL}</span>
+              </a>
+              <a
+                href={createMailtoDispatchUrl(mySubmission)}
+                className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold transition text-xs"
               >
-                Instant Test Unlock
-              </button>
+                Default Mail App
+              </a>
             </div>
           </div>
         </div>
@@ -501,14 +505,70 @@ export const UnlockAccessTab: React.FC = () => {
               </div>
             </div>
 
+            {/* PRIMARY: Send Payment Details & Screenshot directly to Admin Guduru Alemayehu */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-red-950/60 to-indigo-950/70 border border-red-500/40 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
+                    <Send className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-white block">
+                      Send Receipt & Screenshot to Admin Email
+                    </span>
+                    <span className="text-[11px] text-red-200">
+                      Destination: <strong className="text-white underline">{ADMIN_EMAIL}</strong>
+                    </span>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase">
+                  Direct Dispatch
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <a
+                  href={createGmailWebDispatchUrl(lastSubmitted)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/30 transition text-center"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>🚀 Send via Gmail to {ADMIN_EMAIL}</span>
+                </a>
+
+                <a
+                  href={createMailtoDispatchUrl(lastSubmitted)}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#090d16] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold text-xs transition text-center"
+                >
+                  <span>✉️ Open Default Mail App (mailto)</span>
+                </a>
+              </div>
+
+              {lastSubmitted.screenshotUrl && (
+                <div className="flex flex-wrap items-center justify-between pt-1 text-[11px] text-slate-300 gap-1">
+                  <span>📷 Attach your payment screenshot to the email so Admin Guduru can verify immediately.</span>
+                  {lastSubmitted.screenshotUrl.startsWith('data:') && (
+                    <a
+                      href={lastSubmitted.screenshotUrl}
+                      download={`Payment_Screenshot_${lastSubmitted.studentName.replace(/\s+/g, '_')}.png`}
+                      className="text-amber-400 hover:text-amber-300 font-bold underline"
+                    >
+                      Download Screenshot File
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Multi-Device Dispatch Actions */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Phone className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Notify Admin Mobile Directly (0953201048):</span>
+                  <span>Also notify Admin via Mobile / Telegram (0953201048):</span>
                 </span>
-                <span className="text-[10px] text-slate-400">Instant verification</span>
+                <span className="text-[10px] text-slate-400">Backup channels</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">

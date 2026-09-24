@@ -134,14 +134,98 @@ export function createWhatsAppDispatchUrl(sub: PaymentSubmission): string {
 }
 
 /**
- * Format direct Mailto link to Admin
+ * Format direct Gmail Web link to Admin (opens Gmail Compose in browser or Gmail app)
+ */
+export function createGmailWebDispatchUrl(sub: PaymentSubmission): string {
+  const subject = encodeURIComponent(`Smart Study 300 ETB Verification - ${sub.studentName} (${sub.paymentMethod} - ${sub.transactionRef})`);
+  const body = encodeURIComponent(
+    `Hello Admin Guduru Alemayehu,\n\nI have submitted my 300 ETB payment for full access to Smart Study Freshman Tutorial.\n\n` +
+    `==============================\n` +
+    `STUDENT PAYMENT DETAILS\n` +
+    `==============================\n` +
+    `• Student Name: ${sub.studentName}\n` +
+    `• Phone Number: ${sub.studentPhone}\n` +
+    `• Student Email: ${sub.studentEmail || 'N/A'}\n` +
+    `• Payment Method: ${sub.paymentMethod} (${sub.paymentMethod === 'CBE' ? '1000521750255' : '0953201048'})\n` +
+    `• Transaction / Transfer Reference: ${sub.transactionRef}\n` +
+    `• Verification Sync Code: ${sub.syncCode || 'N/A'}\n` +
+    `• Amount Paid: 300 ETB\n` +
+    `• Submitted: ${new Date(sub.submittedAt).toLocaleString()}\n` +
+    `==============================\n\n` +
+    `NOTE: I have attached my payment receipt screenshot to this email.\n\n` +
+    `Please verify my payment in the admin portal and activate my access.\n\n` +
+    `Thank you!\n${sub.studentName}`
+  );
+  return `https://mail.google.com/mail/?view=cm&fs=1&to=gudurualemayehu29@gmail.com&su=${subject}&body=${body}`;
+}
+
+/**
+ * Format direct Mailto link to Admin (mailto:gudurualemayehu29@gmail.com)
  */
 export function createMailtoDispatchUrl(sub: PaymentSubmission): string {
-  const subject = encodeURIComponent(`Smart Study 300 ETB Verification - ${sub.studentName} (${sub.transactionRef})`);
+  const subject = encodeURIComponent(`Smart Study 300 ETB Verification - ${sub.studentName} (${sub.paymentMethod} - ${sub.transactionRef})`);
   const body = encodeURIComponent(
-    `Hello Admin Guduru Alemayehu,\n\nI have submitted my 300 ETB payment verification.\n\nStudent Name: ${sub.studentName}\nPhone: ${sub.studentPhone}\nMethod: ${sub.paymentMethod}\nTransaction Ref: ${sub.transactionRef}\nSync Code: ${sub.syncCode || 'N/A'}\nTime: ${new Date(sub.submittedAt).toLocaleString()}\n\nPlease verify and activate my access.\n\nThank you!`
+    `Hello Admin Guduru Alemayehu,\n\nI have submitted my 300 ETB payment for full access to Smart Study Freshman Tutorial.\n\n` +
+    `==============================\n` +
+    `STUDENT PAYMENT DETAILS\n` +
+    `==============================\n` +
+    `• Student Name: ${sub.studentName}\n` +
+    `• Phone Number: ${sub.studentPhone}\n` +
+    `• Student Email: ${sub.studentEmail || 'N/A'}\n` +
+    `• Payment Method: ${sub.paymentMethod} (${sub.paymentMethod === 'CBE' ? '1000521750255' : '0953201048'})\n` +
+    `• Transaction / Transfer Reference: ${sub.transactionRef}\n` +
+    `• Verification Sync Code: ${sub.syncCode || 'N/A'}\n` +
+    `• Amount Paid: 300 ETB\n` +
+    `• Submitted: ${new Date(sub.submittedAt).toLocaleString()}\n` +
+    `==============================\n\n` +
+    `NOTE: I have attached my payment receipt screenshot to this email.\n\n` +
+    `Please verify my payment in the admin portal and activate my access.\n\n` +
+    `Thank you!\n${sub.studentName}`
   );
   return `mailto:gudurualemayehu29@gmail.com?subject=${subject}&body=${body}`;
+}
+
+/**
+ * Update payment submission status in cloud/API and broadcast across devices
+ */
+export async function updatePaymentSubmissionInCloud(
+  id: string,
+  updates: { status: 'verified' | 'rejected' | 'pending'; adminNotes?: string; verifiedAt?: string }
+): Promise<boolean> {
+  // 1. Broadcast update locally
+  if (broadcastChannel) {
+    try {
+      broadcastChannel.postMessage({ type: 'UPDATE_SUBMISSION', data: { id, ...updates } });
+    } catch (e) {
+      console.warn('Broadcast update failed:', e);
+    }
+  }
+
+  // 2. Update local storage buffer
+  try {
+    const existingRaw = localStorage.getItem(CLOUD_STORAGE_KEY);
+    if (existingRaw) {
+      const existing: PaymentSubmission[] = JSON.parse(existingRaw);
+      const updated = existing.map(s => s.id === id ? { ...s, ...updates } : s);
+      localStorage.setItem(CLOUD_STORAGE_KEY, JSON.stringify(updated));
+    }
+  } catch (e) {
+    console.warn('Local cloud buffer update failed:', e);
+  }
+
+  // 3. Send PATCH to serverless / API endpoint
+  try {
+    const res = await fetch('/api/submissions', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...updates })
+    });
+    if (res.ok) return true;
+  } catch (e) {
+    console.warn('API PATCH submission failed:', e);
+  }
+
+  return true;
 }
 
 /**
@@ -314,13 +398,16 @@ export async function sendCloudChatMessage(message: ChatMessage): Promise<boolea
  */
 export function subscribeToSyncEvents(
   onSubmission: (sub: PaymentSubmission) => void,
-  onChatMessage: (msg: ChatMessage) => void
+  onChatMessage: (msg: ChatMessage) => void,
+  onUpdateSubmission?: (data: { id: string; status: 'verified' | 'rejected' | 'pending'; adminNotes?: string; verifiedAt?: string }) => void
 ): () => void {
   if (!broadcastChannel) return () => {};
 
   const handler = (event: MessageEvent) => {
     if (event.data?.type === 'NEW_SUBMISSION' && event.data.data) {
       onSubmission(event.data.data);
+    } else if (event.data?.type === 'UPDATE_SUBMISSION' && event.data.data && onUpdateSubmission) {
+      onUpdateSubmission(event.data.data);
     } else if (event.data?.type === 'NEW_CHAT_MESSAGE' && event.data.data) {
       onChatMessage(event.data.data);
     }

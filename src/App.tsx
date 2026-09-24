@@ -19,6 +19,7 @@ const MainContent: React.FC = () => {
     activeTab,
     setActiveTab,
     isUnlocked,
+    isAdmin,
     currentAccount,
     isAuthenticated,
     showInstallPromptModal,
@@ -54,7 +55,7 @@ const MainContent: React.FC = () => {
         {activeTab === 'notes' && <NotesTab />}
         {activeTab === 'chat' && <ChatTab />}
         {activeTab === 'ai-tutor' && <AITutorTab />}
-        {activeTab === 'admin' && <AdminPortal />}
+        {activeTab === 'admin' && (isAdmin ? <AdminPortal /> : <QuestionsTab />)}
         {activeTab === 'unlock' && <UnlockAccessTab />}
       </main>
 
@@ -91,14 +92,18 @@ const MainContent: React.FC = () => {
               <Sparkles className="w-3.5 h-3.5" />
               <span>{isUnlocked ? '300 ETB Verified' : 'Submit 300 ETB Screenshot'}</span>
             </button>
-            <span>•</span>
-            <button
-              onClick={() => setActiveTab('admin')}
-              className="flex items-center gap-1 text-slate-300 hover:text-white transition font-medium"
-            >
-              <Shield className="w-3.5 h-3.5 text-amber-400" />
-              <span>Admin ({ADMIN_EMAIL})</span>
-            </button>
+            {isAdmin && (
+              <>
+                <span>•</span>
+                <button
+                  onClick={() => setActiveTab('admin')}
+                  className="flex items-center gap-1 text-slate-300 hover:text-white transition font-medium"
+                >
+                  <Shield className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Admin ({ADMIN_EMAIL})</span>
+                </button>
+              </>
+            )}
             <span>•</span>
             <span className="text-emerald-400 flex items-center gap-1 font-semibold">
               <CheckCircle2 className="w-3.5 h-3.5" /> PWA Ready

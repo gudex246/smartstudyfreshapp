@@ -78,13 +78,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
       icon: Bot,
       isAi: true
     },
-    {
+    ...(isAdmin ? [{
       id: 'admin',
       label: 'Admin Panel',
       icon: Shield,
       isAdminBadge: true,
       pendingCount: pendingPaymentsCount
-    }
+    }] : [])
   ];
 
   return (

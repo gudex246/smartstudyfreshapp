@@ -310,26 +310,26 @@ export const AdminPortal: React.FC = () => {
   // IF NOT AUTHENTICATED: SHOW SECURE ADMIN LOGIN
   if (!isAdmin) {
     return (
-      <div className="max-w-md mx-auto my-10 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-md text-center space-y-6">
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center">
+      <div className="max-w-md mx-auto my-12 bg-[#0c1220] rounded-3xl border border-slate-800 p-6 sm:p-8 shadow-xl text-center space-y-6">
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center">
           <Shield className="w-7 h-7" />
         </div>
 
         <div>
-          <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            Admin Authentication
+          <span className="bg-amber-400/10 text-amber-400 border border-amber-400/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            Restricted Admin Area
           </span>
-          <h2 className="text-xl font-bold text-slate-900 mt-2">
-            Smart Study Admin Portal
+          <h2 className="text-xl font-bold text-white mt-2">
+            Administrator Access Only
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
-            Please enter your administrator email and security PIN to access the management portal.
+          <p className="text-xs text-slate-400 mt-1">
+            This management portal is strictly reserved for Platform Administrator <strong className="text-slate-200">{ADMIN_EMAIL}</strong>. Students cannot view or modify these records.
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4 text-left">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold text-slate-300 mb-1">
               Admin Email
             </label>
             <input
@@ -337,13 +337,13 @@ export const AdminPortal: React.FC = () => {
               required
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
-              placeholder="Enter admin email address"
-              className="w-full text-xs font-medium p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500"
+              placeholder={ADMIN_EMAIL}
+              className="w-full text-xs font-medium p-2.5 rounded-xl border border-slate-700 bg-[#090d16] text-white focus:ring-2 focus:ring-amber-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold text-slate-300 mb-1">
               Security PIN
             </label>
             <input
@@ -355,13 +355,13 @@ export const AdminPortal: React.FC = () => {
                 setPinInput(e.target.value);
                 setLoginError(false);
               }}
-              placeholder="Enter security PIN"
-              className="w-full text-center tracking-widest text-lg font-mono p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter security PIN (Default: 1234)"
+              className="w-full text-center tracking-widest text-lg font-mono p-2.5 rounded-xl border border-slate-700 bg-[#090d16] text-white focus:ring-2 focus:ring-amber-500"
               autoFocus
             />
             {loginError && (
-              <p className="text-xs text-red-600 font-semibold mt-1">
-                Incorrect email or PIN. Please try again.
+              <p className="text-xs text-rose-400 font-semibold mt-1">
+                Access Denied: Only {ADMIN_EMAIL} with the correct security PIN is authorized.
               </p>
             )}
           </div>
@@ -369,14 +369,23 @@ export const AdminPortal: React.FC = () => {
           <button
             id="admin-login-submit"
             type="submit"
-            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition active:scale-95"
+            className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black shadow-sm transition active:scale-95 cursor-pointer"
           >
-            Sign In to Admin Portal
+            Sign In as Admin Guduru
           </button>
         </form>
 
-        <div className="pt-2 text-center text-[11px] text-slate-400">
-          Freshman Course & Question Management • 300 ETB Verification System
+        <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
+          <button
+            type="button"
+            onClick={() => setActiveTab('questions')}
+            className="text-slate-400 hover:text-white transition"
+          >
+            &larr; Back to Questions
+          </button>
+          <span className="text-[11px] text-slate-500">
+            Freshman Verification System
+          </span>
         </div>
       </div>
     );
