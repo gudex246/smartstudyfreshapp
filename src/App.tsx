@@ -57,6 +57,7 @@ const MainContent: React.FC = () => {
         {activeTab === 'ai-tutor' && <AITutorTab />}
         {activeTab === 'admin' && (isAdmin ? <AdminPortal /> : <QuestionsTab />)}
         {activeTab === 'unlock' && <UnlockAccessTab />}
+        {!['questions', 'videos', 'notes', 'chat', 'ai-tutor', 'admin', 'unlock'].includes(activeTab) && <QuestionsTab />}
       </main>
 
       {/* Global Quick Search Modal */}

@@ -56,6 +56,7 @@ export const UnlockAccessTab: React.FC = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [lastSubmitted, setLastSubmitted] = useState<PaymentSubmission | null>(null);
   const [copiedDetails, setCopiedDetails] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Find active student submission
   const mySubmission = paymentSubmissions.find(
@@ -77,9 +78,10 @@ export const UnlockAccessTab: React.FC = () => {
 
     // Check size limit (under 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Screenshot size must be under 5MB.');
+      setFormError('Screenshot size must be under 5MB.');
       return;
     }
+    setFormError(null);
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -90,8 +92,9 @@ export const UnlockAccessTab: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     if (!studentName.trim() || !studentPhone.trim() || !transactionRef.trim()) {
-      alert('Please fill out all required fields (Name, Phone, and Transaction Reference).');
+      setFormError('Please fill out all required fields (Name, Phone, and Transaction Reference).');
       return;
     }
 
@@ -118,7 +121,7 @@ export const UnlockAccessTab: React.FC = () => {
       setSubmitSuccess(true);
     } catch (err) {
       setIsSubmitting(false);
-      alert('Error submitting payment verification.');
+      setFormError('Error submitting payment verification. Please try again.');
     }
   };
 
@@ -199,14 +202,14 @@ export const UnlockAccessTab: React.FC = () => {
               <span className="text-[11px] text-slate-500">All masterclasses unlocked</span>
             </button>
             <button
-              onClick={() => setActiveTab('courses')}
+              onClick={() => setActiveTab('notes')}
               className="p-3 bg-white rounded-xl border border-emerald-200 text-left hover:border-emerald-400 transition"
             >
               <span className="text-xs font-bold text-slate-900 block">Lecture Notes</span>
               <span className="text-[11px] text-slate-500">Full chapters & formulas</span>
             </button>
             <button
-              onClick={() => setActiveTab('quiz')}
+              onClick={() => setActiveTab('questions')}
               className="p-3 bg-white rounded-xl border border-emerald-200 text-left hover:border-emerald-400 transition"
             >
               <span className="text-xs font-bold text-slate-900 block">CBT Question Bank</span>
@@ -760,6 +763,13 @@ export const UnlockAccessTab: React.FC = () => {
               </label>
             )}
           </div>
+
+          {formError && (
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs font-semibold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{formError}</span>
+            </div>
+          )}
 
           <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="text-[11px] text-slate-500">

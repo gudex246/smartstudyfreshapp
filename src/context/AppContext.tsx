@@ -516,7 +516,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           );
           if (updateData.status === 'verified') {
             setStudentProfile(prevProfile => {
-              if (prevProfile.submissionId === updateData.id) {
+              const currentEmail = prevProfile.email?.trim().toLowerCase();
+              const currentPhone = prevProfile.phone?.replace(/\D/g, '');
+
+              const isMatch =
+                (prevProfile.submissionId && prevProfile.submissionId === updateData.id) ||
+                paymentSubmissions.some(
+                  s =>
+                    s.id === updateData.id &&
+                    ((currentEmail && s.studentEmail && currentEmail === s.studentEmail.trim().toLowerCase()) ||
+                     (currentPhone && s.studentPhone && currentPhone === s.studentPhone.replace(/\D/g, '')))
+                );
+
+              if (isMatch) {
                 setSampleStudentPaywallStatusState('verified');
                 safeSetItem(STORAGE_KEYS.SAMPLE_STUDENT_STATUS, 'verified');
                 return {

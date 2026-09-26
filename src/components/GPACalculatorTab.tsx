@@ -75,10 +75,12 @@ export const GPACalculatorTab: React.FC = () => {
     updateGpaCourses([...gpaCourses, newCourse]);
   };
 
+  const [resetFeedback, setResetFeedback] = useState(false);
+
   const handleResetToDefault = () => {
-    if (window.confirm('Reset GPA course list to standard freshman curriculum?')) {
-      updateGpaCourses(DEFAULT_GPA_COURSES);
-    }
+    updateGpaCourses(DEFAULT_GPA_COURSES);
+    setResetFeedback(true);
+    setTimeout(() => setResetFeedback(false), 3000);
   };
 
   // Computations

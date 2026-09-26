@@ -104,6 +104,12 @@ export const AdminPortal: React.FC = () => {
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<'all' | 'pending' | 'verified' | 'rejected'>('all');
   const [submissionSearch, setSubmissionSearch] = useState<string>('');
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   const handleSyncRemote = async () => {
     try {
@@ -269,9 +275,9 @@ export const AdminPortal: React.FC = () => {
       setAdminPin(newPinValue);
       setNewPinModal(false);
       setNewPinValue('');
-      alert('Admin PIN updated successfully!');
+      showToast('Admin PIN updated successfully!', 'success');
     } else {
-      alert('PIN must be at least 4 digits.');
+      showToast('PIN must be at least 4 digits.', 'error');
     }
   };
 
@@ -296,9 +302,9 @@ export const AdminPortal: React.FC = () => {
       const content = event.target?.result as string;
       const res = importDataJSON(content);
       if (res.success) {
-        alert(res.message);
+        showToast(res.message, 'success');
       } else {
-        alert('Error: ' + res.message);
+        showToast('Error: ' + res.message, 'error');
       }
     };
     reader.readAsText(file);
@@ -393,7 +399,23 @@ export const AdminPortal: React.FC = () => {
 
   // AUTHENTICATED ADMIN DASHBOARD
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold flex items-center gap-2 animate-in slide-in-from-bottom-5 ${
+            toast.type === 'error'
+              ? 'bg-rose-950 text-rose-200 border-rose-600'
+              : toast.type === 'info'
+              ? 'bg-blue-950 text-blue-200 border-blue-600'
+              : 'bg-emerald-950 text-emerald-200 border-emerald-600'
+          }`}
+        >
+          <span>{toast.type === 'error' ? '⚠️' : '✓'}</span>
+          <span>{toast.message}</span>
+        </div>
+      )}
+
       {/* Top Admin Status Banner */}
       <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -773,7 +795,7 @@ export const AdminPortal: React.FC = () => {
                       <button
                         onClick={() => {
                           verifyPaymentSubmission(sub.id);
-                          alert(`Verified payment for ${sub.studentName}! Student now has full access unlocked.`);
+                          showToast(`Verified payment for ${sub.studentName}! Full access unlocked across student devices.`, 'success');
                         }}
                         className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 shadow-xs transition"
                       >
@@ -1312,10 +1334,8 @@ export const AdminPortal: React.FC = () => {
               </p>
               <button
                 onClick={() => {
-                  if (confirm('Are you sure you want to reset all data back to the default tutorial state?')) {
-                    resetAllToDefault();
-                    alert('All data restored to Smart Study Tutorial defaults.');
-                  }
+                  resetAllToDefault();
+                  showToast('All data restored to Smart Study Tutorial defaults.', 'info');
                 }}
                 className="w-full py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition"
               >
@@ -1555,7 +1575,7 @@ export const AdminPortal: React.FC = () => {
               <button
                 onClick={() => {
                   if (!editingVideo.title || !editingVideo.videoUrl) {
-                    alert('Please enter video title and URL');
+                    showToast('Please enter video title and URL', 'error');
                     return;
                   }
                   const exists = videos.some((v) => v.id === editingVideo.id);
@@ -1708,7 +1728,7 @@ export const AdminPortal: React.FC = () => {
                 onClick={() => {
                   const cleanQ = cleanQuestionText(editingQuestion.question || '');
                   if (!cleanQ) {
-                    alert('Please enter question text');
+                    showToast('Please enter question text', 'error');
                     return;
                   }
                   const exists = questions.some((q) => q.id === editingQuestion.id);

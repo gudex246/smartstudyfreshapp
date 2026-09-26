@@ -28,6 +28,7 @@ export const QuizTab: React.FC = () => {
   const [selectedExamType, setSelectedExamType] = useState<'all' | 'midterm' | 'final' | 'model'>('all');
   const [examMode, setExamMode] = useState<'timed' | 'practice'>('timed');
   const [questionCount, setQuestionCount] = useState<number>(10);
+  const [filterError, setFilterError] = useState<string | null>(null);
 
   // Active quiz state
   const [isTakingQuiz, setIsTakingQuiz] = useState(false);
@@ -81,9 +82,10 @@ export const QuizTab: React.FC = () => {
     }
 
     if (pool.length === 0) {
-      alert('No questions match this filter. Please choose another course or exam type.');
+      setFilterError('No questions match this filter. Please choose another course or exam type.');
       return;
     }
+    setFilterError(null);
 
     // Shuffle and pick limit - first 4 preview questions if not unlocked
     const effectiveCount = !isUnlocked ? Math.min(questionCount, 4) : questionCount;
@@ -300,6 +302,13 @@ export const QuizTab: React.FC = () => {
                 </select>
               </div>
             </div>
+
+            {filterError && (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold flex items-center gap-2">
+                <span>⚠️</span>
+                <span>{filterError}</span>
+              </div>
+            )}
 
             {/* Start Button */}
             <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">

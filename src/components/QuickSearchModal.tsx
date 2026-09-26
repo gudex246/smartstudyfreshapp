@@ -148,7 +148,7 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({ isOpen, onCl
                       <button
                         key={c.id}
                         onClick={() => {
-                          setActiveTab('courses');
+                          setActiveTab('notes');
                           onClose();
                         }}
                         className="w-full text-left p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center justify-between text-xs transition"
@@ -178,7 +178,7 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({ isOpen, onCl
                       <button
                         key={chapter.id}
                         onClick={() => {
-                          setActiveTab('courses');
+                          setActiveTab('notes');
                           onClose();
                         }}
                         className="w-full text-left p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center justify-between text-xs transition"
@@ -214,7 +214,7 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({ isOpen, onCl
                       <button
                         key={q.id}
                         onClick={() => {
-                          setActiveTab('quiz');
+                          setActiveTab('questions');
                           onClose();
                         }}
                         className="w-full text-left p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center justify-between text-xs transition"
@@ -231,36 +231,6 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({ isOpen, onCl
                           </div>
                         </div>
                         <ChevronRight className="w-4 h-4 text-slate-300 shrink-0" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Survival Guide Results */}
-              {matchingGuides.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Survival Guides ({matchingGuides.length})
-                  </span>
-                  <div className="space-y-1">
-                    {matchingGuides.map((g) => (
-                      <button
-                        key={g.id}
-                        onClick={() => {
-                          setActiveTab('guide');
-                          onClose();
-                        }}
-                        className="w-full text-left p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-center justify-between text-xs transition"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Compass className="w-4 h-4 text-emerald-600" />
-                          <div>
-                            <span className="font-bold text-slate-900">{g.title}</span>
-                            <span className="text-slate-400 block text-[11px]">{g.subtitle}</span>
-                          </div>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-slate-300" />
                       </button>
                     ))}
                   </div>

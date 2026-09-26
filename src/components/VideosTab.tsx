@@ -129,7 +129,7 @@ export const VideosTab: React.FC = () => {
       setMediaError(null);
     } catch (err) {
       console.error('Failed to save video into persistent storage:', err);
-      alert('Could not save video file into browser storage.');
+      setMediaError('Could not save video file into browser storage.');
     } finally {
       setIsResolvingMedia(false);
     }

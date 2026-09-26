@@ -118,7 +118,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
           </div>
 
           {/* 2. Center: Navigation Tabs (Matching Screenshot) */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
+          <nav className="hidden md:flex items-center gap-1 lg:gap-1.5">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -128,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
                   key={item.id}
                   id={`tab-${item.id}`}
                   onClick={() => setActiveTab(item.id)}
-                  className={`relative flex items-center gap-2 px-3.5 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-semibold transition-all select-none ${
+                  className={`relative flex items-center gap-1.5 px-3 lg:px-3.5 py-2 rounded-xl text-xs lg:text-sm font-semibold transition-all select-none ${
                     isActive
                       ? 'bg-[#4f46e5] text-white shadow-md shadow-indigo-600/30 font-bold'
                       : 'text-slate-400 hover:text-white hover:bg-[#12192c]'
@@ -140,6 +140,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
                   {/* AI dot indicator */}
                   {item.isAi && (
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  )}
+
+                  {/* Badges */}
+                  {item.badge && (
+                    <span className="bg-indigo-900/90 text-indigo-200 text-[9px] font-black px-1.5 py-0.2 rounded font-mono border border-indigo-700/60">
+                      {item.badge}
+                    </span>
                   )}
 
                   {/* Yellow ADMIN badge on Admin Panel tab */}
@@ -371,7 +378,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
         </div>
 
         {/* Mobile Navigation Strip (Matching Screenshot Options) */}
-        <div className="md:hidden flex items-center justify-between overflow-x-auto py-2 border-t border-[#182138] scrollbar-none gap-1">
+        <div className="md:hidden flex items-center overflow-x-auto py-2 border-t border-[#182138] scrollbar-none gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -379,7 +386,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition shrink-0 ${
                   isActive
                     ? 'bg-[#4f46e5] text-white shadow-sm'
                     : 'text-slate-400 hover:text-white'
@@ -387,7 +394,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{item.label}</span>
-                {item.isAdminBadge && (
+                {(item as any).isAdminBadge && (
                   <span className="bg-amber-400 text-slate-950 text-[8px] font-black px-1 rounded font-mono">
                     ADMIN
                   </span>
