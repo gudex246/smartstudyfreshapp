@@ -39,8 +39,25 @@ export const VideosTab: React.FC = () => {
   } = useApp();
 
   const [selectedCourseId, setSelectedCourseId] = useState<string>('all');
+  const [selectedStreamFilter, setSelectedStreamFilter] = useState<'all' | 'natural' | 'social'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeVideo, setActiveVideo] = useState<VideoTutorial | null>(videos[0] || null);
+  const [activeVideo, setActiveVideo] = useState<VideoTutorial | null>(() => {
+    return (
+      videos.find((v) => v.courseCode.toLowerCase().includes('math') || v.courseId.includes('math')) ||
+      videos[0] ||
+      null
+    );
+  });
+
+  // Ensure active video is always set if videos change
+  useEffect(() => {
+    if (!activeVideo && videos.length > 0) {
+      const mathVid = videos.find(
+        (v) => v.courseCode.toLowerCase().includes('math') || v.courseId.includes('math')
+      );
+      setActiveVideo(mathVid || videos[0]);
+    }
+  }, [videos, activeVideo]);
 
   const [playableVideoUrl, setPlayableVideoUrl] = useState<string | null>(null);
   const [mediaError, setMediaError] = useState<string | null>(null);
@@ -135,12 +152,23 @@ export const VideosTab: React.FC = () => {
     }
   };
 
-  // Filter videos based on course, search, and stream
+  // Filter videos based on course, search, and stream (never suppress math or selected course)
   const filteredVideos = videos.filter((video) => {
     const course = courses.find((c) => c.id === video.courseId);
+
+    // Stream matching: allow All, Natural, Social, or if course is selected explicitly
     const matchesStream =
-      streamFilter === 'both' || !course || course.stream === 'both' || course.stream === streamFilter;
-    const matchesCourse = selectedCourseId === 'all' || video.courseId === selectedCourseId;
+      selectedStreamFilter === 'all' ||
+      selectedCourseId !== 'all' ||
+      !course ||
+      course.stream === 'both' ||
+      course.stream === selectedStreamFilter;
+
+    const matchesCourse =
+      selectedCourseId === 'all' ||
+      video.courseId === selectedCourseId ||
+      video.courseCode.toLowerCase().includes(selectedCourseId.toLowerCase());
+
     const matchesSearch =
       searchQuery.trim() === '' ||
       video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -459,40 +487,86 @@ export const VideosTab: React.FC = () => {
 
       {/* Filter and Course Selection Strip */}
       <div className="bg-[#0f172a]/95 rounded-2xl border border-[#1e293b] p-3.5 sm:p-4 shadow-lg space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none flex-wrap sm:flex-nowrap">
             <button
-              onClick={() => setSelectedCourseId('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                selectedCourseId === 'all'
+              onClick={() => {
+                setSelectedCourseId('all');
+                setSelectedStreamFilter('all');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                selectedCourseId === 'all' && selectedStreamFilter === 'all'
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'bg-[#0a0f1d] border border-[#1e293b] text-slate-400 hover:text-white'
               }`}
             >
-              All Courses ({videos.length})
+              All Masterclasses ({videos.length})
             </button>
-            {courses.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setSelectedCourseId(c.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border ${
-                  selectedCourseId === c.id
-                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm'
-                    : 'bg-[#0a0f1d] border-[#1e293b] text-slate-400 hover:text-white'
-                }`}
-              >
-                {c.code}
-              </button>
-            ))}
+
+            <button
+              onClick={() => {
+                setSelectedCourseId('all');
+                setSelectedStreamFilter('natural');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border cursor-pointer ${
+                selectedStreamFilter === 'natural' && selectedCourseId === 'all'
+                  ? 'bg-blue-600 border-blue-500 text-white shadow-sm'
+                  : 'bg-[#0a0f1d] border-[#1e293b] text-slate-400 hover:text-white'
+              }`}
+            >
+              📐 Natural Science
+            </button>
+
+            <button
+              onClick={() => {
+                setSelectedCourseId('all');
+                setSelectedStreamFilter('social');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border cursor-pointer ${
+                selectedStreamFilter === 'social' && selectedCourseId === 'all'
+                  ? 'bg-amber-600 border-amber-500 text-white shadow-sm'
+                  : 'bg-[#0a0f1d] border-[#1e293b] text-slate-400 hover:text-white'
+              }`}
+            >
+              📊 Social Science
+            </button>
+
+            <div className="h-4 w-px bg-slate-700 mx-1 shrink-0 hidden sm:block" />
+
+            {courses.map((c) => {
+              const count = videos.filter(
+                (v) => v.courseId === c.id || v.courseCode.toLowerCase().includes(c.code.toLowerCase())
+              ).length;
+
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => {
+                    setSelectedCourseId(c.id);
+                    setSelectedStreamFilter('all');
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border flex items-center gap-1 cursor-pointer ${
+                    selectedCourseId === c.id
+                      ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm'
+                      : 'bg-[#0a0f1d] border-[#1e293b] text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <span>{c.code}</span>
+                  {count > 0 && (
+                    <span className="text-[10px] opacity-80 font-mono">({count})</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="relative">
+          <div className="relative shrink-0">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search tutorial topics..."
+              placeholder="Search Math, Vectors, Limits..."
               className="w-full sm:w-60 pl-8 pr-3 py-1.5 rounded-xl border border-[#1e293b] bg-[#0a0f1d] text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
             />
           </div>

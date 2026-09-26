@@ -70,6 +70,7 @@ function apiDevServerPlugin(): Plugin {
   const dataDir = path.resolve(__dirname, 'public', 'data');
   const subsFile = path.resolve(dataDir, 'submissions.json');
   const chatFile = path.resolve(dataDir, 'chat.json');
+  const videosFile = path.resolve(dataDir, 'videos.json');
 
   const loadSubmissions = (): any[] => {
     try {
@@ -140,8 +141,27 @@ function apiDevServerPlugin(): Plugin {
     } catch {}
   };
 
+  const loadVideos = (): any[] => {
+    try {
+      if (fs.existsSync(videosFile)) {
+        return JSON.parse(fs.readFileSync(videosFile, 'utf-8'));
+      }
+    } catch {}
+    return [];
+  };
+
+  const saveVideos = (data: any[]) => {
+    try {
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      fs.writeFileSync(videosFile, JSON.stringify(data, null, 2), 'utf-8');
+    } catch {}
+  };
+
   let devSubmissions: any[] = loadSubmissions();
   let devChatMessages: any[] = loadChat();
+  let devVideos: any[] = loadVideos();
 
   return {
     name: 'vite-plugin-dev-api',
@@ -237,6 +257,44 @@ function apiDevServerPlugin(): Plugin {
               }
             });
             return;
+          }
+        }
+
+        if (pathname === '/api/videos') {
+          if (req.method === 'GET') {
+            res.setHeader('Content-Type', 'application/json');
+            return res.end(JSON.stringify(devVideos));
+          }
+          if (req.method === 'POST') {
+            let body = '';
+            req.on('data', chunk => { body += chunk; });
+            req.on('end', () => {
+              try {
+                const newVid = JSON.parse(body);
+                const existingIdx = devVideos.findIndex(v => v.id === newVid.id);
+                if (existingIdx >= 0) {
+                  devVideos[existingIdx] = { ...devVideos[existingIdx], ...newVid };
+                } else {
+                  devVideos.unshift(newVid);
+                }
+                saveVideos(devVideos);
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ success: true, video: newVid }));
+              } catch (e: any) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: e.message }));
+              }
+            });
+            return;
+          }
+          if (req.method === 'DELETE') {
+            const vidId = url.searchParams.get('id');
+            if (vidId) {
+              devVideos = devVideos.filter(v => v.id !== vidId);
+              saveVideos(devVideos);
+              res.setHeader('Content-Type', 'application/json');
+              return res.end(JSON.stringify({ success: true }));
+            }
           }
         }
 

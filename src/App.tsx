@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppProvider, useApp, ADMIN_EMAIL } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { QuickSearchModal } from './components/QuickSearchModal';
@@ -12,15 +12,12 @@ import { UnlockAccessTab } from './components/UnlockAccessTab';
 import { ChatTab } from './components/ChatTab';
 import { SignInPage } from './components/SignInPage';
 import { AppInstallModal } from './components/AppInstallModal';
-import { BookOpen, Shield, Sparkles, CheckCircle2, Phone, CreditCard } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const {
     activeTab,
-    setActiveTab,
-    isUnlocked,
     isAdmin,
-    currentAccount,
     isAuthenticated,
     showInstallPromptModal,
     setShowInstallPromptModal,
@@ -63,51 +60,15 @@ const MainContent: React.FC = () => {
       {/* Global Quick Search Modal */}
       <QuickSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
-      {/* Sleek Dark Footer with Ethiopia Payment Credentials & Admin Info */}
-      <footer className="bg-[#070b14] border-t border-[#182138] mt-12 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-          <div className="flex flex-wrap items-center gap-3 text-center md:text-left">
-            <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
-              <BookOpen className="w-4 h-4" />
+      {/* Clean Footer showing only Smart Study Tutorial Freshman */}
+      <footer className="bg-[#070b14] border-t border-[#182138] mt-12 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+              <BookOpen className="w-3.5 h-3.5" />
             </div>
-            <div>
-              <span className="font-bold text-white text-sm">
-                Smart Study Tutorial Freshman
-              </span>
-              <div className="flex flex-wrap items-center gap-2 mt-0.5 text-[11px] text-slate-400">
-                <span className="text-amber-400 font-mono font-bold">300 ETB Access</span>
-                <span>•</span>
-                <span>CBE: <strong className="text-slate-200 font-mono">1000521750255</strong></span>
-                <span>•</span>
-                <span>Telebirr: <strong className="text-slate-200 font-mono">0953201048</strong></span>
-                <span>(Guduru Alemayehu)</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4 text-xs">
-            <button
-              onClick={() => setActiveTab('unlock')}
-              className="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 transition"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{isUnlocked ? '300 ETB Verified' : 'Submit 300 ETB Screenshot'}</span>
-            </button>
-            {isAdmin && (
-              <>
-                <span>•</span>
-                <button
-                  onClick={() => setActiveTab('admin')}
-                  className="flex items-center gap-1 text-slate-300 hover:text-white transition font-medium"
-                >
-                  <Shield className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Admin ({ADMIN_EMAIL})</span>
-                </button>
-              </>
-            )}
-            <span>•</span>
-            <span className="text-emerald-400 flex items-center gap-1 font-semibold">
-              <CheckCircle2 className="w-3.5 h-3.5" /> PWA Ready
+            <span className="font-bold text-white text-sm tracking-wide">
+              Smart Study Tutorial Freshman
             </span>
           </div>
         </div>

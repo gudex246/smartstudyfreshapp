@@ -311,10 +311,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_QUESTIONS.map((q) => ({ ...q, question: cleanQuestionText(q.question) }));
   });
 
-  // Load videos
+  // Load videos (ensuring built-in Mathematics and latest tutorial videos are always merged)
   const [videos, setVideos] = useState<VideoTutorial[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.VIDEOS);
-    return saved ? JSON.parse(saved) : INITIAL_VIDEOS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const savedIds = new Set(parsed.map((v: any) => v.id));
+          const missingDefaults = INITIAL_VIDEOS.filter((iv) => !savedIds.has(iv.id));
+          return [...missingDefaults, ...parsed];
+        }
+      } catch {}
+    }
+    return INITIAL_VIDEOS;
   });
 
   // Load payment submissions
@@ -562,6 +572,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       doSync();
     };
     window.addEventListener('focus', handleFocus);
+
+    // Sync videos from /api/videos so uploaded videos persist across installations and devices
+    const syncVideosFromApi = async () => {
+      try {
+        const res = await fetch('/api/videos');
+        if (res.ok) {
+          const remoteVideos: VideoTutorial[] = await res.json();
+          if (Array.isArray(remoteVideos) && remoteVideos.length > 0) {
+            setVideos((prev) => {
+              const existingIds = new Set(prev.map((v) => v.id));
+              const toAdd = remoteVideos.filter((rv) => !existingIds.has(rv.id));
+              if (toAdd.length > 0) {
+                return [...toAdd, ...prev];
+              }
+              return prev;
+            });
+          }
+        }
+      } catch {}
+    };
+    syncVideosFromApi();
 
     return () => {
       isMounted = false;
@@ -999,17 +1030,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setShowInstallPromptModal(false);
   };
 
-  // Video CRUD
+  // Video CRUD (persisting locally and to cloud API)
   const addVideo = (video: VideoTutorial) => {
-    setVideos(prev => [video, ...prev]);
+    setVideos(prev => [video, ...prev.filter(v => v.id !== video.id)]);
+    fetch('/api/videos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(video)
+    }).catch(() => {});
   };
 
   const updateVideo = (updated: VideoTutorial) => {
     setVideos(prev => prev.map(v => v.id === updated.id ? updated : v));
+    fetch('/api/videos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated)
+    }).catch(() => {});
   };
 
   const deleteVideo = (id: string) => {
     setVideos(prev => prev.filter(v => v.id !== id));
+    fetch(`/api/videos?id=${id}`, {
+      method: 'DELETE'
+    }).catch(() => {});
   };
 
   // Courses CRUD

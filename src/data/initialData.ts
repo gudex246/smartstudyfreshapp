@@ -8146,34 +8146,6 @@ export const DEFAULT_GPA_COURSES: GPACourseItem[] = [
 
 export const INITIAL_VIDEOS: VideoTutorial[] = [
   {
-    id: 'vid-econ-1',
-    courseId: 'econ-1011',
-    courseCode: 'Econ 1011',
-    title: 'Economics for Social: Demand, Supply & Market Equilibrium Calculations',
-    description: 'Step-by-step solving of linear demand and supply equations, price ceiling shortages, price floor surpluses, and equilibrium price/quantity determination.',
-    videoUrl: 'https://www.youtube.com/embed/juM2ROSLWSE',
-    duration: '27:15',
-    topic: 'Demand, Supply & Equilibrium',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false, // Free preview
-    views: 1560,
-    addedAt: '2025-09-22'
-  },
-  {
-    id: 'vid-econ-2',
-    courseId: 'econ-1011',
-    courseCode: 'Econ 1011',
-    title: 'Economics for Social: Elasticity of Demand & Consumer Utility Maximization',
-    description: 'Mastering midpoint price elasticity formulas, cross-price elasticity for substitutes/complements, and equi-marginal utility conditions (MUx/Px = MUy/Py).',
-    videoUrl: 'https://www.youtube.com/embed/6Z3h-fJ15pI',
-    duration: '32:40',
-    topic: 'Elasticity & Consumer Behavior',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: true,
-    views: 1240,
-    addedAt: '2025-09-26'
-  },
-  {
     id: 'vid-math-1',
     courseId: 'math-1011',
     courseCode: 'Math 1011',
@@ -8200,6 +8172,48 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     isPremium: true, // Premium locked (300 ETB)
     views: 980,
     addedAt: '2025-09-15'
+  },
+  {
+    id: 'vid-math-3',
+    courseId: 'math-1011',
+    courseCode: 'Math 1011',
+    title: 'Mathematics for Natural Science: Derivatives, Chain Rule & Implicit Differentiation',
+    description: 'Derivatives of polynomial, trigonometric, and exponential functions, chain rule shortcuts, and implicit differentiation for exam problem walkthroughs.',
+    videoUrl: 'https://www.youtube.com/embed/rR_5tS4xH38',
+    duration: '34:20',
+    topic: 'Differential Calculus',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: true,
+    views: 1105,
+    addedAt: '2025-09-18'
+  },
+  {
+    id: 'vid-econ-1',
+    courseId: 'econ-1011',
+    courseCode: 'Econ 1011',
+    title: 'Economics for Social: Demand, Supply & Market Equilibrium Calculations',
+    description: 'Step-by-step solving of linear demand and supply equations, price ceiling shortages, price floor surpluses, and equilibrium price/quantity determination.',
+    videoUrl: 'https://www.youtube.com/embed/juM2ROSLWSE',
+    duration: '27:15',
+    topic: 'Demand, Supply & Equilibrium',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: false, // Free preview
+    views: 1560,
+    addedAt: '2025-09-22'
+  },
+  {
+    id: 'vid-econ-2',
+    courseId: 'econ-1011',
+    courseCode: 'Econ 1011',
+    title: 'Economics for Social: Elasticity of Demand & Consumer Utility Maximization',
+    description: 'Mastering midpoint price elasticity formulas, cross-price elasticity for substitutes/complements, and equi-marginal utility conditions (MUx/Px = MUy/Py).',
+    videoUrl: 'https://www.youtube.com/embed/6Z3h-fJ15pI',
+    duration: '32:40',
+    topic: 'Elasticity & Consumer Behavior',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: true,
+    views: 1240,
+    addedAt: '2025-09-26'
   },
   {
     id: 'vid-geog-1',
