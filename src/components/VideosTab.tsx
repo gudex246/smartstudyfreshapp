@@ -35,9 +35,11 @@ export const VideosTab: React.FC = () => {
     isUnlocked,
     setActiveTab,
     streamFilter,
-    updateVideo
+    updateVideo,
+    syncVideosWithServer
   } = useApp();
 
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string>('all');
   const [selectedStreamFilter, setSelectedStreamFilter] = useState<'all' | 'natural' | 'social'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -560,15 +562,30 @@ export const VideosTab: React.FC = () => {
             })}
           </div>
 
-          <div className="relative shrink-0">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Math, Vectors, Limits..."
-              className="w-full sm:w-60 pl-8 pr-3 py-1.5 rounded-xl border border-[#1e293b] bg-[#0a0f1d] text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
-            />
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="relative flex-1 sm:w-60">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search Math, Vectors, Limits..."
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#1e293b] bg-[#0a0f1d] text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <button
+              onClick={async () => {
+                setIsSyncing(true);
+                await syncVideosWithServer();
+                setIsSyncing(false);
+              }}
+              className="px-2.5 py-1.5 rounded-xl border border-[#1e293b] bg-[#0a0f1d] hover:bg-[#18233c] text-slate-300 hover:text-white transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer shadow-xs"
+              title="Sync latest masterclasses from cloud server"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-indigo-400 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Sync</span>
+            </button>
           </div>
         </div>
       </div>

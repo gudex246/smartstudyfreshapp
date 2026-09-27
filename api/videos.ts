@@ -69,16 +69,20 @@ export default function handler(req: any, res: any) {
     req.on('data', (chunk: any) => { body += chunk; });
     req.on('end', () => {
       try {
-        const newVideo: VideoPayload = JSON.parse(body);
-        const idx = videos.findIndex(v => v.id === newVideo.id);
-        if (idx >= 0) {
-          videos[idx] = { ...videos[idx], ...newVideo };
-        } else {
-          videos.unshift(newVideo);
+        const payload = JSON.parse(body);
+        const currentList = loadVideos();
+        const incoming: VideoPayload[] = Array.isArray(payload) ? payload : [payload];
+        for (const item of incoming) {
+          const idx = currentList.findIndex(v => v.id === item.id);
+          if (idx >= 0) {
+            currentList[idx] = { ...currentList[idx], ...item };
+          } else {
+            currentList.unshift(item);
+          }
         }
-        saveVideos(videos);
+        saveVideos(currentList);
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ success: true, video: newVideo }));
+        res.end(JSON.stringify({ success: true, count: currentList.length }));
       } catch (e: any) {
         res.statusCode = 400;
         res.end(JSON.stringify({ error: e.message }));

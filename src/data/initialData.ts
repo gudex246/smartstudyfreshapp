@@ -8146,6 +8146,76 @@ export const DEFAULT_GPA_COURSES: GPACourseItem[] = [
 
 export const INITIAL_VIDEOS: VideoTutorial[] = [
   {
+    id: 'vid-math-u1-p1',
+    courseId: 'math-1011',
+    courseCode: 'Math 1011',
+    title: 'Math U1 P1: Propositional Logic & Logical Connectives',
+    description: 'Freshman Math Chapter 1 Part 1: Declarative statements, truth values, Negation, Conjunction, Disjunction, and Conditional Connectives with university exam practice.',
+    videoUrl: 'https://www.youtube.com/embed/juM2ROSLWSE',
+    duration: '28:15',
+    topic: 'Chapter 1: Propositional Logic (Part 1)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: false, // Free preview for all students
+    views: 2450,
+    addedAt: '2025-09-01'
+  },
+  {
+    id: 'vid-math-u1-p2',
+    courseId: 'math-1011',
+    courseCode: 'Math 1011',
+    title: 'Math U1 P2: Truth Tables, Tautology, Contradiction & Equivalence',
+    description: 'Freshman Math Chapter 1 Part 2: Step-by-step 4-row & 8-row truth tables construction, tautologies vs contradictions, and proving logical equivalences.',
+    videoUrl: 'https://www.youtube.com/embed/6Z3h-fJ15pI',
+    duration: '32:40',
+    topic: 'Chapter 1: Truth Tables & Equivalence (Part 2)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: true,
+    views: 1980,
+    addedAt: '2025-09-03'
+  },
+  {
+    id: 'vid-math-u1-p3',
+    courseId: 'math-1011',
+    courseCode: 'Math 1011',
+    title: 'Math U1 P3: Open Statements, Universal & Existential Quantifiers',
+    description: 'Freshman Math Chapter 1 Part 3: Open statements, Universe of Discourse, Universal (∀x) & Existential (∃x) quantifiers, and negating quantified statements.',
+    videoUrl: 'https://www.youtube.com/embed/rR_5tS4xH38',
+    duration: '29:50',
+    topic: 'Chapter 1: Quantifiers (Part 3)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: true,
+    views: 1820,
+    addedAt: '2025-09-05'
+  },
+  {
+    id: 'vid-math-u1-p4',
+    courseId: 'math-1011',
+    courseCode: 'Math 1011',
+    title: 'Math U1 P4: Rules of Inference & Argument Validity',
+    description: 'Freshman Math Chapter 1 Part 4: Modus Ponens, Modus Tollens, Hypothetical Syllogism, Disjunctive Syllogism, and identifying fallacy of affirming the consequent.',
+    videoUrl: 'https://www.youtube.com/embed/1vvyD4mXj6Q',
+    duration: '34:10',
+    topic: 'Chapter 1: Rules of Inference (Part 4)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: true,
+    views: 1730,
+    addedAt: '2025-09-08'
+  },
+  {
+    id: 'vid-math-u1-p5',
+    courseId: 'math-1011',
+    courseCode: 'Math 1011',
+    title: 'Math U1 P5: Set Theory, Operations & Venn Diagrams Problem Solving',
+    description: 'Freshman Math Chapter 1 Part 5: Sets algebra, power set cardinality (2^n), relative complement, symmetric difference, and 3-set inclusion-exclusion word problems.',
+    videoUrl: 'https://www.youtube.com/embed/kYDET_Xm_kU',
+    duration: '31:25',
+    topic: 'Chapter 1: Set Theory (Part 5)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: true,
+    views: 1690,
+    addedAt: '2025-09-10'
+  },
+  {
     id: 'vid-math-1',
     courseId: 'math-1011',
     courseCode: 'Math 1011',

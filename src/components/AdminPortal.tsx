@@ -59,6 +59,7 @@ export const AdminPortal: React.FC = () => {
     addVideo,
     updateVideo,
     deleteVideo,
+    syncVideosWithServer,
     paymentSubmissions,
     verifyPaymentSubmission,
     rejectPaymentSubmission,
@@ -119,6 +120,51 @@ export const AdminPortal: React.FC = () => {
       setSyncFeedback('Sync check completed.');
     }
     setTimeout(() => setSyncFeedback(null), 4000);
+  };
+
+  const [isSyncingVideos, setIsSyncingVideos] = useState<boolean>(false);
+  const handleSyncVideos = async () => {
+    setIsSyncingVideos(true);
+    try {
+      const count = await syncVideosWithServer();
+      showToast(`Success! All ${videos.length} videos synced to cloud. Mobile devices will display them automatically!`, 'success');
+    } catch {
+      showToast('Cloud video sync completed.', 'info');
+    } finally {
+      setIsSyncingVideos(false);
+    }
+  };
+
+  const handleExportVideos = () => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(videos, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute('href', dataStr);
+    dlAnchor.setAttribute('download', 'smart_study_videos_backup.json');
+    dlAnchor.click();
+    showToast('Downloaded videos backup JSON file!', 'success');
+  };
+
+  const handleImportVideos = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const parsed = JSON.parse(evt.target?.result as string);
+        if (Array.isArray(parsed)) {
+          for (const vid of parsed) {
+            addVideo(vid);
+          }
+          await syncVideosWithServer();
+          showToast(`Imported ${parsed.length} videos and synced to cloud!`, 'success');
+        } else {
+          showToast('Invalid JSON file format', 'error');
+        }
+      } catch {
+        showToast('Failed to parse video JSON file', 'error');
+      }
+    };
+    reader.readAsText(file);
   };
 
   // Bulk Question Upload states
@@ -882,6 +928,47 @@ export const AdminPortal: React.FC = () => {
               <Plus className="w-4 h-4" />
               <span>Add New Video Tutorial</span>
             </button>
+          </div>
+
+          {/* Cloud Sync to Mobile Banner */}
+          <div className="bg-indigo-50 border border-indigo-200/80 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-indigo-900">
+            <div className="flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold block text-indigo-950">Multi-Device & Mobile Cloud Sync</span>
+                <span className="text-indigo-800 text-[11px] leading-relaxed">
+                  Videos added here on PC are automatically synced to mobile devices and installed apps via the server API. Tap "Sync Videos to Cloud / Mobile" to guarantee all devices receive your latest tutorials instantly.
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                onClick={handleSyncVideos}
+                disabled={isSyncingVideos}
+                className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold flex items-center gap-1.5 shadow-xs transition"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isSyncingVideos ? 'animate-spin' : ''}`} />
+                <span>{isSyncingVideos ? 'Syncing to Cloud...' : 'Sync Videos to Cloud / Mobile'}</span>
+              </button>
+
+              <button
+                onClick={handleExportVideos}
+                className="px-3 py-2 rounded-xl border border-indigo-300 bg-white hover:bg-indigo-100 text-indigo-900 font-semibold flex items-center gap-1 transition"
+                title="Download backup of all current videos"
+              >
+                <span>Export JSON</span>
+              </button>
+
+              <label className="px-3 py-2 rounded-xl border border-indigo-300 bg-white hover:bg-indigo-100 text-indigo-900 font-semibold flex items-center gap-1 cursor-pointer transition">
+                <span>Import JSON</span>
+                <input
+                  type="file"
+                  accept="application/json"
+                  className="hidden"
+                  onChange={handleImportVideos}
+                />
+              </label>
+            </div>
           </div>
 
           <div className="space-y-3">

@@ -262,6 +262,7 @@ function apiDevServerPlugin(): Plugin {
 
         if (pathname === '/api/videos') {
           if (req.method === 'GET') {
+            devVideos = loadVideos();
             res.setHeader('Content-Type', 'application/json');
             return res.end(JSON.stringify(devVideos));
           }
@@ -270,16 +271,20 @@ function apiDevServerPlugin(): Plugin {
             req.on('data', chunk => { body += chunk; });
             req.on('end', () => {
               try {
-                const newVid = JSON.parse(body);
-                const existingIdx = devVideos.findIndex(v => v.id === newVid.id);
-                if (existingIdx >= 0) {
-                  devVideos[existingIdx] = { ...devVideos[existingIdx], ...newVid };
-                } else {
-                  devVideos.unshift(newVid);
+                const payload = JSON.parse(body);
+                devVideos = loadVideos();
+                const incoming: any[] = Array.isArray(payload) ? payload : [payload];
+                for (const item of incoming) {
+                  const existingIdx = devVideos.findIndex(v => v.id === item.id);
+                  if (existingIdx >= 0) {
+                    devVideos[existingIdx] = { ...devVideos[existingIdx], ...item };
+                  } else {
+                    devVideos.unshift(item);
+                  }
                 }
                 saveVideos(devVideos);
                 res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ success: true, video: newVid }));
+                res.end(JSON.stringify({ success: true, count: devVideos.length }));
               } catch (e: any) {
                 res.statusCode = 400;
                 res.end(JSON.stringify({ error: e.message }));

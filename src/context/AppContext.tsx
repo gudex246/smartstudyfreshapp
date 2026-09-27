@@ -221,6 +221,7 @@ interface AppContextType {
   addVideo: (video: VideoTutorial) => void;
   updateVideo: (video: VideoTutorial) => void;
   deleteVideo: (id: string) => void;
+  syncVideosWithServer: () => Promise<number>;
 
   // Course CRUD
   addCourse: (course: Course) => void;
@@ -567,32 +568,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Fast polling every 3.5 seconds so admin verification opens the student's app instantly
     const interval = setInterval(doSync, 3500);
 
-    // Also sync immediately when window or tab receives focus
-    const handleFocus = () => {
-      doSync();
-    };
-    window.addEventListener('focus', handleFocus);
-
-    // Sync videos from /api/videos so uploaded videos persist across installations and devices
-    const syncVideosFromApi = async () => {
+    // Two-way video sync: push any local PC uploads to /api/videos and fetch remote updates
+    const doVideoSync = async () => {
       try {
         const res = await fetch('/api/videos');
         if (res.ok) {
           const remoteVideos: VideoTutorial[] = await res.json();
-          if (Array.isArray(remoteVideos) && remoteVideos.length > 0) {
+          if (Array.isArray(remoteVideos)) {
+            // Check for any local custom videos not yet on server
+            const savedRaw = localStorage.getItem(STORAGE_KEYS.VIDEOS);
+            let localList: VideoTutorial[] = [];
+            if (savedRaw) {
+              try { localList = JSON.parse(savedRaw); } catch {}
+            }
+
+            const remoteIds = new Set(remoteVideos.map(rv => rv.id));
+            const unsynced = localList.filter(lv => !remoteIds.has(lv.id));
+
+            if (unsynced.length > 0) {
+              await fetch('/api/videos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(unsynced)
+              }).catch(() => {});
+            }
+
+            // Merge server videos into local state
             setVideos((prev) => {
-              const existingIds = new Set(prev.map((v) => v.id));
-              const toAdd = remoteVideos.filter((rv) => !existingIds.has(rv.id));
+              const currentIds = new Set(prev.map((v) => v.id));
+              const toAdd = remoteVideos.filter((rv) => !currentIds.has(rv.id));
               if (toAdd.length > 0) {
-                return [...toAdd, ...prev];
+                const combined = [...toAdd, ...prev];
+                safeSetItem(STORAGE_KEYS.VIDEOS, JSON.stringify(combined));
+                return combined;
               }
               return prev;
             });
           }
         }
-      } catch {}
+      } catch (err) {
+        console.warn('Video sync warning:', err);
+      }
     };
-    syncVideosFromApi();
+
+    doVideoSync();
+
+    // Also sync immediately when window or tab receives focus
+    const handleFocus = () => {
+      doSync();
+      doVideoSync();
+    };
+    window.addEventListener('focus', handleFocus);
 
     return () => {
       isMounted = false;
@@ -1056,6 +1082,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }).catch(() => {});
   };
 
+  const syncVideosWithServer = async (): Promise<number> => {
+    try {
+      const res = await fetch('/api/videos');
+      if (res.ok) {
+        const remoteVideos: VideoTutorial[] = await res.json();
+        if (Array.isArray(remoteVideos)) {
+          const savedRaw = localStorage.getItem(STORAGE_KEYS.VIDEOS);
+          let localList: VideoTutorial[] = [];
+          if (savedRaw) {
+            try { localList = JSON.parse(savedRaw); } catch {}
+          }
+          const allLocal = [...videos];
+          for (const item of localList) {
+            if (!allLocal.some(v => v.id === item.id)) {
+              allLocal.push(item);
+            }
+          }
+          const remoteIds = new Set(remoteVideos.map(rv => rv.id));
+          const unsynced = allLocal.filter(lv => !remoteIds.has(lv.id));
+          if (unsynced.length > 0) {
+            await fetch('/api/videos', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(unsynced)
+            }).catch(() => {});
+          }
+
+          let newAdded = 0;
+          setVideos((prev) => {
+            const currentIds = new Set(prev.map(v => v.id));
+            const toAdd = remoteVideos.filter(rv => !currentIds.has(rv.id));
+            if (toAdd.length > 0) {
+              newAdded = toAdd.length;
+              const merged = [...toAdd, ...prev];
+              safeSetItem(STORAGE_KEYS.VIDEOS, JSON.stringify(merged));
+              return merged;
+            }
+            return prev;
+          });
+          return unsynced.length + newAdded;
+        }
+      }
+    } catch (err) {
+      console.warn('Video sync failed:', err);
+    }
+    return 0;
+  };
+
   // Courses CRUD
   const addCourse = (course: Course) => {
     setCourses(prev => [course, ...prev]);
@@ -1324,6 +1398,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addVideo,
         updateVideo,
         deleteVideo,
+        syncVideosWithServer,
         addCourse,
         updateCourse,
         deleteCourse,
