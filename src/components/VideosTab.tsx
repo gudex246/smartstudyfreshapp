@@ -24,6 +24,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { VideoTutorial } from '../types';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { INITIAL_VIDEOS } from '../data/initialData';
 import { formatVideoEmbedUrl, isDirectVideoFile, getOriginalVideoUrl } from '../utils/videoUtils';
 import { getVideoBlob, saveVideoBlob, uploadFileToServer, uploadLocalVideoToServer } from '../utils/videoStorage';
 
@@ -126,7 +127,22 @@ export const VideosTab: React.FC = () => {
         }
       }
 
-      // 4. If temporary blob URL exists
+      // 4. If local video blob is not found on this device (e.g. on mobile while file was added on PC),
+      // fallback to the verified online stream URL from the curriculum
+      const defaultVideo = INITIAL_VIDEOS.find((iv) => iv.id === videoId);
+      if (defaultVideo?.videoUrl && !defaultVideo.videoUrl.startsWith('idb://')) {
+        const formatted = formatVideoEmbedUrl(defaultVideo.videoUrl);
+        if (formatted && !isCancelled) {
+          setPlayableVideoUrl(formatted);
+          setIsResolvingMedia(false);
+          if (activeVideo.videoUrl !== defaultVideo.videoUrl) {
+            updateVideo({ ...activeVideo, videoUrl: defaultVideo.videoUrl });
+          }
+          return;
+        }
+      }
+
+      // 5. If temporary blob URL exists
       if (url.startsWith('blob:')) {
         try {
           const res = await fetch(url, { method: 'HEAD' });
@@ -138,7 +154,7 @@ export const VideosTab: React.FC = () => {
         } catch {}
       }
 
-      // 5. If it's a local video not yet synced to this device
+      // 6. If it's a local video not yet synced to this device
       if (!isCancelled) {
         setIsResolvingMedia(false);
         setPlayableVideoUrl(null);
@@ -417,16 +433,16 @@ export const VideosTab: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                {!isActiveVideoLocked && activeVideo.videoUrl && (
+                {!isActiveVideoLocked && (playableVideoUrl || (activeVideo.videoUrl && !activeVideo.videoUrl.startsWith('idb://'))) && (
                   <a
-                    href={getOriginalVideoUrl(activeVideo.videoUrl)}
+                    href={getOriginalVideoUrl(playableVideoUrl || activeVideo.videoUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#18233c] hover:bg-[#23355b] text-indigo-300 hover:text-white text-[11px] font-semibold border border-indigo-500/30 transition shadow-xs"
-                    title="If browser blocks connection in iframe, watch directly in YouTube/Browser"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 hover:text-white text-xs font-semibold border border-indigo-500/40 transition shadow-xs"
+                    title="Open directly in YouTube or browser"
                   >
-                    <ExternalLink className="w-3 h-3" />
-                    <span>Watch in New Tab</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Watch in YouTube / New Tab</span>
                   </a>
                 )}
                 {activeVideo.isPremium ? (
