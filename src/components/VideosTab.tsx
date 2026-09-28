@@ -26,7 +26,14 @@ import { VideoTutorial } from '../types';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { INITIAL_VIDEOS } from '../data/initialData';
 import { formatVideoEmbedUrl, isDirectVideoFile, getOriginalVideoUrl } from '../utils/videoUtils';
-import { getVideoBlob, saveVideoBlob, uploadFileToServer, uploadLocalVideoToServer } from '../utils/videoStorage';
+import {
+  getVideoBlob,
+  saveVideoBlob,
+  uploadFileToServer,
+  uploadLocalVideoToServer,
+  getAllVideoBlobKeys,
+  syncAllLocalVideosToServer
+} from '../utils/videoStorage';
 
 export const VideosTab: React.FC = () => {
   const isOnline = useOnlineStatus();
@@ -66,6 +73,28 @@ export const VideosTab: React.FC = () => {
   const [mediaError, setMediaError] = useState<string | null>(null);
   const [isResolvingMedia, setIsResolvingMedia] = useState<boolean>(false);
   const [showTroubleshootGuide, setShowTroubleshootGuide] = useState<boolean>(false);
+  const [localBlobCount, setLocalBlobCount] = useState<number>(0);
+  const [isSyncingLocalVideos, setIsSyncingLocalVideos] = useState<boolean>(false);
+  const [localSyncStatusMsg, setLocalSyncStatusMsg] = useState<string | null>(null);
+
+  // Scan local IndexedDB for any original Smart Study Tutorial videos and auto-sync
+  useEffect(() => {
+    getAllVideoBlobKeys()
+      .then((keys) => {
+        setLocalBlobCount(keys.length);
+        if (keys.length > 0) {
+          syncAllLocalVideosToServer()
+            .then(({ synced }) => {
+              if (synced > 0) {
+                setLocalSyncStatusMsg(`${synced} original video(s) uploaded to server! Mobile devices can now stream them.`);
+                syncVideosWithServer();
+              }
+            })
+            .catch(() => {});
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Resolve video URL for playback (including IndexedDB persistent storage and expired blob check)
   useEffect(() => {
@@ -105,7 +134,7 @@ export const VideosTab: React.FC = () => {
 
       // 2. Check if the server has the uploaded video at /uploads/videos/${videoId}.mp4
       try {
-        const serverPath = `/uploads/videos/${videoId}.mp4`;
+        const serverPath = url.startsWith('/uploads/videos/') ? url : `/uploads/videos/${videoId}.mp4`;
         const chk = await fetch(serverPath, { method: 'HEAD' });
         if (chk.ok && !isCancelled) {
           setPlayableVideoUrl(serverPath);
@@ -118,7 +147,7 @@ export const VideosTab: React.FC = () => {
       } catch {}
 
       // 3. If url is an external URL (YouTube / Vimeo / Google Drive / direct MP4)
-      if (url && !url.startsWith('idb://') && !url.startsWith('blob:')) {
+      if (url && !url.startsWith('idb://') && !url.startsWith('blob:') && !url.startsWith('/uploads/videos/')) {
         const formatted = formatVideoEmbedUrl(url);
         if (formatted && !isCancelled) {
           setPlayableVideoUrl(formatted);
@@ -127,22 +156,7 @@ export const VideosTab: React.FC = () => {
         }
       }
 
-      // 4. If local video blob is not found on this device (e.g. on mobile while file was added on PC),
-      // fallback to the verified online stream URL from the curriculum
-      const defaultVideo = INITIAL_VIDEOS.find((iv) => iv.id === videoId);
-      if (defaultVideo?.videoUrl && !defaultVideo.videoUrl.startsWith('idb://')) {
-        const formatted = formatVideoEmbedUrl(defaultVideo.videoUrl);
-        if (formatted && !isCancelled) {
-          setPlayableVideoUrl(formatted);
-          setIsResolvingMedia(false);
-          if (activeVideo.videoUrl !== defaultVideo.videoUrl) {
-            updateVideo({ ...activeVideo, videoUrl: defaultVideo.videoUrl });
-          }
-          return;
-        }
-      }
-
-      // 5. If temporary blob URL exists
+      // 4. If temporary blob URL exists
       if (url.startsWith('blob:')) {
         try {
           const res = await fetch(url, { method: 'HEAD' });
@@ -154,12 +168,12 @@ export const VideosTab: React.FC = () => {
         } catch {}
       }
 
-      // 6. If it's a local video not yet synced to this device
+      // 5. If it's a local video not yet synced to this device
       if (!isCancelled) {
         setIsResolvingMedia(false);
         setPlayableVideoUrl(null);
         setMediaError(
-          'This video file was uploaded on your computer browser. To watch it on mobile, simply open Smart Study on your PC once to automatically upload it to the cloud, or re-select the MP4 file below.'
+          `Original Smart Study Tutorial video ("${activeVideo.title}") by Guduru Alemayehu. This video file was uploaded on your computer browser. Please open the website on that computer once to finish auto-uploading to the server, or tap below to upload the MP4 file directly from this phone.`
         );
       }
     }
@@ -315,6 +329,42 @@ export const VideosTab: React.FC = () => {
         </div>
       )}
 
+      {/* Original Smart Study Tutorial Video Sync Banner */}
+      {localBlobCount > 0 && (
+        <div className="p-4 rounded-2xl bg-indigo-950/60 border border-indigo-700/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-300 shrink-0">
+              <Video className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-white text-xs sm:text-sm">
+                Original Smart Study Tutorial Videos ({localBlobCount}) Detected on this Device
+              </h4>
+              <p className="text-[11px] text-indigo-300/90 mt-0.5">
+                {localSyncStatusMsg || 'Sync your original MP4 video files to the server so mobile phones and tablets can stream them immediately.'}
+              </p>
+            </div>
+          </div>
+          <button
+            disabled={isSyncingLocalVideos}
+            onClick={async () => {
+              setIsSyncingLocalVideos(true);
+              try {
+                const res = await syncAllLocalVideosToServer();
+                setLocalSyncStatusMsg(`Success! ${res.synced > 0 ? res.synced : res.total} video(s) synced to server for mobile streaming.`);
+                await syncVideosWithServer();
+              } finally {
+                setIsSyncingLocalVideos(false);
+              }
+            }}
+            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 transition shrink-0"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncingLocalVideos ? 'animate-spin' : ''}`} />
+            <span>{isSyncingLocalVideos ? 'Uploading to Server...' : 'Sync Original Videos to Server'}</span>
+          </button>
+        </div>
+      )}
+
       {/* Main Video Theater Player */}
       {activeVideo && (() => {
         const activeVideoIndex = filteredVideos.findIndex((v) => v.id === activeVideo.id);
@@ -350,21 +400,24 @@ export const VideosTab: React.FC = () => {
               </div>
             ) : mediaError ? (
               <div className="p-6 sm:p-8 text-center text-white max-w-lg space-y-4">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 mx-auto flex items-center justify-center">
-                  <AlertCircle className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 mx-auto flex items-center justify-center">
+                  <Video className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400" />
                 </div>
                 <div className="space-y-1.5">
                   <h3 className="text-base sm:text-lg font-bold text-white">
-                    Video Not Available or Connection Expired
+                    {activeVideo.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+                  <p className="text-xs font-semibold text-indigo-300">
+                    Smart Study Tutorial by Guduru Alemayehu
+                  </p>
+                  <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed pt-1">
                     {mediaError}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                   <label className="cursor-pointer px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm inline-flex items-center gap-2 transition shadow-md">
                     <Upload className="w-4 h-4" />
-                    <span>Re-select Video File (Permanent Storage)</span>
+                    <span>Upload MP4 File For This Video</span>
                     <input
                       type="file"
                       accept="video/mp4,video/webm,video/ogg"
@@ -372,7 +425,7 @@ export const VideosTab: React.FC = () => {
                       onChange={handleReuploadVideoFile}
                     />
                   </label>
-                  {activeVideo.videoUrl && !activeVideo.videoUrl.startsWith('blob:') && !activeVideo.videoUrl.startsWith('idb://') && (
+                  {activeVideo.videoUrl && !activeVideo.videoUrl.startsWith('blob:') && !activeVideo.videoUrl.startsWith('idb://') && !activeVideo.videoUrl.startsWith('/uploads/videos/') && (
                     <a
                       href={getOriginalVideoUrl(activeVideo.videoUrl)}
                       target="_blank"

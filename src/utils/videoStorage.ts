@@ -164,3 +164,34 @@ export async function checkServerVideoExists(url: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Scans all video blobs saved in IndexedDB and uploads any missing ones to the server
+ * so that mobile phones and any other devices can stream the original video files immediately.
+ */
+export async function syncAllLocalVideosToServer(): Promise<{ synced: number; total: number; uploadedUrls: Record<string, string> }> {
+  try {
+    const keys = await getAllVideoBlobKeys();
+    let synced = 0;
+    const uploadedUrls: Record<string, string> = {};
+
+    for (const key of keys) {
+      const cleanId = key.replace(/^idb:\/\//, '');
+      const serverUrl = `/uploads/videos/${cleanId}.mp4`;
+      const exists = await checkServerVideoExists(serverUrl);
+      if (!exists) {
+        const uploaded = await uploadLocalVideoToServer(key, `${cleanId}.mp4`);
+        if (uploaded) {
+          synced++;
+          uploadedUrls[cleanId] = uploaded;
+        }
+      } else {
+        uploadedUrls[cleanId] = serverUrl;
+      }
+    }
+    return { synced, total: keys.length, uploadedUrls };
+  } catch (err) {
+    console.warn('syncAllLocalVideosToServer warning:', err);
+    return { synced: 0, total: 0, uploadedUrls: {} };
+  }
+}

@@ -33,7 +33,7 @@ import {
   fetchRemotePaymentSubmissions,
   subscribeToSyncEvents
 } from '../utils/cloudSync';
-import { uploadLocalVideoToServer } from '../utils/videoStorage';
+import { uploadLocalVideoToServer, syncAllLocalVideosToServer } from '../utils/videoStorage';
 
 export const ADMIN_EMAIL = 'gudurualemayehu29@gmail.com';
 export const DEFAULT_PIN = '1234';
@@ -604,22 +604,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const remoteIds = new Set(remoteVideos.map(rv => rv.id));
             const unsynced = localList.filter(lv => !remoteIds.has(lv.id));
 
-            // If any local video is stored in browser IndexedDB (idb://), upload the binary to server
-            for (const v of localList) {
-              if (v.videoUrl && v.videoUrl.startsWith('idb://')) {
-                uploadLocalVideoToServer(v.videoUrl, `${v.id}.mp4`).then(serverUrl => {
-                  if (serverUrl) {
-                    const migrated = { ...v, videoUrl: serverUrl };
-                    fetch('/api/videos', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(migrated)
-                    }).catch(() => {});
-                    setVideos(curr => curr.map(item => item.id === v.id ? migrated : item));
-                  }
-                }).catch(() => {});
+            // Sync all original video blobs stored in browser IndexedDB (idb://) to server so mobile can stream them
+            syncAllLocalVideosToServer().then(({ synced, uploadedUrls }) => {
+              if (synced > 0) {
+                for (const [vId, sUrl] of Object.entries(uploadedUrls)) {
+                  fetch('/api/videos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: vId, videoUrl: sUrl })
+                  }).catch(() => {});
+                }
+                setVideos((curr) =>
+                  curr.map((item) =>
+                    uploadedUrls[item.id] ? { ...item, videoUrl: uploadedUrls[item.id] } : item
+                  )
+                );
               }
-            }
+            }).catch(() => {});
 
             if (unsynced.length > 0) {
               await fetch('/api/videos', {
