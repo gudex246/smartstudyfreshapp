@@ -33,6 +33,7 @@ import {
   fetchRemotePaymentSubmissions,
   subscribeToSyncEvents
 } from '../utils/cloudSync';
+import { uploadLocalVideoToServer } from '../utils/videoStorage';
 
 export const ADMIN_EMAIL = 'gudurualemayehu29@gmail.com';
 export const DEFAULT_PIN = '1234';
@@ -312,16 +313,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_QUESTIONS.map((q) => ({ ...q, question: cleanQuestionText(q.question) }));
   });
 
-  // Load videos (ensuring built-in Mathematics and latest tutorial videos are always merged)
+  // Load videos (ensuring built-in Mathematics and latest tutorial videos are always merged and streamable)
   const [videos, setVideos] = useState<VideoTutorial[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.VIDEOS);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const savedIds = new Set(parsed.map((v: any) => v.id));
+          const initialMap = new Map(INITIAL_VIDEOS.map((v) => [v.id, v]));
+          // Upgrade any local idb:// videos if INITIAL_VIDEOS has streamable URL
+          const upgraded = parsed.map((item: any) => {
+            const def = initialMap.get(item.id);
+            if (def && item.videoUrl?.startsWith('idb://') && !def.videoUrl?.startsWith('idb://')) {
+              return { ...item, videoUrl: def.videoUrl };
+            }
+            return item;
+          });
+          const savedIds = new Set(upgraded.map((v: any) => v.id));
           const missingDefaults = INITIAL_VIDEOS.filter((iv) => !savedIds.has(iv.id));
-          return [...missingDefaults, ...parsed];
+          return [...missingDefaults, ...upgraded];
         }
       } catch {}
     }
@@ -585,6 +595,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const remoteIds = new Set(remoteVideos.map(rv => rv.id));
             const unsynced = localList.filter(lv => !remoteIds.has(lv.id));
 
+            // If any local video is stored in browser IndexedDB (idb://), upload the binary to server
+            for (const v of localList) {
+              if (v.videoUrl && v.videoUrl.startsWith('idb://')) {
+                uploadLocalVideoToServer(v.videoUrl, `${v.id}.mp4`).then(serverUrl => {
+                  if (serverUrl) {
+                    const migrated = { ...v, videoUrl: serverUrl };
+                    fetch('/api/videos', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(migrated)
+                    }).catch(() => {});
+                    setVideos(curr => curr.map(item => item.id === v.id ? migrated : item));
+                  }
+                }).catch(() => {});
+              }
+            }
+
             if (unsynced.length > 0) {
               await fetch('/api/videos', {
                 method: 'POST',
@@ -593,14 +620,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               }).catch(() => {});
             }
 
-            // Merge server videos into local state
+            // Merge server videos into local state (and upgrade any local idb:// videos to streamable URLs)
             setVideos((prev) => {
-              const currentIds = new Set(prev.map((v) => v.id));
+              const remoteMap = new Map(remoteVideos.map((rv) => [rv.id, rv]));
+              let hasChanges = false;
+              const merged = prev.map((localVid) => {
+                const remote = remoteMap.get(localVid.id);
+                if (remote) {
+                  if (localVid.videoUrl?.startsWith('idb://') && !remote.videoUrl?.startsWith('idb://')) {
+                    hasChanges = true;
+                    return { ...localVid, videoUrl: remote.videoUrl };
+                  }
+                }
+                return localVid;
+              });
+
+              const currentIds = new Set(merged.map((v) => v.id));
               const toAdd = remoteVideos.filter((rv) => !currentIds.has(rv.id));
               if (toAdd.length > 0) {
-                const combined = [...toAdd, ...prev];
-                safeSetItem(STORAGE_KEYS.VIDEOS, JSON.stringify(combined));
-                return combined;
+                hasChanges = true;
+                merged.unshift(...toAdd);
+              }
+
+              if (hasChanges) {
+                safeSetItem(STORAGE_KEYS.VIDEOS, JSON.stringify(merged));
+                return merged;
               }
               return prev;
             });
@@ -1101,6 +1145,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
           const remoteIds = new Set(remoteVideos.map(rv => rv.id));
           const unsynced = allLocal.filter(lv => !remoteIds.has(lv.id));
+
+          // Upload any binary blobs in IndexedDB to server so all devices can stream them
+          for (const v of allLocal) {
+            if (v.videoUrl && v.videoUrl.startsWith('idb://')) {
+              try {
+                const serverUrl = await uploadLocalVideoToServer(v.videoUrl, `${v.id}.mp4`);
+                if (serverUrl) {
+                  v.videoUrl = serverUrl;
+                  await fetch('/api/videos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(v)
+                  }).catch(() => {});
+                }
+              } catch {}
+            }
+          }
+
           if (unsynced.length > 0) {
             await fetch('/api/videos', {
               method: 'POST',
@@ -1111,11 +1173,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
           let newAdded = 0;
           setVideos((prev) => {
-            const currentIds = new Set(prev.map(v => v.id));
+            const remoteMap = new Map(remoteVideos.map(rv => [rv.id, rv]));
+            let hasChanges = false;
+            const merged = prev.map((localVid) => {
+              const remote = remoteMap.get(localVid.id);
+              if (remote) {
+                if (localVid.videoUrl?.startsWith('idb://') && !remote.videoUrl?.startsWith('idb://')) {
+                  hasChanges = true;
+                  return { ...localVid, videoUrl: remote.videoUrl };
+                }
+              }
+              return localVid;
+            });
+
+            const currentIds = new Set(merged.map(v => v.id));
             const toAdd = remoteVideos.filter(rv => !currentIds.has(rv.id));
             if (toAdd.length > 0) {
               newAdded = toAdd.length;
-              const merged = [...toAdd, ...prev];
+              hasChanges = true;
+              merged.unshift(...toAdd);
+            }
+
+            if (hasChanges) {
               safeSetItem(STORAGE_KEYS.VIDEOS, JSON.stringify(merged));
               return merged;
             }

@@ -163,25 +163,23 @@ function apiDevServerPlugin(): Plugin {
   let devChatMessages: any[] = loadChat();
   let devVideos: any[] = loadVideos();
 
-  return {
-    name: 'vite-plugin-dev-api',
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        if (!req.url?.startsWith('/api/')) {
-          return next();
-        }
+  const apiMiddleware = (req: any, res: any, next: any) => {
+    if (!req.url?.startsWith('/api/')) {
+      return next();
+    }
 
-        const url = new URL(req.url, 'http://localhost:3000');
-        const pathname = url.pathname;
+    const url = new URL(req.url, 'http://localhost:3000');
+    const pathname = url.pathname;
 
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader('Access-Control-Expose-Headers', '*');
 
-        if (req.method === 'OPTIONS') {
-          res.statusCode = 200;
-          return res.end();
-        }
+    if (req.method === 'OPTIONS') {
+      res.statusCode = 200;
+      return res.end();
+    }
 
         if (pathname === '/api/submissions') {
           if (req.method === 'GET') {
@@ -303,8 +301,41 @@ function apiDevServerPlugin(): Plugin {
           }
         }
 
+        if (pathname === '/api/upload-video') {
+          if (req.method === 'POST') {
+            const rawFilename = url.searchParams.get('filename') || req.headers['x-filename'] || `video_${Date.now()}.mp4`;
+            const cleanFilename = String(rawFilename).replace(/[^a-zA-Z0-9._-]/g, '_');
+            const uploadDir = path.resolve(__dirname, 'public', 'uploads', 'videos');
+            if (!fs.existsSync(uploadDir)) {
+              fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            const filePath = path.resolve(uploadDir, cleanFilename);
+            const writeStream = fs.createWriteStream(filePath);
+            req.pipe(writeStream);
+            writeStream.on('finish', () => {
+              const publicUrl = `/uploads/videos/${cleanFilename}`;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ success: true, url: publicUrl, filename: cleanFilename }));
+            });
+            writeStream.on('error', (err: any) => {
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: err.message }));
+            });
+            return;
+          }
+        }
+
         next();
-      });
+  };
+
+  return {
+    name: 'vite-plugin-dev-api',
+    configureServer(server) {
+      server.middlewares.use(apiMiddleware);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(apiMiddleware);
     }
   };
 }

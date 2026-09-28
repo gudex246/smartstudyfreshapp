@@ -89,3 +89,78 @@ export async function deleteVideoBlob(idOrUri: string): Promise<void> {
     console.warn('Failed to delete video from IndexedDB:', err);
   }
 }
+
+/**
+ * Returns all video keys saved in IndexedDB
+ */
+export async function getAllVideoBlobKeys(): Promise<string[]> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.getAllKeys();
+      req.onsuccess = () => resolve(((req.result as any[]) || []).map(k => String(k)));
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.error('Failed to get video keys from IndexedDB:', err);
+    return [];
+  }
+}
+
+/**
+ * Uploads a raw File or Blob directly to /api/upload-video
+ */
+export async function uploadFileToServer(file: Blob | File, filename?: string, id?: string): Promise<string | null> {
+  try {
+    const cleanName = filename || (file instanceof File ? file.name : `video_${Date.now()}.mp4`);
+    const cleanId = id || `vid_${Date.now()}`;
+    const res = await fetch(`/api/upload-video?filename=${encodeURIComponent(cleanName)}&id=${encodeURIComponent(cleanId)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': file.type || 'video/mp4'
+      },
+      body: file
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.url) {
+        return data.url;
+      }
+    }
+  } catch (err) {
+    console.warn('Upload to server failed (offline or local dev):', err);
+  }
+  return null;
+}
+
+/**
+ * Reads local binary video blob from IndexedDB and uploads it to the server
+ * so that mobile phones and any device can stream it over HTTP.
+ */
+export async function uploadLocalVideoToServer(idOrUri: string, filename?: string): Promise<string | null> {
+  try {
+    const blob = await getVideoBlob(idOrUri);
+    if (!blob) return null;
+    const cleanId = idOrUri.replace(/^idb:\/\//, '');
+    const cleanName = filename || `${cleanId}.mp4`;
+    return await uploadFileToServer(blob, cleanName, cleanId);
+  } catch (err) {
+    console.warn('Failed to sync video to server from IndexedDB:', err);
+    return null;
+  }
+}
+
+/**
+ * Checks if a video URL (such as /uploads/videos/...) is reachable on the server
+ */
+export async function checkServerVideoExists(url: string): Promise<boolean> {
+  try {
+    if (!url || url.startsWith('idb://') || url.startsWith('blob:')) return false;
+    const res = await fetch(url, { method: 'HEAD' });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}

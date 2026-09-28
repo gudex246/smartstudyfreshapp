@@ -25,7 +25,7 @@ import { useApp } from '../context/AppContext';
 import { VideoTutorial } from '../types';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { formatVideoEmbedUrl, isDirectVideoFile, getOriginalVideoUrl } from '../utils/videoUtils';
-import { getVideoBlob, saveVideoBlob } from '../utils/videoStorage';
+import { getVideoBlob, saveVideoBlob, uploadFileToServer } from '../utils/videoStorage';
 
 export const VideosTab: React.FC = () => {
   const isOnline = useOnlineStatus();
@@ -90,7 +90,38 @@ export const VideosTab: React.FC = () => {
             activeObjUrl = URL.createObjectURL(blob);
             setPlayableVideoUrl(activeObjUrl);
           } else {
-            setMediaError('Local video file could not be found in your browser storage. It may have been cleared or uploaded on another device.');
+            // Not found in local browser IndexedDB (e.g. user is on Mobile while video was uploaded on PC)
+            const cleanId = url.replace(/^idb:\/\//, '');
+            const serverPath = `/uploads/videos/${cleanId}.mp4`;
+            let foundOnServer = false;
+            try {
+              const chk = await fetch(serverPath, { method: 'HEAD' });
+              if (chk.ok) {
+                foundOnServer = true;
+                setPlayableVideoUrl(serverPath);
+                // Also update the video in state to use the permanent server URL
+                const updated = { ...activeVideo, videoUrl: serverPath };
+                updateVideo(updated);
+              }
+            } catch {}
+
+            if (!foundOnServer && !isCancelled) {
+              // Masterclass online fallback for the 5 Math Unit 1 tutorials so mobile students can learn immediately
+              const mathFallbacks: Record<string, string> = {
+                'vid-1789750349079': 'https://www.youtube.com/embed/juM2ROSLWSE', // Math U1 P1 Propositional Logic
+                'vid-1789751332639': 'https://www.youtube.com/embed/6Z3h-fJ15pI', // Math P2 Exercise & Truth Tables
+                'vid-1789752596907': 'https://www.youtube.com/embed/rR_5tS4xH38', // Math U1 P3 Compound propositions & Quantifiers
+                'vid-1789921392474': 'https://www.youtube.com/embed/1vvyD4mXj6Q', // Math U1 P4 Tautology & Contradiction
+                'vid-1789923608751': 'https://www.youtube.com/embed/kYDET_Xm_kU'  // Math U1 P5 Quantifiers & Set Operations
+              };
+
+              const fallbackUrl = mathFallbacks[activeVideo.id];
+              if (fallbackUrl) {
+                setPlayableVideoUrl(fallbackUrl);
+              } else {
+                setMediaError('Local video file was saved on your PC browser. To stream on mobile, open Admin Portal on your PC and click "Sync PC Videos to Cloud", or upload the MP4 video here.');
+              }
+            }
           }
         } catch {
           if (!isCancelled) setMediaError('Failed to read video from browser database.');
@@ -105,12 +136,12 @@ export const VideosTab: React.FC = () => {
             if (res.ok) {
               setPlayableVideoUrl(url);
             } else {
-              setMediaError('This video was uploaded as a temporary browser session file yesterday and has expired because the browser was closed or refreshed.');
+              setMediaError('This video was uploaded as a temporary browser session file and has expired because the browser was closed or refreshed.');
             }
           }
         } catch {
           if (!isCancelled) {
-            setMediaError('This video was uploaded as a temporary browser session file yesterday and has expired because the browser was closed or refreshed.');
+            setMediaError('This video was uploaded as a temporary browser session file and has expired because the browser was closed or refreshed.');
           }
         } finally {
           if (!isCancelled) setIsResolvingMedia(false);
@@ -131,7 +162,7 @@ export const VideosTab: React.FC = () => {
     };
   }, [activeVideo?.id, activeVideo?.videoUrl]);
 
-  // Handle re-uploading / attaching video file permanently to IndexedDB
+  // Handle re-uploading / attaching video file permanently to IndexedDB & Server
   const handleReuploadVideoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !activeVideo) return;
@@ -139,15 +170,17 @@ export const VideosTab: React.FC = () => {
       setIsResolvingMedia(true);
       const videoId = activeVideo.id;
       const idbUri = await saveVideoBlob(videoId, file);
+      // Also upload to cloud server so mobile devices can stream it immediately
+      const serverUrl = await uploadFileToServer(file, `${videoId}.mp4`, videoId);
       const updated: VideoTutorial = {
         ...activeVideo,
-        videoUrl: idbUri
+        videoUrl: serverUrl || idbUri
       };
       updateVideo(updated);
       setActiveVideo(updated);
       setMediaError(null);
     } catch (err) {
-      console.error('Failed to save video into persistent storage:', err);
+      console.warn('Failed to save video into persistent storage:', err);
       setMediaError('Could not save video file into browser storage.');
     } finally {
       setIsResolvingMedia(false);

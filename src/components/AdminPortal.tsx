@@ -34,7 +34,7 @@ import { useApp, ADMIN_EMAIL } from '../context/AppContext';
 import { Course, Chapter, ExamQuestion, VideoTutorial, PaymentSubmission, Announcement } from '../types';
 import { cleanQuestionText } from '../utils/textUtils';
 import { formatVideoEmbedUrl, isDirectVideoFile } from '../utils/videoUtils';
-import { saveVideoBlob } from '../utils/videoStorage';
+import { saveVideoBlob, uploadLocalVideoToServer, uploadFileToServer } from '../utils/videoStorage';
 
 export const AdminPortal: React.FC = () => {
   const {
@@ -165,6 +165,37 @@ export const AdminPortal: React.FC = () => {
       }
     };
     reader.readAsText(file);
+  };
+
+  const [isUploadingFile, setIsUploadingFile] = useState<boolean>(false);
+  const [isMigratingVideos, setIsMigratingVideos] = useState<boolean>(false);
+
+  const handleMigrateLocalVideos = async () => {
+    setIsMigratingVideos(true);
+    let count = 0;
+    try {
+      for (const vid of videos) {
+        if (vid.videoUrl && (vid.videoUrl.startsWith('idb://') || vid.videoUrl.startsWith('blob:'))) {
+          const cleanName = `${vid.id}.mp4`;
+          const serverUrl = await uploadLocalVideoToServer(vid.videoUrl, cleanName);
+          if (serverUrl) {
+            const updated = { ...vid, videoUrl: serverUrl };
+            updateVideo(updated);
+            count++;
+          }
+        }
+      }
+      await syncVideosWithServer();
+      if (count > 0) {
+        showToast(`Success! ${count} video(s) uploaded to server! Mobile phones can now stream them.`, 'success');
+      } else {
+        showToast('All local videos are already synced to cloud server.', 'info');
+      }
+    } catch {
+      showToast('Error syncing local videos', 'error');
+    } finally {
+      setIsMigratingVideos(false);
+    }
   };
 
   // Bulk Question Upload states
@@ -1546,16 +1577,30 @@ export const AdminPortal: React.FC = () => {
                         const file = e.target.files?.[0];
                         if (file) {
                           const videoId = editingVideo.id || `vid_${Date.now()}`;
+                          setIsUploadingFile(true);
                           try {
+                            // 1. Save locally to browser IndexedDB
                             const idbUri = await saveVideoBlob(videoId, file);
+                            
+                            // 2. Upload to server so mobile devices can stream it
+                            const cleanName = `${videoId}.mp4`;
+                            const serverUrl = await uploadFileToServer(file, cleanName, videoId);
+                            
+                            const finalUrl = serverUrl || idbUri;
                             setEditingVideo({
                               ...editingVideo,
                               id: videoId,
-                              videoUrl: idbUri,
+                              videoUrl: finalUrl,
                               title: editingVideo.title || file.name.replace(/\.[^/.]+$/, '')
                             });
+                            
+                            if (serverUrl) {
+                              showToast('Video uploaded to server! Mobile phones can stream it.', 'success');
+                            } else {
+                              showToast('Video saved locally in browser storage.', 'info');
+                            }
                           } catch (err) {
-                            console.error('Failed to save in IndexedDB, falling back:', err);
+                            console.warn('File upload note:', err);
                             const fileUrl = URL.createObjectURL(file);
                             setEditingVideo({
                               ...editingVideo,
@@ -1563,6 +1608,8 @@ export const AdminPortal: React.FC = () => {
                               videoUrl: fileUrl,
                               title: editingVideo.title || file.name.replace(/\.[^/.]+$/, '')
                             });
+                          } finally {
+                            setIsUploadingFile(false);
                           }
                         }
                       }}
