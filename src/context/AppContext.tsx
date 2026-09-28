@@ -321,17 +321,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const initialMap = new Map(INITIAL_VIDEOS.map((v) => [v.id, v]));
-          // Upgrade any local idb:// videos if INITIAL_VIDEOS has streamable URL
-          const upgraded = parsed.map((item: any) => {
-            const def = initialMap.get(item.id);
-            if (def && item.videoUrl?.startsWith('idb://') && !def.videoUrl?.startsWith('idb://')) {
-              return { ...item, videoUrl: def.videoUrl };
+          // If any video in localStorage had placeholder URLs, reset to idb:// so it loads from IndexedDB
+          const cleaned = parsed.map((item: any) => {
+            if (
+              item.videoUrl?.includes('juM2ROSLWSE') ||
+              item.videoUrl?.includes('6Z3h-fJ15pI') ||
+              item.videoUrl?.includes('rR_5tS4xH38') ||
+              item.videoUrl?.includes('1vvyD4mXj6Q') ||
+              item.videoUrl?.includes('kYDET_Xm_kU')
+            ) {
+              return { ...item, videoUrl: `idb://${item.id}` };
             }
             return item;
           });
-          const savedIds = new Set(upgraded.map((v: any) => v.id));
+          const savedIds = new Set(cleaned.map((v: any) => v.id));
           const missingDefaults = INITIAL_VIDEOS.filter((iv) => !savedIds.has(iv.id));
-          return [...missingDefaults, ...upgraded];
+          return [...missingDefaults, ...cleaned];
         }
       } catch {}
     }
@@ -625,6 +630,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               const remoteMap = new Map(remoteVideos.map((rv) => [rv.id, rv]));
               let hasChanges = false;
               const merged = prev.map((localVid) => {
+                if (
+                  localVid.videoUrl?.includes('juM2ROSLWSE') ||
+                  localVid.videoUrl?.includes('6Z3h-fJ15pI') ||
+                  localVid.videoUrl?.includes('rR_5tS4xH38') ||
+                  localVid.videoUrl?.includes('1vvyD4mXj6Q') ||
+                  localVid.videoUrl?.includes('kYDET_Xm_kU')
+                ) {
+                  hasChanges = true;
+                  return { ...localVid, videoUrl: `idb://${localVid.id}` };
+                }
                 const remote = remoteMap.get(localVid.id);
                 if (remote) {
                   if (localVid.videoUrl?.startsWith('idb://') && !remote.videoUrl?.startsWith('idb://')) {
@@ -1176,6 +1191,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const remoteMap = new Map(remoteVideos.map(rv => [rv.id, rv]));
             let hasChanges = false;
             const merged = prev.map((localVid) => {
+              if (
+                localVid.videoUrl?.includes('juM2ROSLWSE') ||
+                localVid.videoUrl?.includes('6Z3h-fJ15pI') ||
+                localVid.videoUrl?.includes('rR_5tS4xH38') ||
+                localVid.videoUrl?.includes('1vvyD4mXj6Q') ||
+                localVid.videoUrl?.includes('kYDET_Xm_kU')
+              ) {
+                hasChanges = true;
+                return { ...localVid, videoUrl: `idb://${localVid.id}` };
+              }
               const remote = remoteMap.get(localVid.id);
               if (remote) {
                 if (localVid.videoUrl?.startsWith('idb://') && !remote.videoUrl?.startsWith('idb://')) {

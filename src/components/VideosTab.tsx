@@ -25,7 +25,7 @@ import { useApp } from '../context/AppContext';
 import { VideoTutorial } from '../types';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { formatVideoEmbedUrl, isDirectVideoFile, getOriginalVideoUrl } from '../utils/videoUtils';
-import { getVideoBlob, saveVideoBlob, uploadFileToServer } from '../utils/videoStorage';
+import { getVideoBlob, saveVideoBlob, uploadFileToServer, uploadLocalVideoToServer } from '../utils/videoStorage';
 
 export const VideosTab: React.FC = () => {
   const isOnline = useOnlineStatus();
@@ -74,81 +74,77 @@ export const VideosTab: React.FC = () => {
     setPlayableVideoUrl(null);
 
     async function resolveSource() {
-      if (!activeVideo?.videoUrl || !activeVideo.videoUrl.trim()) {
+      if (!activeVideo) {
         setPlayableVideoUrl(null);
         return;
       }
 
-      const url = activeVideo.videoUrl.trim();
+      setIsResolvingMedia(true);
+      const videoId = activeVideo.id;
+      const url = (activeVideo.videoUrl || '').trim();
 
-      if (url.startsWith('idb://')) {
-        setIsResolvingMedia(true);
-        try {
-          const blob = await getVideoBlob(url);
-          if (isCancelled) return;
-          if (blob) {
-            activeObjUrl = URL.createObjectURL(blob);
-            setPlayableVideoUrl(activeObjUrl);
-          } else {
-            // Not found in local browser IndexedDB (e.g. user is on Mobile while video was uploaded on PC)
-            const cleanId = url.replace(/^idb:\/\//, '');
-            const serverPath = `/uploads/videos/${cleanId}.mp4`;
-            let foundOnServer = false;
-            try {
-              const chk = await fetch(serverPath, { method: 'HEAD' });
-              if (chk.ok) {
-                foundOnServer = true;
-                setPlayableVideoUrl(serverPath);
-                // Also update the video in state to use the permanent server URL
-                const updated = { ...activeVideo, videoUrl: serverPath };
-                updateVideo(updated);
-              }
-            } catch {}
+      // 1. Check local IndexedDB FIRST (if video file was uploaded on this PC/device)
+      try {
+        const localBlob = (await getVideoBlob(videoId)) || (url.startsWith('idb://') ? await getVideoBlob(url) : null);
+        if (localBlob && !isCancelled) {
+          activeObjUrl = URL.createObjectURL(localBlob);
+          setPlayableVideoUrl(activeObjUrl);
+          setIsResolvingMedia(false);
 
-            if (!foundOnServer && !isCancelled) {
-              // Masterclass online fallback for the 5 Math Unit 1 tutorials so mobile students can learn immediately
-              const mathFallbacks: Record<string, string> = {
-                'vid-1789750349079': 'https://www.youtube.com/embed/juM2ROSLWSE', // Math U1 P1 Propositional Logic
-                'vid-1789751332639': 'https://www.youtube.com/embed/6Z3h-fJ15pI', // Math P2 Exercise & Truth Tables
-                'vid-1789752596907': 'https://www.youtube.com/embed/rR_5tS4xH38', // Math U1 P3 Compound propositions & Quantifiers
-                'vid-1789921392474': 'https://www.youtube.com/embed/1vvyD4mXj6Q', // Math U1 P4 Tautology & Contradiction
-                'vid-1789923608751': 'https://www.youtube.com/embed/kYDET_Xm_kU'  // Math U1 P5 Quantifiers & Set Operations
-              };
-
-              const fallbackUrl = mathFallbacks[activeVideo.id];
-              if (fallbackUrl) {
-                setPlayableVideoUrl(fallbackUrl);
-              } else {
-                setMediaError('Local video file was saved on your PC browser. To stream on mobile, open Admin Portal on your PC and click "Sync PC Videos to Cloud", or upload the MP4 video here.');
-              }
+          // Auto-sync this local file to server in background so other devices (like mobile) can stream it!
+          uploadLocalVideoToServer(videoId, `${videoId}.mp4`).then((serverUrl) => {
+            if (serverUrl) {
+              const updated = { ...activeVideo, videoUrl: serverUrl };
+              updateVideo(updated);
             }
-          }
-        } catch {
-          if (!isCancelled) setMediaError('Failed to read video from browser database.');
-        } finally {
-          if (!isCancelled) setIsResolvingMedia(false);
+          }).catch(() => {});
+          return;
         }
-      } else if (url.startsWith('blob:')) {
-        setIsResolvingMedia(true);
+      } catch {}
+
+      // 2. Check if the server has the uploaded video at /uploads/videos/${videoId}.mp4
+      try {
+        const serverPath = `/uploads/videos/${videoId}.mp4`;
+        const chk = await fetch(serverPath, { method: 'HEAD' });
+        if (chk.ok && !isCancelled) {
+          setPlayableVideoUrl(serverPath);
+          setIsResolvingMedia(false);
+          if (activeVideo.videoUrl !== serverPath) {
+            updateVideo({ ...activeVideo, videoUrl: serverPath });
+          }
+          return;
+        }
+      } catch {}
+
+      // 3. If url is an external URL (YouTube / Vimeo / Google Drive / direct MP4)
+      if (url && !url.startsWith('idb://') && !url.startsWith('blob:')) {
+        const formatted = formatVideoEmbedUrl(url);
+        if (formatted && !isCancelled) {
+          setPlayableVideoUrl(formatted);
+          setIsResolvingMedia(false);
+          return;
+        }
+      }
+
+      // 4. If temporary blob URL exists
+      if (url.startsWith('blob:')) {
         try {
           const res = await fetch(url, { method: 'HEAD' });
-          if (!isCancelled) {
-            if (res.ok) {
-              setPlayableVideoUrl(url);
-            } else {
-              setMediaError('This video was uploaded as a temporary browser session file and has expired because the browser was closed or refreshed.');
-            }
+          if (res.ok && !isCancelled) {
+            setPlayableVideoUrl(url);
+            setIsResolvingMedia(false);
+            return;
           }
-        } catch {
-          if (!isCancelled) {
-            setMediaError('This video was uploaded as a temporary browser session file and has expired because the browser was closed or refreshed.');
-          }
-        } finally {
-          if (!isCancelled) setIsResolvingMedia(false);
-        }
-      } else {
-        const formatted = formatVideoEmbedUrl(url);
-        setPlayableVideoUrl(formatted || null);
+        } catch {}
+      }
+
+      // 5. If it's a local video not yet synced to this device
+      if (!isCancelled) {
+        setIsResolvingMedia(false);
+        setPlayableVideoUrl(null);
+        setMediaError(
+          'This video file was uploaded on your computer browser. To watch it on mobile, simply open Smart Study on your PC once to automatically upload it to the cloud, or re-select the MP4 file below.'
+        );
       }
     }
 
@@ -378,7 +374,7 @@ export const VideosTab: React.FC = () => {
                 <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mx-auto" />
                 <p className="text-xs font-semibold">Loading video media...</p>
               </div>
-            ) : playableVideoUrl && isDirectVideoFile(activeVideo.videoUrl) ? (
+            ) : playableVideoUrl && isDirectVideoFile(playableVideoUrl) ? (
               <video
                 key={playableVideoUrl}
                 src={playableVideoUrl}
