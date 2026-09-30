@@ -76,6 +76,8 @@ export const VideosTab: React.FC = () => {
   const [localBlobCount, setLocalBlobCount] = useState<number>(0);
   const [isSyncingLocalVideos, setIsSyncingLocalVideos] = useState<boolean>(false);
   const [localSyncStatusMsg, setLocalSyncStatusMsg] = useState<string | null>(null);
+  const [showUrlInput, setShowUrlInput] = useState<boolean>(false);
+  const [customUrlInput, setCustomUrlInput] = useState<string>('');
 
   // Scan local IndexedDB for any original Smart Study Tutorial videos and auto-sync
   useEffect(() => {
@@ -156,7 +158,21 @@ export const VideosTab: React.FC = () => {
         }
       }
 
-      // 4. If temporary blob URL exists
+      // 4. Check if curriculum has a verified online streaming link (e.g. YouTube)
+      const defaultVideo = INITIAL_VIDEOS.find((iv) => iv.id === videoId);
+      if (defaultVideo?.videoUrl && defaultVideo.videoUrl.startsWith('http')) {
+        const formatted = formatVideoEmbedUrl(defaultVideo.videoUrl);
+        if (formatted && !isCancelled) {
+          setPlayableVideoUrl(formatted);
+          setIsResolvingMedia(false);
+          if (activeVideo.videoUrl !== defaultVideo.videoUrl) {
+            updateVideo({ ...activeVideo, videoUrl: defaultVideo.videoUrl });
+          }
+          return;
+        }
+      }
+
+      // 5. If temporary blob URL exists
       if (url.startsWith('blob:')) {
         try {
           const res = await fetch(url, { method: 'HEAD' });
@@ -414,10 +430,10 @@ export const VideosTab: React.FC = () => {
                     {mediaError}
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 pt-2">
                   <label className="cursor-pointer px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm inline-flex items-center gap-2 transition shadow-md">
                     <Upload className="w-4 h-4" />
-                    <span>Upload MP4 File For This Video</span>
+                    <span>Upload MP4 File From This Phone</span>
                     <input
                       type="file"
                       accept="video/mp4,video/webm,video/ogg"
@@ -425,6 +441,13 @@ export const VideosTab: React.FC = () => {
                       onChange={handleReuploadVideoFile}
                     />
                   </label>
+                  <button
+                    onClick={() => setShowUrlInput(!showUrlInput)}
+                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs sm:text-sm inline-flex items-center gap-2 transition"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Paste YouTube / Drive Link</span>
+                  </button>
                   {activeVideo.videoUrl && !activeVideo.videoUrl.startsWith('blob:') && !activeVideo.videoUrl.startsWith('idb://') && !activeVideo.videoUrl.startsWith('/uploads/videos/') && (
                     <a
                       href={getOriginalVideoUrl(activeVideo.videoUrl)}
@@ -437,6 +460,39 @@ export const VideosTab: React.FC = () => {
                     </a>
                   )}
                 </div>
+
+                {showUrlInput && (
+                  <div className="w-full max-w-md mx-auto flex items-center gap-2 pt-2">
+                    <input
+                      type="text"
+                      value={customUrlInput}
+                      onChange={(e) => setCustomUrlInput(e.target.value)}
+                      placeholder="Paste YouTube watch link (https://youtu.be/...)"
+                      className="flex-1 p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 font-mono"
+                    />
+                    <button
+                      onClick={async () => {
+                        if (customUrlInput.trim() && activeVideo) {
+                          const converted = formatVideoEmbedUrl(customUrlInput.trim());
+                          const updated = { ...activeVideo, videoUrl: converted };
+                          updateVideo(updated);
+                          setActiveVideo(updated);
+                          setMediaError(null);
+                          setShowUrlInput(false);
+                          setCustomUrlInput('');
+                          await fetch('/api/videos', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updated)
+                          }).catch(() => {});
+                        }
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shrink-0"
+                    >
+                      Save & Play
+                    </button>
+                  </div>
+                )}
               </div>
             ) : isResolvingMedia || (!playableVideoUrl && !mediaError) ? (
               <div className="p-8 text-center text-slate-400 space-y-3">

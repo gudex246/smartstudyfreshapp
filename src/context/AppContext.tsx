@@ -324,16 +324,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           // If any video in localStorage had placeholder or local idb:// URLs, upgrade to verified streamable URLs
           const cleaned = parsed.map((item: any) => {
             const initial = initialMap.get(item.id);
-            if (
-              item.videoUrl?.includes('juM2ROSLWSE') ||
-              item.videoUrl?.includes('6Z3h-fJ15pI') ||
-              item.videoUrl?.includes('rR_5tS4xH38') ||
-              item.videoUrl?.includes('1vvyD4mXj6Q') ||
-              item.videoUrl?.includes('kYDET_Xm_kU') ||
-              (item.videoUrl?.startsWith('idb://') && initial && !initial.videoUrl.startsWith('idb://'))
-            ) {
-              if (initial) {
-                return { ...item, videoUrl: initial.videoUrl };
+            if (initial && initial.videoUrl?.startsWith('http')) {
+              if (
+                item.videoUrl?.startsWith('/uploads/videos/') ||
+                item.videoUrl?.startsWith('idb://') ||
+                !item.videoUrl ||
+                item.videoUrl?.includes('juM2ROSLWSE') ||
+                item.videoUrl?.includes('6Z3h-fJ15pI') ||
+                item.videoUrl?.includes('rR_5tS4xH38') ||
+                item.videoUrl?.includes('1vvyD4mXj6Q') ||
+                item.videoUrl?.includes('kYDET_Xm_kU') ||
+                (initial.id.startsWith('vid-1789') && item.videoUrl !== initial.videoUrl)
+              ) {
+                return { ...item, videoUrl: initial.videoUrl, title: initial.title, instructor: initial.instructor };
               }
             }
             return item;
@@ -641,21 +644,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 const streamableUrl = (!remote?.videoUrl?.startsWith('idb://') && remote?.videoUrl) || (!initial?.videoUrl.startsWith('idb://') && initial?.videoUrl);
 
                 if (
+                  localVid.videoUrl?.startsWith('/uploads/videos/') ||
+                  localVid.videoUrl?.startsWith('idb://') ||
                   localVid.videoUrl?.includes('juM2ROSLWSE') ||
                   localVid.videoUrl?.includes('6Z3h-fJ15pI') ||
                   localVid.videoUrl?.includes('rR_5tS4xH38') ||
                   localVid.videoUrl?.includes('1vvyD4mXj6Q') ||
                   localVid.videoUrl?.includes('kYDET_Xm_kU') ||
-                  (localVid.videoUrl?.startsWith('idb://') && streamableUrl)
+                  (initial && initial.id.startsWith('vid-1789') && localVid.videoUrl !== initial.videoUrl)
                 ) {
                   if (streamableUrl && localVid.videoUrl !== streamableUrl) {
                     hasChanges = true;
-                    return { ...localVid, videoUrl: streamableUrl };
+                    return {
+                      ...localVid,
+                      videoUrl: streamableUrl,
+                      title: initial?.title || remote?.title || localVid.title,
+                      instructor: initial?.instructor || remote?.instructor || localVid.instructor
+                    };
                   }
                 }
                 if (remote && remote.videoUrl && localVid.videoUrl !== remote.videoUrl && !remote.videoUrl.startsWith('idb://')) {
                   hasChanges = true;
-                  return { ...localVid, videoUrl: remote.videoUrl };
+                  return {
+                    ...localVid,
+                    videoUrl: remote.videoUrl,
+                    title: remote.title || localVid.title,
+                    instructor: remote.instructor || localVid.instructor
+                  };
                 }
                 return localVid;
               });
