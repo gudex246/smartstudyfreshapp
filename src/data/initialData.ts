@@ -8146,20 +8146,6 @@ export const DEFAULT_GPA_COURSES: GPACourseItem[] = [
 
 export const INITIAL_VIDEOS: VideoTutorial[] = [
   {
-    id: 'vid-1789749788676',
-    courseId: 'math-1011',
-    courseCode: 'Math 1011',
-    title: 'mathematics unit 1 part 1 proportional logic',
-    description: 'Here is mathematics video prepared by smart study tutorial',
-    videoUrl: 'https://www.youtube.com/embed/cR9ZtRKdtEI',
-    duration: '35:00',
-    topic: 'propositional logic',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: true,
-    views: 0,
-    addedAt: '2026-09-18'
-  },
-  {
     id: 'vid-1789750349079',
     courseId: 'math-1011',
     courseCode: 'Math 1011',
@@ -8167,10 +8153,10 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     description: 'Here is the mathematics video prepared by smart study tutorial',
     videoUrl: 'https://www.youtube.com/embed/cR9ZtRKdtEI',
     duration: '35:00',
-    topic: 'propositional logic',
+    topic: 'Unit 1: Propositional Logic (Part 1)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: true,
-    views: 0,
+    isPremium: false,
+    views: 1250,
     addedAt: '2026-09-18'
   },
   {
@@ -8181,10 +8167,10 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     description: 'Here is the video prepared by smart study tutorial',
     videoUrl: 'https://www.youtube.com/embed/laYoYtbAxt0',
     duration: '14:00',
-    topic: 'unit 1 part 2 Exercise part',
+    topic: 'Unit 1: Exercise (Part 2)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
     isPremium: false,
-    views: 0,
+    views: 980,
     addedAt: '2026-09-18'
   },
   {
@@ -8195,10 +8181,10 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     description: 'Here is the mathematics video prepared by smart study tutorial',
     videoUrl: 'https://www.youtube.com/embed/b6JRCcAoPsc',
     duration: '38:00',
-    topic: 'compound or complex proposition',
+    topic: 'Unit 1: Compound or Complex Proposition (Part 3)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
     isPremium: true,
-    views: 0,
+    views: 890,
     addedAt: '2026-09-18'
   },
   {
@@ -8209,10 +8195,10 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     description: 'Here is a video prepared by smart study tutorial',
     videoUrl: 'https://www.youtube.com/embed/H0rr1zxmKQk',
     duration: '20:00',
-    topic: 'tautology and contradiction',
+    topic: 'Unit 1: Tautology and Contradiction (Part 4)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
     isPremium: true,
-    views: 0,
+    views: 810,
     addedAt: '2026-09-20'
   },
   {
@@ -8223,123 +8209,11 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     description: 'Here is the video prepared by smart study tutorial',
     videoUrl: 'https://www.youtube.com/embed/6GcqN3Ntu8w',
     duration: '26:00',
-    topic: 'Quantifiers occurring in combination',
+    topic: 'Unit 1: Quantifiers Occurring in Combination (Part 5)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
     isPremium: true,
-    views: 0,
+    views: 740,
     addedAt: '2026-09-20'
-  },
-  {
-    id: 'vid-math-u1-p1',
-    courseId: 'math-1011',
-    courseCode: 'Math 1011',
-    title: 'Math U1 P1: Propositional Logic & Logical Connectives',
-    description: 'Freshman Math Chapter 1 Part 1: Declarative statements, truth values, Negation, Conjunction, Disjunction, and Conditional Connectives with university exam practice.',
-    videoUrl: 'https://www.youtube.com/embed/2y6RlC3Q7SM',
-    duration: '28:15',
-    topic: 'Chapter 1: Propositional Logic (Part 1)',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false, // Free preview for all students
-    views: 2450,
-    addedAt: '2025-09-01'
-  },
-  {
-    id: 'vid-math-u1-p2',
-    courseId: 'math-1011',
-    courseCode: 'Math 1011',
-    title: 'Math U1 P2: Truth Tables, Tautology, Contradiction & Equivalence',
-    description: 'Freshman Math Chapter 1 Part 2: Step-by-step 4-row & 8-row truth tables construction, tautologies vs contradictions, and proving logical equivalences.',
-    videoUrl: 'https://www.youtube.com/embed/WdPQDOEBh2A',
-    duration: '32:40',
-    topic: 'Chapter 1: Truth Tables & Equivalence (Part 2)',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: true,
-    views: 1980,
-    addedAt: '2025-09-03'
-  },
-  {
-    id: 'vid-math-u1-p3',
-    courseId: 'math-1011',
-    courseCode: 'Math 1011',
-    title: 'Math U1 P3: Open Statements, Universal & Existential Quantifiers',
-    description: 'Freshman Math Chapter 1 Part 3: Open statements, Universe of Discourse, Universal (∀x) & Existential (∃x) quantifiers, and negating quantified statements.',
-    videoUrl: 'https://www.youtube.com/embed/9L15JlPUUXI',
-    duration: '29:50',
-    topic: 'Chapter 1: Quantifiers (Part 3)',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: true,
-    views: 1820,
-    addedAt: '2025-09-05'
-  },
-  {
-    id: 'vid-math-u1-p4',
-    courseId: 'math-1011',
-    courseCode: 'Math 1011',
-    title: 'Math U1 P4: Rules of Inference & Argument Validity',
-    description: 'Freshman Math Chapter 1 Part 4: Modus Ponens, Modus Tollens, Hypothetical Syllogism, Disjunctive Syllogism, and identifying fallacy of affirming the consequent.',
-    videoUrl: 'https://www.youtube.com/embed/OmzKzakWn6g',
-    duration: '34:10',
-    topic: 'Chapter 1: Rules of Inference (Part 4)',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: true,
-    views: 1730,
-    addedAt: '2025-09-08'
-  },
-  {
-    id: 'vid-math-u1-p5',
-    courseId: 'math-1011',
-    courseCode: 'Math 1011',
-    title: 'Math U1 P5: Set Theory, Operations & Venn Diagrams Problem Solving',
-    description: 'Freshman Math Chapter 1 Part 5: Sets algebra, power set cardinality (2^n), relative complement, symmetric difference, and 3-set inclusion-exclusion word problems.',
-    videoUrl: 'https://www.youtube.com/embed/F_I_PeTOPls',
-    duration: '31:25',
-    topic: 'Chapter 1: Set Theory (Part 5)',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: true,
-    views: 1690,
-    addedAt: '2025-09-10'
-  },
-  {
-    id: 'vid-math-1',
-    courseId: 'math-1011',
-    courseCode: 'Math 1011',
-    title: 'Mathematics for Natural Science: Limits at Infinity & Squeeze Theorem',
-    description: 'Complete breakdown of limit evaluation techniques, squeeze theorem questions commonly appearing on university midterm exams, and algebraic rationalization.',
-    videoUrl: 'https://www.youtube.com/embed/Z1KnjOi9GzM',
-    duration: '28:45',
-    topic: 'Limits & Continuity',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false, // Free preview
-    views: 1420,
-    addedAt: '2025-09-12'
-  },
-  {
-    id: 'vid-math-2',
-    courseId: 'math-1011',
-    courseCode: 'Math 1011',
-    title: 'Mathematics for Natural Science: Vectors, Dot & Cross Product',
-    description: 'Step-by-step problem solving for 3D vector orthogonality, normal vectors to planes, and angle between lines in space.',
-    videoUrl: 'https://www.youtube.com/embed/vqsgmlJrhHY',
-    duration: '35:10',
-    topic: 'Vectors & 3D Geometry',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: true, // Premium locked (300 ETB)
-    views: 980,
-    addedAt: '2025-09-15'
-  },
-  {
-    id: 'vid-math-3',
-    courseId: 'math-1011',
-    courseCode: 'Math 1011',
-    title: 'Mathematics for Natural Science: Derivatives, Chain Rule & Implicit Differentiation',
-    description: 'Derivatives of polynomial, trigonometric, and exponential functions, chain rule shortcuts, and implicit differentiation for exam problem walkthroughs.',
-    videoUrl: 'https://www.youtube.com/embed/dF7woDjHCig',
-    duration: '34:20',
-    topic: 'Differential Calculus',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: true,
-    views: 1105,
-    addedAt: '2025-09-18'
   },
   {
     id: 'vid-econ-1',
@@ -8412,18 +8286,46 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     addedAt: '2025-09-21'
   },
   {
-    id: 'vid-phys-1',
+    id: 'vid-phys-u1-p1',
     courseId: 'phys-1011',
     courseCode: 'Phys 1011',
-    title: 'General Physics: 2D Projectile Motion & Vector Resolution',
-    description: 'Master kinematic equations in 2 dimensions, maximum height, flight time, and horizontal range problems with past university exam examples.',
-    videoUrl: 'https://www.youtube.com/embed/pvhx6hz03Y8',
-    duration: '31:20',
-    topic: 'Vectors & 2D Kinematics',
-    instructor: 'Smart Study Physics Team',
+    title: 'physics unit 1 part 1',
+    description: 'Here is the physics video prepared by smart study tutorial',
+    videoUrl: 'https://www.youtube.com/embed/zRlmmISIuXU',
+    duration: '32:00',
+    topic: 'Unit 1: Physics and Measurement (Part 1)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
     isPremium: false, // Free preview
     views: 1890,
-    addedAt: '2025-09-18'
+    addedAt: '2026-10-01'
+  },
+  {
+    id: 'vid-phys-u1-p2',
+    courseId: 'phys-1011',
+    courseCode: 'Phys 1011',
+    title: 'physics unit 1 part 2',
+    description: 'Here is the physics video prepared by smart study tutorial',
+    videoUrl: 'https://www.youtube.com/embed/zJhE9B5ekqU',
+    duration: '28:00',
+    topic: 'Unit 1: Vectors & Kinematics (Part 2)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: false, // Free preview
+    views: 1420,
+    addedAt: '2026-10-04'
+  },
+  {
+    id: 'vid-phys-u2-p2',
+    courseId: 'phys-1011',
+    courseCode: 'Phys 1011',
+    title: 'physics unit 2 part 2',
+    description: 'Here is the physics video prepared by smart study tutorial',
+    videoUrl: 'https://www.youtube.com/embed/cLgDF5dOB5s',
+    duration: '31:00',
+    topic: 'Unit 2: Two-Dimensional Motion & Dynamics (Part 2)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: true, // Smart Study Pro 300 ETB
+    views: 1210,
+    addedAt: '2026-10-04'
   },
   {
     id: 'vid-loct-1',

@@ -320,9 +320,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const foreignMathIds = new Set([
+            'vid-math-u1-p1', 'vid-math-u1-p2', 'vid-math-u1-p3', 'vid-math-u1-p4', 'vid-math-u1-p5',
+            'vid-math-1', 'vid-math-2', 'vid-math-3', 'vid-1789749788676', 'vid-phys-1'
+          ]);
+          const filtered = parsed.filter((item: any) => !foreignMathIds.has(item.id));
           const initialMap = new Map(INITIAL_VIDEOS.map((v) => [v.id, v]));
           // If any video in localStorage had placeholder or local idb:// URLs, upgrade to verified streamable URLs
-          const cleaned = parsed.map((item: any) => {
+          const cleaned = filtered.map((item: any) => {
             const initial = initialMap.get(item.id);
             if (initial && initial.videoUrl?.startsWith('http')) {
               if (
@@ -343,7 +348,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
           const savedIds = new Set(cleaned.map((v: any) => v.id));
           const missingDefaults = INITIAL_VIDEOS.filter((iv) => !savedIds.has(iv.id));
-          return [...missingDefaults, ...cleaned];
+          const result = [...missingDefaults, ...cleaned];
+          try {
+            localStorage.setItem(STORAGE_KEYS.VIDEOS, JSON.stringify(result));
+          } catch {}
+          return result;
         }
       } catch {}
     }
@@ -358,7 +367,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Load current student profile
   const [studentProfile, setStudentProfile] = useState<StudentProfile>(() => {
-    const authAdmin = sessionStorage.getItem(STORAGE_KEYS.ADMIN_AUTH) === 'true' || localStorage.getItem('smart_study_admin_session') === 'true';
     const saved = localStorage.getItem(STORAGE_KEYS.STUDENT);
     if (saved) {
       try {
@@ -367,16 +375,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const isUserAdminEmail = parsed.email && parsed.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase();
           return {
             ...parsed,
-            isUnlocked: authAdmin || isUserAdminEmail ? true : Boolean(parsed.isUnlocked)
+            isUnlocked: isUserAdminEmail ? true : Boolean(parsed.isUnlocked)
+          };
+        }
+      } catch {}
+    }
+    const savedAuthUser = localStorage.getItem(STORAGE_KEYS.AUTH_USER);
+    if (savedAuthUser) {
+      try {
+        const parsed = JSON.parse(savedAuthUser);
+        if (parsed && typeof parsed === 'object') {
+          const isUserAdminEmail = parsed.email && parsed.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase();
+          return {
+            name: parsed.name || (isUserAdminEmail ? 'Guduru Alemayehu' : 'Freshman Student'),
+            email: parsed.email || (isUserAdminEmail ? ADMIN_EMAIL : 'student@university.edu.et'),
+            phone: parsed.phone || '0953201048',
+            university: parsed.university || 'Addis Ababa University (AAU)',
+            isUnlocked: isUserAdminEmail ? true : false
           };
         }
       } catch {}
     }
     return {
-      name: authAdmin ? 'Guduru Alemayehu' : 'Freshman Student',
-      email: authAdmin ? ADMIN_EMAIL : 'student@university.edu.et',
+      name: 'Freshman Student',
+      email: 'student@university.edu.et',
       phone: '0953201048',
-      isUnlocked: authAdmin ? true : false
+      isUnlocked: false
     };
   });
 
@@ -428,28 +452,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [showInstallPromptModal, setShowInstallPromptModal] = useState<boolean>(false);
 
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
-    const auth = sessionStorage.getItem(STORAGE_KEYS.ADMIN_AUTH);
-    if (auth === 'true') return true;
-    const adminPerm = localStorage.getItem('smart_study_admin_session');
-    if (adminPerm === 'true') return true;
     try {
-      const savedStudent = localStorage.getItem(STORAGE_KEYS.STUDENT);
-      if (savedStudent) {
-        const parsed = JSON.parse(savedStudent);
-        if (parsed.email && parsed.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-          return true;
-        }
-      }
       const savedAuthUser = localStorage.getItem(STORAGE_KEYS.AUTH_USER);
       if (savedAuthUser) {
         const parsed = JSON.parse(savedAuthUser);
         if (parsed.email && parsed.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
           return true;
         }
+        return false;
+      }
+      const savedStudent = localStorage.getItem(STORAGE_KEYS.STUDENT);
+      if (savedStudent) {
+        const parsed = JSON.parse(savedStudent);
+        if (parsed.email && parsed.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+          return true;
+        }
+        return false;
       }
     } catch {}
-    const acc = localStorage.getItem(STORAGE_KEYS.CURRENT_ACCOUNT);
-    if (acc === 'super-admin') return true;
     return false;
   });
 
@@ -635,10 +655,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
             // Merge server videos into local state (and upgrade any local idb:// videos to streamable URLs)
             setVideos((prev) => {
-              const remoteMap = new Map(remoteVideos.map((rv) => [rv.id, rv]));
-              let hasChanges = false;
+              const foreignMathIds = new Set([
+                'vid-math-u1-p1', 'vid-math-u1-p2', 'vid-math-u1-p3', 'vid-math-u1-p4', 'vid-math-u1-p5',
+                'vid-math-1', 'vid-math-2', 'vid-math-3', 'vid-1789749788676', 'vid-phys-1'
+              ]);
+              const sanitizedPrev = prev.filter((v) => !foreignMathIds.has(v.id));
+              const remoteMap = new Map(remoteVideos.filter((rv) => !foreignMathIds.has(rv.id)).map((rv) => [rv.id, rv]));
+              let hasChanges = sanitizedPrev.length !== prev.length;
               const initialMap = new Map(INITIAL_VIDEOS.map((iv) => [iv.id, iv]));
-              const merged = prev.map((localVid) => {
+              const merged = sanitizedPrev.map((localVid) => {
                 const initial = initialMap.get(localVid.id);
                 const remote = remoteMap.get(localVid.id);
                 const streamableUrl = (!remote?.videoUrl?.startsWith('idb://') && remote?.videoUrl) || (!initial?.videoUrl.startsWith('idb://') && initial?.videoUrl);
@@ -676,7 +701,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               });
 
               const currentIds = new Set(merged.map((v) => v.id));
-              const toAdd = remoteVideos.filter((rv) => !currentIds.has(rv.id));
+              const toAdd = remoteVideos.filter((rv) => !foreignMathIds.has(rv.id) && !currentIds.has(rv.id));
               if (toAdd.length > 0) {
                 hasChanges = true;
                 merged.unshift(...toAdd);
@@ -1085,10 +1110,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const signIn = (data: SignInData) => {
-    const isAdminEmail = data.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase();
-    const isExplicitAdmin = data.role === 'admin' || isAdminEmail;
+    const isAdminEmail = Boolean(data.email && data.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase());
 
-    if (isExplicitAdmin) {
+    if (isAdminEmail) {
       setIsAdmin(true);
       sessionStorage.setItem(STORAGE_KEYS.ADMIN_AUTH, 'true');
       localStorage.setItem('smart_study_admin_session', 'true');
@@ -1100,7 +1124,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setStudentProfile(prev => ({
         ...prev,
         name: data.name?.trim() || 'Guduru Alemayehu',
-        email: data.email?.trim() || ADMIN_EMAIL,
+        email: ADMIN_EMAIL,
         isUnlocked: true,
         unlockedAt: new Date().toISOString()
       }));
@@ -1137,6 +1161,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsAdmin(false);
     safeSetItem(STORAGE_KEYS.IS_AUTHENTICATED, 'false');
     sessionStorage.removeItem(STORAGE_KEYS.ADMIN_AUTH);
+    localStorage.removeItem('smart_study_admin_session');
+    localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+    localStorage.removeItem(STORAGE_KEYS.STUDENT);
     setShowInstallPromptModal(false);
   };
 

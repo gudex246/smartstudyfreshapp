@@ -244,7 +244,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
                 <div className="hidden sm:block leading-tight">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-bold text-white max-w-[120px] truncate">
-                      {isAdmin ? 'Administrator' : (studentProfile.name || 'Freshman Student')}
+                      {isAdmin ? 'Guduru Alemayehu' : (studentProfile.name || 'Freshman Student')}
                     </span>
                     <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-sm uppercase tracking-wide ${
                       isAdmin
@@ -253,11 +253,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
                         ? 'bg-emerald-400 text-slate-950'
                         : 'bg-slate-700 text-slate-200'
                     }`}>
-                      {isAdmin ? 'ADMIN' : (isUnlocked ? 'PRO 300 ETB' : 'FREE PREVIEW')}
+                      {isAdmin ? 'ADMIN' : (isUnlocked ? 'PRO 300 ETB' : 'STUDENT')}
                     </span>
                   </div>
                   <span className="text-[10px] text-slate-400 font-mono block max-w-[140px] truncate">
-                    {isAdmin ? 'admin@smartstudy.edu.et' : (studentProfile.email || 'student@university.edu.et')}
+                    {isAdmin ? ADMIN_EMAIL : (studentProfile.email || 'student@university.edu.et')}
                   </span>
                 </div>
 
@@ -280,12 +280,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
                           ? 'bg-emerald-400 text-slate-950'
                           : 'bg-slate-700 text-slate-200'
                       }`}>
-                        {isAdmin ? 'ADMIN' : (isUnlocked ? '300 ETB ACTIVE' : 'FREE (4 QS)')}
+                        {isAdmin ? 'ADMIN' : (isUnlocked ? '300 ETB ACTIVE' : 'STUDENT')}
                       </span>
                     </div>
 
                     <div className="text-[11px] text-slate-400 font-mono truncate">
-                      {isAdmin ? 'admin@smartstudy.edu.et' : studentProfile.email}
+                      {isAdmin ? ADMIN_EMAIL : studentProfile.email}
                     </div>
 
                     {!isAdmin && (
@@ -303,21 +303,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
 
                   {/* Action Links */}
                   <div className="space-y-1 text-xs pt-1 border-t border-[#1e293b]">
-                    {!isAdmin && (
-                      <button
-                        onClick={() => {
-                          unlockAllForAdmin();
-                          setProfileDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center gap-2 p-2 rounded-xl text-emerald-300 bg-emerald-950/40 border border-emerald-600/30 hover:bg-emerald-900/50 transition font-semibold"
-                        title="Instant Admin Access for Guduru Alemayehu"
-                      >
-                        <Shield className="w-4 h-4 text-emerald-400" />
-                        <span>Admin Guduru: Open All Questions</span>
-                      </button>
-                    )}
-
-                    {/* Unlock Access Tab link */}
+                    {/* Unlock Access Tab link for students */}
                     {!isUnlocked && !isAdmin && (
                       <button
                         onClick={() => {
@@ -331,6 +317,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
                       </button>
                     )}
 
+                    {/* Admin Control Panel - ONLY visible to ADMIN_EMAIL */}
                     {isAdmin && (
                       <button
                         onClick={() => {

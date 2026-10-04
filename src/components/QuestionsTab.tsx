@@ -688,14 +688,6 @@ export const QuestionsTab: React.FC = () => {
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Pay 300 ETB to Unlock All</span>
                 </button>
-                <button
-                  onClick={() => unlockAllForAdmin()}
-                  className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold border border-amber-500/40 transition flex items-center justify-center gap-1.5"
-                  title="Direct unlock for Admin Guduru Alemayehu"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Admin: Open All Questions</span>
-                </button>
               </div>
             </div>
           )}
