@@ -141,6 +141,25 @@ app.post('/api/submissions', (req, res) => {
           if (fs.existsSync(distReceipts)) {
             fs.writeFileSync(path.resolve(distReceipts, filename), buffer);
           }
+
+          // Asynchronously mirror image to global CDN and broadcast to admin
+          fetch('https://ntfy.sh/smartstudy_receipts_guduru29', {
+            method: 'POST',
+            headers: { 'Filename': filename, 'Title': `Receipt ${sub.id}` },
+            body: buffer
+          })
+            .then(r => r.json())
+            .then(cdnData => {
+              if (cdnData?.attachment?.url) {
+                const cloudUrl = cdnData.attachment.url;
+                fetch('https://ntfy.sh/smartstudy_subs_guduru29', {
+                  method: 'POST',
+                  headers: { 'Title': `300 ETB: ${sub.studentName}` },
+                  body: JSON.stringify({ type: 'SUBMISSION', data: { ...sub, screenshotUrl: cloudUrl, cloudScreenshotUrl: cloudUrl } })
+                }).catch(() => {});
+              }
+            })
+            .catch(() => {});
         }
       } catch (err) {
         console.warn('Could not save screenshot buffer to file:', err);
@@ -157,6 +176,36 @@ app.post('/api/submissions', (req, res) => {
 
     saveSubmissions(currentSubs);
     res.json({ success: true, submission: sub });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/upload-receipt', (req, res) => {
+  try {
+    const { image, id } = req.body;
+    if (!image) return res.status(400).json({ error: 'No image provided' });
+    const filename = `receipt-${id || Date.now()}.jpg`;
+    const filePath = path.resolve(receiptsDir, filename);
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    fs.writeFileSync(filePath, buffer);
+    const localUrl = `/uploads/receipts/${filename}`;
+
+    // Mirror to global CDN
+    fetch('https://ntfy.sh/smartstudy_receipts_guduru29', {
+      method: 'POST',
+      headers: { 'Filename': filename, 'Title': `Receipt ${id}` },
+      body: buffer
+    })
+      .then(r => r.json())
+      .then(cdnData => {
+        const cloudUrl = cdnData?.attachment?.url || localUrl;
+        res.json({ success: true, url: cloudUrl, localUrl });
+      })
+      .catch(() => {
+        res.json({ success: true, url: localUrl, localUrl });
+      });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -268,10 +317,16 @@ app.delete('/api/videos', (req, res) => {
 const isProduction = process.env.NODE_ENV === 'production';
 
 async function startServer() {
+  const { createServer } = await import('http');
+  const server = createServer(app);
+
   if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { middlewareMode: true, hmr: false },
+      server: {
+        middlewareMode: true,
+        hmr: { server }
+      },
       appType: 'spa'
     });
     app.use(vite.middlewares);
@@ -283,7 +338,7 @@ async function startServer() {
     });
   }
 
-  app.listen(port, '0.0.0.0', () => {
+  server.listen(port, '0.0.0.0', () => {
     console.log(`Server running at http://0.0.0.0:${port} [${isProduction ? 'production' : 'development'}]`);
   });
 }

@@ -1,6 +1,18 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      // Suppress harmless WebSocket HMR warning in preview iframe (per AI Studio guidelines: HMR is disabled, ignore WebSocket errors)
+      (function() {
+        const origError = console.error;
+        console.error = function(...args) {
+          if (typeof args[0] === 'string' && (args[0].includes('[vite] failed to connect to websocket') || args[0].includes('WebSocket connection to') || (args[0] === '[vite]' && args[1] && String(args[1]).includes('websocket')))) {
+            return;
+          }
+          origError.apply(console, args);
+        };
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smart Study Tutorial Freshman</title>

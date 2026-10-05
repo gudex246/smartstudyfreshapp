@@ -29,7 +29,8 @@ import {
   createGmailWebDispatchUrl,
   createMailtoDispatchUrl,
   createSmsDispatchUrl,
-  createPhoneCallUrl
+  createPhoneCallUrl,
+  uploadReceiptToCloud
 } from '../utils/cloudSync';
 
 export const UnlockAccessTab: React.FC = () => {
@@ -116,7 +117,18 @@ export const UnlockAccessTab: React.FC = () => {
             const compressed = canvas.toDataURL('image/jpeg', 0.65);
             setScreenshotPreview(compressed);
             const sizeKB = Math.round((compressed.length * 3) / 4 / 1024);
-            setCompressionInfo(`✓ Screenshot optimized to ${sizeKB} KB (Ready for instant sending)`);
+            setCompressionInfo(`✓ Compressed to ${sizeKB} KB. Uploading to cloud...`);
+
+            // Immediately pre-upload to cloud CDN in background
+            const tempId = 'rec-' + Date.now();
+            uploadReceiptToCloud(compressed, tempId)
+              .then((cloudUrl) => {
+                if (cloudUrl) {
+                  setScreenshotPreview(cloudUrl);
+                  setCompressionInfo(`✓ Screenshot securely synced to cloud CDN (${sizeKB} KB)`);
+                }
+              })
+              .catch(() => {});
           } else {
             setScreenshotPreview(rawDataUrl);
             setCompressionInfo(null);
@@ -148,9 +160,22 @@ export const UnlockAccessTab: React.FC = () => {
       return;
     }
 
-    const finalScreenshot = screenshotPreview;
-
     setIsSubmitting(true);
+    let finalScreenshot = screenshotPreview;
+
+    // If still in data: base64, ensure cloud upload completes
+    if (finalScreenshot && finalScreenshot.startsWith('data:')) {
+      setCompressionInfo('Uploading receipt to cloud relay...');
+      try {
+        const cloudUrl = await uploadReceiptToCloud(finalScreenshot, 'sub-' + Date.now());
+        if (cloudUrl) {
+          finalScreenshot = cloudUrl;
+          setScreenshotPreview(cloudUrl);
+        }
+      } catch (e) {
+        console.warn('Pre-upload during submit failed, fallback to local buffer', e);
+      }
+    }
 
     try {
       const created = await addPaymentSubmission({

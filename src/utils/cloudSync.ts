@@ -328,7 +328,10 @@ export async function dispatchPaymentSubmissionToCloud(sub: PaymentSubmission): 
       const resJson = await res.json();
       if (resJson && resJson.submission) {
         if (!finalSub.screenshotUrl.startsWith('http') && resJson.submission.screenshotUrl) {
-          finalSub.screenshotUrl = resJson.submission.screenshotUrl;
+          const origin = typeof window !== 'undefined' ? window.location.origin : '';
+          finalSub.screenshotUrl = resJson.submission.screenshotUrl.startsWith('http')
+            ? resJson.submission.screenshotUrl
+            : `${origin}${resJson.submission.screenshotUrl}`;
         }
       }
       apiSuccess = true;
@@ -384,18 +387,33 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
         if (!line.trim()) continue;
         try {
           const item = JSON.parse(line);
-          if (item && item.message) {
-            const parsedMsg = JSON.parse(item.message);
-            if (parsedMsg.type === 'SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
-              const prev = map.get(parsedMsg.data.id);
-              if (!prev || (prev.status !== 'verified' && parsedMsg.data.status === 'verified')) {
-                map.set(parsedMsg.data.id, parsedMsg.data);
+          let parsedMsg: any = null;
+
+          // If ntfy converted large payload to attachment, fetch and parse JSON file
+          if (item && item.attachment && item.attachment.url && (item.attachment.name?.endsWith('.json') || item.attachment.type?.includes('json'))) {
+            try {
+              const attRes = await fetch(item.attachment.url, { signal: AbortSignal.timeout(3500) });
+              if (attRes.ok) {
+                parsedMsg = await attRes.json();
               }
-            } else if (parsedMsg.type === 'UPDATE_SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
-              const existing = map.get(parsedMsg.data.id);
-              if (existing) {
-                map.set(parsedMsg.data.id, { ...existing, ...parsedMsg.data });
-              }
+            } catch {}
+          }
+
+          if (!parsedMsg && item && item.message) {
+            try {
+              parsedMsg = JSON.parse(item.message);
+            } catch {}
+          }
+
+          if (parsedMsg && parsedMsg.type === 'SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
+            const prev = map.get(parsedMsg.data.id);
+            if (!prev || (prev.status !== 'verified' && parsedMsg.data.status === 'verified') || (!prev.screenshotUrl && parsedMsg.data.screenshotUrl)) {
+              map.set(parsedMsg.data.id, parsedMsg.data);
+            }
+          } else if (parsedMsg && parsedMsg.type === 'UPDATE_SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
+            const existing = map.get(parsedMsg.data.id);
+            if (existing) {
+              map.set(parsedMsg.data.id, { ...existing, ...parsedMsg.data });
             }
           }
         } catch {}
@@ -418,7 +436,7 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
           const existing = map.get(sub.id);
           if (!existing) {
             map.set(sub.id, sub);
-          } else if (sub.status === 'verified') {
+          } else if (sub.status === 'verified' || (!existing.screenshotUrl && sub.screenshotUrl)) {
             map.set(sub.id, { ...existing, ...sub });
           }
         }
@@ -451,12 +469,25 @@ export function subscribeToRemoteSubmissions(onUpdate: (data: any) => void): () 
   let es: EventSource | null = null;
   try {
     es = new EventSource(`${NTFY_SUBMISSIONS_TOPIC}/sse`);
-    es.onmessage = (event) => {
+    es.onmessage = async (event) => {
       try {
         const item = JSON.parse(event.data);
+        if (item && item.attachment && item.attachment.url && (item.attachment.name?.endsWith('.json') || item.attachment.type?.includes('json'))) {
+          try {
+            const attRes = await fetch(item.attachment.url);
+            if (attRes.ok) {
+              const payload = await attRes.json();
+              onUpdate(payload);
+              return;
+            }
+          } catch {}
+        }
+
         if (item && item.message) {
-          const payload = JSON.parse(item.message);
-          onUpdate(payload);
+          try {
+            const payload = JSON.parse(item.message);
+            onUpdate(payload);
+          } catch {}
         }
       } catch {}
     };

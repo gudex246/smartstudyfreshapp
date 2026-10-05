@@ -513,7 +513,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           } else if (
             existing.status !== r.status ||
             existing.verifiedAt !== r.verifiedAt ||
-            existing.adminNotes !== r.adminNotes
+            existing.adminNotes !== r.adminNotes ||
+            (r.screenshotUrl && r.screenshotUrl !== existing.screenshotUrl) ||
+            (!existing.screenshotUrl && r.screenshotUrl)
           ) {
             prevMap.set(r.id, { ...existing, ...r });
             hasChanges = true;
@@ -1003,12 +1005,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       let newCount = 0;
       if (remotes && remotes.length > 0) {
         setPaymentSubmissions(prev => {
-          const prevMap = new Map(prev.map(p => [p.id, p]));
+          const prevMap = new Map<string, PaymentSubmission>(prev.map(p => [p.id, p]));
           let changed = false;
           remotes.forEach(r => {
-            if (!prevMap.has(r.id)) {
+            const existing = prevMap.get(r.id);
+            if (!existing) {
               prevMap.set(r.id, r);
               newCount++;
+              changed = true;
+            } else if (
+              existing.status !== r.status ||
+              (r.screenshotUrl && r.screenshotUrl !== existing.screenshotUrl) ||
+              (!existing.screenshotUrl && r.screenshotUrl)
+            ) {
+              prevMap.set(r.id, { ...existing, ...r });
               changed = true;
             }
           });
