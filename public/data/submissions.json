@@ -1,0 +1,45 @@
+[
+  {
+    "id": "sub-verify-student-receipt",
+    "studentName": "Blen Tsegaye",
+    "studentPhone": "0911223344",
+    "studentEmail": "blen.t@aau.edu.et",
+    "paymentMethod": "Telebirr",
+    "transactionRef": "TL-894210",
+    "amount": 300,
+    "submittedAt": "2026-10-05T06:39:00.000Z",
+    "status": "pending",
+    "screenshotUrl": "/uploads/receipts/sub-verify-student-receipt.png"
+  },
+  {
+    "id": "pay-demo-blen",
+    "studentName": "Blen Tsegaye",
+    "studentEmail": "student.sample@smartstudy.edu.et",
+    "studentPhone": "0911223344",
+    "paymentMethod": "Telebirr",
+    "accountOrPhoneUsed": "0953201048",
+    "transactionRef": "TL-98421035",
+    "amount": 300,
+    "screenshotUrl": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80",
+    "submittedAt": "2026-10-05T03:21:00.656Z",
+    "status": "verified",
+    "verifiedAt": "2026-10-05T04:21:00.656Z",
+    "adminNotes": "Payment confirmed on Telebirr 0953201048. Access activated.",
+    "syncCode": "SS-849102"
+  },
+  {
+    "id": "pay-demo-dawit",
+    "studentName": "Dawit Bekele",
+    "studentEmail": "dawit.b@freshman.edu.et",
+    "studentPhone": "0922334455",
+    "paymentMethod": "CBE",
+    "accountOrPhoneUsed": "1000521750255",
+    "transactionRef": "FT24089921",
+    "amount": 300,
+    "screenshotUrl": "https://images.unsplash.com/photo-1556742049-0a67c5574f73?auto=format&fit=crop&w=600&q=80",
+    "submittedAt": "2026-10-05T05:21:00.656Z",
+    "status": "pending",
+    "adminNotes": "Awaiting admin review from gudurualemayehu29@gmail.com",
+    "syncCode": "SS-904128"
+  }
+]

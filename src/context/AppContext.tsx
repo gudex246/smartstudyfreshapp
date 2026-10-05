@@ -31,7 +31,8 @@ import {
   dispatchPaymentSubmissionToCloud,
   updatePaymentSubmissionInCloud,
   fetchRemotePaymentSubmissions,
-  subscribeToSyncEvents
+  subscribeToSyncEvents,
+  subscribeToRemoteSubmissions
 } from '../utils/cloudSync';
 import { uploadLocalVideoToServer, syncAllLocalVideosToServer } from '../utils/videoStorage';
 
@@ -202,7 +203,7 @@ interface AppContextType {
     accountOrPhoneUsed?: string;
     transactionRef: string;
     screenshotUrl: string;
-  }) => PaymentSubmission;
+  }) => Promise<PaymentSubmission>;
 
   // Admin state & methods
   isAdmin: boolean;
@@ -610,6 +611,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Fast polling every 3.5 seconds so admin verification opens the student's app instantly
     const interval = setInterval(doSync, 3500);
 
+    // Global Multi-Device Real-time SSE Push (receives submissions from any phone/PC in <500ms)
+    const unsubscribeRemote = subscribeToRemoteSubmissions((payload: any) => {
+      if (payload && payload.type === 'SUBMISSION' && payload.data) {
+        applyRemoteSubmissions([payload.data]);
+      } else if (payload && payload.type === 'UPDATE_SUBMISSION' && payload.data) {
+        const updateData = payload.data;
+        setPaymentSubmissions((prev) =>
+          prev.map((s) => (s.id === updateData.id ? { ...s, ...updateData } : s))
+        );
+        if (updateData.status === 'verified') {
+          setStudentProfile((prevProfile) => {
+            const currentEmail = prevProfile.email?.trim().toLowerCase();
+            const currentPhone = prevProfile.phone?.replace(/\D/g, '');
+            const isMatch =
+              prevProfile.submissionId === updateData.id ||
+              (currentEmail && paymentSubmissions.some((s) => s.id === updateData.id && s.studentEmail && s.studentEmail.toLowerCase() === currentEmail)) ||
+              (currentPhone && paymentSubmissions.some((s) => s.id === updateData.id && s.studentPhone && s.studentPhone.replace(/\D/g, '') === currentPhone));
+
+            if (isMatch) {
+              setSampleStudentPaywallStatusState('verified');
+              safeSetItem(STORAGE_KEYS.SAMPLE_STUDENT_STATUS, 'verified');
+              return {
+                ...prevProfile,
+                isUnlocked: true,
+                unlockedAt: updateData.verifiedAt || new Date().toISOString()
+              };
+            }
+            return prevProfile;
+          });
+        }
+      }
+    });
+
     // Two-way video sync: push any local PC uploads to /api/videos and fetch remote updates
     const doVideoSync = async () => {
       try {
@@ -732,6 +766,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       isMounted = false;
       unsubscribe();
+      unsubscribeRemote();
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
     };
@@ -909,7 +944,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Student Payment Submission
-  const addPaymentSubmission = (data: {
+  const addPaymentSubmission = async (data: {
     studentName: string;
     studentEmail: string;
     studentPhone: string;
@@ -917,9 +952,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     accountOrPhoneUsed?: string;
     transactionRef: string;
     screenshotUrl: string;
-  }): PaymentSubmission => {
+  }): Promise<PaymentSubmission> => {
     const syncCode = generateSyncCode();
-    const newSubmission: PaymentSubmission = {
+    let newSubmission: PaymentSubmission = {
       id: 'sub-' + Date.now(),
       studentName: data.studentName,
       studentEmail: data.studentEmail,
@@ -936,12 +971,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       deliveryChannel: 'cloud_sync'
     };
 
-    setPaymentSubmissions(prev => [newSubmission, ...prev]);
-
-    // Dispatch to cloud relay & Vercel API asynchronously for multi-device delivery
-    dispatchPaymentSubmissionToCloud(newSubmission).catch(err => {
+    // Dispatch to API & Cloud and retrieve server image URL if available
+    try {
+      const dispatchRes = await dispatchPaymentSubmissionToCloud(newSubmission);
+      if (dispatchRes && dispatchRes.updatedSubmission) {
+        newSubmission = dispatchRes.updatedSubmission;
+      }
+    } catch (err) {
       console.warn('Cross-device dispatch notification:', err);
-    });
+    }
+
+    setPaymentSubmissions(prev => [newSubmission, ...prev.filter(p => p.id !== newSubmission.id)]);
 
     // Link submission to current student profile
     setStudentProfile(prev => ({

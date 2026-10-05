@@ -4,9 +4,9 @@ const SYNC_BROADCAST_CHANNEL = 'smart_study_freshman_sync_v1';
 const CLOUD_STORAGE_KEY = 'smart_study_cloud_submissions_v1';
 const CHAT_STORAGE_KEY = 'smart_study_chat_messages_v1';
 
-// Shared open cloud relay endpoint (Free public REST relay for cross-device synchronization)
-const PUBLIC_RELAY_BASE = 'https://api.restful-api.dev/objects';
-const CLOUD_ROOM_ID = 'smart-study-freshman-ethiopia-cbe-telebirr-sync';
+// Cross-device Global PubSub & CDN storage for instant receipt sync across all phones & PCs
+export const NTFY_SUBMISSIONS_TOPIC = 'https://ntfy.sh/smartstudy_subs_guduru29';
+export const NTFY_RECEIPTS_TOPIC = 'https://ntfy.sh/smartstudy_receipts_guduru29';
 
 // Default initial chat messages so newly installed apps immediately have welcoming discussions
 export const INITIAL_CHAT_MESSAGES: ChatMessage[] = [
@@ -81,6 +81,11 @@ export function generateSyncCode(): string {
  * Format telegram message URL for student to directly forward screenshot & details to admin
  */
 export function createTelegramDispatchUrl(sub: PaymentSubmission): string {
+  const host = typeof window !== 'undefined' ? window.location.origin : 'https://smart-study-freshman.vercel.app';
+  const receiptImgUrl = sub.screenshotUrl && !sub.screenshotUrl.startsWith('data:')
+    ? `\n🖼 *Receipt Link:* ${host}${sub.screenshotUrl}`
+    : '';
+
   const message = [
     `🎓 *SMART STUDY TUTORIAL 300 ETB VERIFICATION*`,
     `━━━━━━━━━━━━━━━━━━━━━`,
@@ -92,13 +97,13 @@ export function createTelegramDispatchUrl(sub: PaymentSubmission): string {
     `🔑 *Sync Code:* ${sub.syncCode || 'N/A'}`,
     `💰 *Amount:* 300 ETB`,
     `🕒 *Submitted:* ${new Date(sub.submittedAt).toLocaleString()}`,
+    receiptImgUrl,
     `━━━━━━━━━━━━━━━━━━━━━`,
-    `📎 *Please find attached payment receipt screenshot.*`
-  ].join('\n');
+    `📎 *Please verify my 300 ETB payment and activate full access!*`
+  ].filter(Boolean).join('\n');
 
-  // Direct Telegram share link
   const encoded = encodeURIComponent(message);
-  return `https://t.me/share/url?url=https://smart-study-freshman.vercel.app&text=${encoded}`;
+  return `https://t.me/share/url?url=${encodeURIComponent(host)}&text=${encoded}`;
 }
 
 /**
@@ -118,28 +123,16 @@ export function createPhoneCallUrl(): string {
 }
 
 /**
- * Format WhatsApp direct message to Admin (+251953201048)
- */
-export function createWhatsAppDispatchUrl(sub: PaymentSubmission): string {
-  const message = [
-    `*SMART STUDY 300 ETB VERIFICATION*`,
-    `Student: ${sub.studentName}`,
-    `Phone: ${sub.studentPhone}`,
-    `Method: ${sub.paymentMethod}`,
-    `Txn Ref: ${sub.transactionRef}`,
-    `Sync Code: ${sub.syncCode || 'N/A'}`,
-    `Date: ${new Date(sub.submittedAt).toLocaleString()}`
-  ].join('\n');
-  return `https://wa.me/251953201048?text=${encodeURIComponent(message)}`;
-}
-
-/**
  * Format direct Gmail Web link to Admin (opens Gmail Compose in browser or Gmail app)
  */
 export function createGmailWebDispatchUrl(sub: PaymentSubmission): string {
   const subject = encodeURIComponent(`Smart Study 300 ETB Verification - ${sub.studentName} (${sub.paymentMethod} - ${sub.transactionRef})`);
+  const receiptImgUrl = sub.screenshotUrl && !sub.screenshotUrl.startsWith('data:')
+    ? `• Payment Screenshot Link: ${typeof window !== 'undefined' ? window.location.origin : ''}${sub.screenshotUrl}\n`
+    : '';
+
   const body = encodeURIComponent(
-    `Hello Admin Guduru Alemayehu,\n\nI have submitted my 300 ETB payment for full access to Smart Study Freshman Tutorial.\n\n` +
+    `Hello Admin Guduru Alemayehu,\n\nI have completed my 300 ETB payment for the Smart Study Freshman Tutorial Full Package.\n\n` +
     `==============================\n` +
     `STUDENT PAYMENT DETAILS\n` +
     `==============================\n` +
@@ -151,9 +144,10 @@ export function createGmailWebDispatchUrl(sub: PaymentSubmission): string {
     `• Verification Sync Code: ${sub.syncCode || 'N/A'}\n` +
     `• Amount Paid: 300 ETB\n` +
     `• Submitted: ${new Date(sub.submittedAt).toLocaleString()}\n` +
+    receiptImgUrl +
     `==============================\n\n` +
-    `NOTE: I have attached my payment receipt screenshot to this email.\n\n` +
-    `Please verify my payment in the admin portal and activate my access.\n\n` +
+    `NOTE: My payment receipt screenshot is attached / linked above.\n\n` +
+    `Please verify my payment in the admin portal to activate my full access.\n\n` +
     `Thank you!\n${sub.studentName}`
   );
   return `https://mail.google.com/mail/?view=cm&fs=1&to=gudurualemayehu29@gmail.com&su=${subject}&body=${body}`;
@@ -164,8 +158,12 @@ export function createGmailWebDispatchUrl(sub: PaymentSubmission): string {
  */
 export function createMailtoDispatchUrl(sub: PaymentSubmission): string {
   const subject = encodeURIComponent(`Smart Study 300 ETB Verification - ${sub.studentName} (${sub.paymentMethod} - ${sub.transactionRef})`);
+  const receiptImgUrl = sub.screenshotUrl && !sub.screenshotUrl.startsWith('data:')
+    ? `• Payment Screenshot Link: ${typeof window !== 'undefined' ? window.location.origin : ''}${sub.screenshotUrl}\n`
+    : '';
+
   const body = encodeURIComponent(
-    `Hello Admin Guduru Alemayehu,\n\nI have submitted my 300 ETB payment for full access to Smart Study Freshman Tutorial.\n\n` +
+    `Hello Admin Guduru Alemayehu,\n\nI have completed my 300 ETB payment for the Smart Study Freshman Tutorial Full Package.\n\n` +
     `==============================\n` +
     `STUDENT PAYMENT DETAILS\n` +
     `==============================\n` +
@@ -177,12 +175,64 @@ export function createMailtoDispatchUrl(sub: PaymentSubmission): string {
     `• Verification Sync Code: ${sub.syncCode || 'N/A'}\n` +
     `• Amount Paid: 300 ETB\n` +
     `• Submitted: ${new Date(sub.submittedAt).toLocaleString()}\n` +
+    receiptImgUrl +
     `==============================\n\n` +
-    `NOTE: I have attached my payment receipt screenshot to this email.\n\n` +
-    `Please verify my payment in the admin portal and activate my access.\n\n` +
+    `NOTE: My payment receipt screenshot is attached / linked above.\n\n` +
+    `Please verify my payment in the admin portal to activate my full access.\n\n` +
     `Thank you!\n${sub.studentName}`
   );
   return `mailto:gudurualemayehu29@gmail.com?subject=${subject}&body=${body}`;
+}
+
+/**
+ * Convert base64 data URL to binary Blob
+ */
+function dataUrlToBlob(dataUrl: string): Blob | null {
+  try {
+    const parts = dataUrl.split(',');
+    if (parts.length < 2) return null;
+    const mimeMatch = parts[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const binary = atob(parts[1]);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      array[i] = binary.charCodeAt(i);
+    }
+    return new Blob([array], { type: mime });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Upload screenshot to global multi-device CDN
+ */
+export async function uploadReceiptToCloud(dataUrl: string, subId: string): Promise<string | null> {
+  if (!dataUrl || !dataUrl.startsWith('data:')) {
+    return dataUrl || null;
+  }
+  try {
+    const blob = dataUrlToBlob(dataUrl);
+    if (!blob) return null;
+
+    const res = await fetch(NTFY_RECEIPTS_TOPIC, {
+      method: 'POST',
+      headers: {
+        'Filename': `receipt-${subId}.jpg`,
+        'Title': `Payment Receipt ${subId}`
+      },
+      body: blob
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.attachment && data.attachment.url) {
+        return data.attachment.url;
+      }
+    }
+  } catch (err) {
+    console.warn('Cloud receipt upload failed, fallback to local', err);
+  }
+  return null;
 }
 
 /**
@@ -213,26 +263,41 @@ export async function updatePaymentSubmissionInCloud(
     console.warn('Local cloud buffer update failed:', e);
   }
 
-  // 3. Send PATCH to serverless / API endpoint
+  // 3. Send PATCH to Local API endpoint
   try {
-    const res = await fetch('/api/submissions', {
+    await fetch('/api/submissions', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, ...updates })
     });
-    if (res.ok) return true;
   } catch (e) {
     console.warn('API PATCH submission failed:', e);
+  }
+
+  // 4. Broadcast to Global multi-device sync topic
+  try {
+    await fetch(NTFY_SUBMISSIONS_TOPIC, {
+      method: 'POST',
+      headers: {
+        'Title': `Verified: ${id}`,
+        'Tags': 'white_check_mark'
+      },
+      body: JSON.stringify({ type: 'UPDATE_SUBMISSION', data: { id, ...updates } })
+    });
+  } catch (err) {
+    console.warn('Global update broadcast failed:', err);
   }
 
   return true;
 }
 
 /**
- * Publish a new payment submission to all sync channels (Broadcast, LocalStorage buffer, and Vercel/Cloud API)
+ * Publish a new payment submission to all sync channels (Broadcast, LocalStorage, Local API, and Global Cloud Relay)
  */
-export async function dispatchPaymentSubmissionToCloud(sub: PaymentSubmission): Promise<{ success: boolean; channel: string }> {
-  // 1. Broadcast locally
+export async function dispatchPaymentSubmissionToCloud(sub: PaymentSubmission): Promise<{ success: boolean; channel: string; updatedSubmission: PaymentSubmission }> {
+  let finalSub: PaymentSubmission = { ...sub };
+
+  // 1. Broadcast locally for multi-tab
   if (broadcastChannel) {
     try {
       broadcastChannel.postMessage({ type: 'NEW_SUBMISSION', data: sub });
@@ -241,89 +306,169 @@ export async function dispatchPaymentSubmissionToCloud(sub: PaymentSubmission): 
     }
   }
 
-  // 2. Save in cloud backup buffer
-  try {
-    const existingRaw = localStorage.getItem(CLOUD_STORAGE_KEY);
-    const existing: PaymentSubmission[] = existingRaw ? JSON.parse(existingRaw) : [];
-    const merged = [sub, ...existing.filter(item => item.id !== sub.id)].slice(0, 50);
-    localStorage.setItem(CLOUD_STORAGE_KEY, JSON.stringify(merged));
-  } catch (e) {
-    console.warn('Local cloud buffer save failed:', e);
+  // 2. Upload screenshot to Global CDN if base64 so ANY device worldwide can view it
+  if (finalSub.screenshotUrl && finalSub.screenshotUrl.startsWith('data:')) {
+    try {
+      const cloudUrl = await uploadReceiptToCloud(finalSub.screenshotUrl, finalSub.id);
+      if (cloudUrl) {
+        finalSub.screenshotUrl = cloudUrl;
+      }
+    } catch {}
   }
 
-  // 3. Post to Vercel/Local Serverless API endpoint
+  // 3. Post to Local API endpoint
   let apiSuccess = false;
   try {
     const res = await fetch('/api/submissions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(sub)
+      body: JSON.stringify(finalSub)
     });
     if (res.ok) {
+      const resJson = await res.json();
+      if (resJson && resJson.submission) {
+        if (!finalSub.screenshotUrl.startsWith('http') && resJson.submission.screenshotUrl) {
+          finalSub.screenshotUrl = resJson.submission.screenshotUrl;
+        }
+      }
       apiSuccess = true;
     }
-  } catch {
-    // If running in pure static mode without API running, fallback to shared relay
+  } catch {}
+
+  // 4. Publish to global multi-device sync topic (for cross-phone/PC sync)
+  try {
+    await fetch(NTFY_SUBMISSIONS_TOPIC, {
+      method: 'POST',
+      headers: {
+        'Title': `300 ETB Payment: ${finalSub.studentName}`,
+        'Tags': 'moneybag,mortar_board'
+      },
+      body: JSON.stringify({ type: 'SUBMISSION', data: finalSub })
+    });
+  } catch (err) {
+    console.warn('Global pubsub broadcast failed:', err);
   }
 
-  // 4. Also post to Public Cloud Relay room if API was offline
-  if (!apiSuccess) {
-    try {
-      // Fallback post to cloud sync
-      await fetch(`${PUBLIC_RELAY_BASE}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: `${CLOUD_ROOM_ID}_sub_${sub.id}`,
-          data: {
-            submission: sub,
-            updatedAt: new Date().toISOString()
-          }
-        })
-      });
-      apiSuccess = true;
-    } catch {
-      // Offline fallback
-    }
+  // 5. Save in local backup buffer
+  try {
+    const existingRaw = localStorage.getItem(CLOUD_STORAGE_KEY);
+    const existing: PaymentSubmission[] = existingRaw ? JSON.parse(existingRaw) : [];
+    const merged = [finalSub, ...existing.filter(item => item.id !== finalSub.id)].slice(0, 50);
+    localStorage.setItem(CLOUD_STORAGE_KEY, JSON.stringify(merged));
+  } catch (e) {
+    console.warn('Local cloud buffer save failed:', e);
   }
 
   return {
     success: true,
-    channel: apiSuccess ? 'cloud_sync' : 'local_ready'
+    channel: apiSuccess ? 'cloud_sync' : 'local_ready',
+    updatedSubmission: finalSub
   };
 }
 
 /**
- * Fetch remote submissions from cloud / API to merge into Admin dashboard
+ * Fetch remote submissions from both Global Cloud Relay & Local API
  */
 export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission[]> {
-  const remoteList: PaymentSubmission[] = [];
+  const map = new Map<string, PaymentSubmission>();
 
-  // 1. Try Vercel Serverless / Local API
+  // 1. Fetch from Global Multi-Device Topic (sync across all phones & PCs)
   try {
-    const res = await fetch('/api/submissions', { signal: AbortSignal.timeout(4000) });
+    const resGlobal = await fetch(`${NTFY_SUBMISSIONS_TOPIC}/json?poll=1&since=24h`, {
+      signal: AbortSignal.timeout(4500)
+    });
+    if (resGlobal.ok) {
+      const text = await resGlobal.text();
+      const lines = text.trim().split('\n');
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const item = JSON.parse(line);
+          if (item && item.message) {
+            const parsedMsg = JSON.parse(item.message);
+            if (parsedMsg.type === 'SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
+              const prev = map.get(parsedMsg.data.id);
+              if (!prev || (prev.status !== 'verified' && parsedMsg.data.status === 'verified')) {
+                map.set(parsedMsg.data.id, parsedMsg.data);
+              }
+            } else if (parsedMsg.type === 'UPDATE_SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
+              const existing = map.get(parsedMsg.data.id);
+              if (existing) {
+                map.set(parsedMsg.data.id, { ...existing, ...parsedMsg.data });
+              }
+            }
+          }
+        } catch {}
+      }
+    }
+  } catch (err) {
+    console.warn('Global sync poll notice:', err);
+  }
+
+  // 2. Fetch from Local Server API
+  try {
+    const res = await fetch('/api/submissions', {
+      signal: AbortSignal.timeout(4000),
+      cache: 'no-store'
+    });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data)) {
-        return data;
+        for (const sub of data) {
+          const existing = map.get(sub.id);
+          if (!existing) {
+            map.set(sub.id, sub);
+          } else if (sub.status === 'verified') {
+            map.set(sub.id, { ...existing, ...sub });
+          }
+        }
       }
     }
-  } catch {
-    // API not responding or offline
-  }
+  } catch {}
 
-  // 2. Check local cloud buffer
+  // 3. Fallback to localStorage buffer
   try {
     const cachedRaw = localStorage.getItem(CLOUD_STORAGE_KEY);
     if (cachedRaw) {
       const cached: PaymentSubmission[] = JSON.parse(cachedRaw);
-      return cached;
+      for (const sub of cached) {
+        if (!map.has(sub.id)) {
+          map.set(sub.id, sub);
+        }
+      }
     }
-  } catch {
-    // ignore
+  } catch {}
+
+  return Array.from(map.values()).sort(
+    (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+  );
+}
+
+/**
+ * Subscribe to real-time submission events via SSE for instant multi-device arrival
+ */
+export function subscribeToRemoteSubmissions(onUpdate: (data: any) => void): () => void {
+  let es: EventSource | null = null;
+  try {
+    es = new EventSource(`${NTFY_SUBMISSIONS_TOPIC}/sse`);
+    es.onmessage = (event) => {
+      try {
+        const item = JSON.parse(event.data);
+        if (item && item.message) {
+          const payload = JSON.parse(item.message);
+          onUpdate(payload);
+        }
+      } catch {}
+    };
+  } catch (err) {
+    console.warn('SSE subscription failed, falling back to polling', err);
   }
 
-  return remoteList;
+  return () => {
+    if (es) {
+      es.close();
+    }
+  };
 }
 
 /**

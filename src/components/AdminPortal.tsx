@@ -28,7 +28,9 @@ import {
   DollarSign,
   Sparkles,
   FileText,
-  RefreshCw
+  RefreshCw,
+  Mail,
+  Phone
 } from 'lucide-react';
 import { useApp, ADMIN_EMAIL } from '../context/AppContext';
 import { Course, Chapter, ExamQuestion, VideoTutorial, PaymentSubmission, Announcement } from '../types';
@@ -61,6 +63,7 @@ export const AdminPortal: React.FC = () => {
     deleteVideo,
     syncVideosWithServer,
     paymentSubmissions,
+    addPaymentSubmission,
     verifyPaymentSubmission,
     rejectPaymentSubmission,
     deletePaymentSubmission,
@@ -123,6 +126,57 @@ export const AdminPortal: React.FC = () => {
   };
 
   const [isSyncingVideos, setIsSyncingVideos] = useState<boolean>(false);
+  const [quickVerifyInput, setQuickVerifyInput] = useState<string>('');
+  const [quickStudentName, setQuickStudentName] = useState<string>('');
+  const [quickPaymentMethod, setQuickPaymentMethod] = useState<'CBE' | 'Telebirr'>('Telebirr');
+
+  const handleQuickVerify = async () => {
+    const query = quickVerifyInput.trim();
+    if (!query) {
+      showToast('Please enter student phone or transaction ref to verify', 'error');
+      return;
+    }
+
+    const cleanQuery = query.toLowerCase();
+    const cleanDigits = query.replace(/\D/g, '');
+
+    const existing = paymentSubmissions.find((s) => {
+      const sRef = (s.transactionRef || '').toLowerCase();
+      const sPhone = (s.studentPhone || '').replace(/\D/g, '');
+      const sEmail = (s.studentEmail || '').toLowerCase();
+      const sCode = (s.syncCode || '').toLowerCase();
+      return (
+        sRef === cleanQuery ||
+        (cleanDigits.length >= 9 && sPhone.includes(cleanDigits)) ||
+        sEmail === cleanQuery ||
+        sCode === cleanQuery
+      );
+    });
+
+    if (existing) {
+      verifyPaymentSubmission(existing.id, `Verified by Guduru Alemayehu via Admin Portal`);
+      showToast(`Verified access for ${existing.studentName} (${existing.paymentMethod} - ${existing.transactionRef})!`, 'success');
+      setQuickVerifyInput('');
+      setQuickStudentName('');
+    } else {
+      try {
+        const created = await addPaymentSubmission({
+          studentName: quickStudentName.trim() || 'Verified Student',
+          studentEmail: query.includes('@') ? query : 'student@freshman.edu.et',
+          studentPhone: cleanDigits.length >= 9 ? query : '0953201048',
+          paymentMethod: quickPaymentMethod,
+          transactionRef: query,
+          screenshotUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80'
+        });
+        verifyPaymentSubmission(created.id, `Manual direct verification by Guduru Alemayehu`);
+        showToast(`Created & verified 300 ETB access for ${created.studentName}!`, 'success');
+      } catch (e) {
+        showToast('Error creating verification record', 'error');
+      }
+      setQuickVerifyInput('');
+      setQuickStudentName('');
+    }
+  };
   const handleSyncVideos = async () => {
     setIsSyncingVideos(true);
     try {
@@ -288,7 +342,7 @@ export const AdminPortal: React.FC = () => {
           options.push(bl.replace(/^[A-D][\.\)]\s*/i, ''));
         } else if (/^(?:Answer|Key|Correct Answer)[\:\s]+([A-D]|True|False)/i.test(bl)) {
           const m = bl.match(/^(?:Answer|Key|Correct Answer)[\:\s]+([A-D]|True|False)/i);
-          if (m) answerLetter = m[1].toUpperCase();
+          if (m && m[1]) answerLetter = m[1].toUpperCase();
         } else if (/^(?:Explanation|Ibsa|ማብራሪያ)[\:\s]+/i.test(bl)) {
           explanation = bl.replace(/^(?:Explanation|Ibsa|ማብራሪያ)[\:\s]+/i, '');
         } else if (/^(?:Amharic|አማርኛ)[\:\s]+/i.test(bl)) {
@@ -741,6 +795,53 @@ export const AdminPortal: React.FC = () => {
             </div>
           )}
 
+          {/* ⚡ INSTANT QUICK VERIFY BY PHONE OR TRANSACTION REF */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200/80 shadow-2xs space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                    Direct Verify Student Access (300 ETB)
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    If a student emailed <strong className="text-blue-900">{ADMIN_EMAIL}</strong> or sent screenshot on Telegram / SMS, paste their phone or transaction ID here to unlock access instantly.
+                  </p>
+                </div>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase">
+                Instant Unlock
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+              <input
+                type="text"
+                value={quickVerifyInput}
+                onChange={(e) => setQuickVerifyInput(e.target.value)}
+                placeholder="Paste Phone Number, CBE Ref, or Telebirr Txn ID..."
+                className="sm:col-span-6 px-3.5 py-2.5 rounded-xl border border-blue-200 bg-white text-xs font-mono font-medium focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              />
+              <input
+                type="text"
+                value={quickStudentName}
+                onChange={(e) => setQuickStudentName(e.target.value)}
+                placeholder="Student Name (optional)"
+                className="sm:col-span-3 px-3 py-2.5 rounded-xl border border-blue-200 bg-white text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              />
+              <button
+                type="button"
+                onClick={handleQuickVerify}
+                className="sm:col-span-3 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm shadow-blue-600/20"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>Verify & Activate</span>
+              </button>
+            </div>
+          </div>
+
           {/* Search bar for submissions */}
           <div className="relative">
             <input
@@ -776,143 +877,205 @@ export const AdminPortal: React.FC = () => {
               .map((sub) => (
                 <div
                   key={sub.id}
-                  className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-2xs hover:shadow-xs transition space-y-4"
                 >
-                  <div className="flex items-start gap-4">
-                    {/* Screenshot thumbnail */}
-                    <div
-                      onClick={() => sub.screenshotUrl && sub.screenshotUrl.trim() !== '' && setViewingScreenshot(sub.screenshotUrl)}
-                      className="w-20 h-20 rounded-xl bg-slate-200 border border-slate-300 overflow-hidden shrink-0 cursor-pointer relative group flex items-center justify-center"
-                    >
-                      {sub.screenshotUrl && sub.screenshotUrl.trim() !== '' ? (
-                        <img
-                          src={sub.screenshotUrl}
-                          alt="Payment Receipt"
-                          className="w-full h-full object-cover group-hover:scale-105 transition"
-                        />
-                      ) : (
-                        <FileText className="w-6 h-6 text-slate-400" />
-                      )}
-                      {sub.screenshotUrl && sub.screenshotUrl.trim() !== '' && (
-                        <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition">
-                          <Eye className="w-4 h-4" />
-                        </div>
+                  {/* Top Header Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-extrabold text-slate-900 text-base">{sub.studentName}</span>
+                      <span
+                        className={`text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                          sub.status === 'verified'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : sub.status === 'pending'
+                            ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse'
+                            : 'bg-rose-100 text-rose-800 border border-rose-300'
+                        }`}
+                      >
+                        {(sub.status || 'pending').toUpperCase()}
+                      </span>
+                      {sub.syncCode && (
+                        <span className="bg-indigo-50 text-indigo-700 font-mono font-bold text-[11px] px-2.5 py-0.5 rounded-md border border-indigo-200">
+                          Sync Code: {sub.syncCode}
+                        </span>
                       )}
                     </div>
 
-                    <div className="space-y-1 text-xs">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-bold text-slate-900 text-sm">{sub.studentName}</span>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            sub.status === 'verified'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : sub.status === 'pending'
-                              ? 'bg-amber-100 text-amber-800 animate-pulse'
-                              : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {sub.status.toUpperCase()}
-                        </span>
+                    <span className="text-slate-400 text-xs">
+                      Submitted: {new Date(sub.submittedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}{' '}
+                      {new Date(sub.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
 
-                        {sub.syncCode && (
-                          <span className="bg-indigo-100 text-indigo-800 font-mono font-bold text-[10px] px-2 py-0.5 rounded-md border border-indigo-200">
-                            Sync Code: {sub.syncCode}
+                  {/* Main Body: Prominent Screenshot on Left/Top, Details and Actions on Right */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+                    {/* PROMINENT PAYMENT RECEIPT SCREENSHOT (LARGE & CLEAR) */}
+                    <div className="md:col-span-4 lg:col-span-4 flex flex-col items-center">
+                      <div
+                        onClick={() => sub.screenshotUrl && sub.screenshotUrl.trim() !== '' && setViewingScreenshot(sub.screenshotUrl)}
+                        className="w-full h-56 sm:h-64 rounded-xl bg-slate-950 border-2 border-slate-200 overflow-hidden cursor-pointer relative group flex items-center justify-center shadow-xs"
+                        title="Click to view full screen"
+                      >
+                        {sub.screenshotUrl && sub.screenshotUrl.trim() !== '' ? (
+                          <img
+                            src={sub.screenshotUrl}
+                            alt={`Payment receipt from ${sub.studentName}`}
+                            className="w-full h-full object-contain group-hover:scale-105 transition duration-200 bg-slate-900"
+                          />
+                        ) : (
+                          <div className="text-center p-4 text-slate-400">
+                            <AlertTriangle className="w-8 h-8 mx-auto mb-1 text-amber-400" />
+                            <span className="text-xs font-semibold block">No Screenshot Uploaded</span>
+                            <span className="text-[10px] text-slate-500">Student didn't attach image</span>
+                          </div>
+                        )}
+
+                        {sub.screenshotUrl && sub.screenshotUrl.trim() !== '' && (
+                          <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-xs font-bold gap-1 transition duration-200 backdrop-blur-2xs">
+                            <Eye className="w-6 h-6 text-amber-400" />
+                            <span>Click to View Full Screen</span>
+                          </div>
+                        )}
+
+                        <div className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-black px-2 py-0.5 rounded-md border border-white/20">
+                          Receipt Screenshot
+                        </div>
+                      </div>
+
+                      {sub.screenshotUrl && sub.screenshotUrl.trim() !== '' && (
+                        <button
+                          type="button"
+                          onClick={() => setViewingScreenshot(sub.screenshotUrl)}
+                          className="mt-2 text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Inspect Full Screen Receipt</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* PAYMENT & STUDENT DETAILS */}
+                    <div className="md:col-span-8 lg:col-span-8 space-y-4">
+                      {/* Key Details Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-0.5">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Phone Number</span>
+                          <span className="text-xs font-mono font-bold text-slate-900 block truncate">
+                            {sub.studentPhone || 'N/A'}
+                          </span>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-0.5">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Payment Method</span>
+                          <span className="text-xs font-bold text-indigo-700 block">
+                            {sub.paymentMethod} • <strong className="text-emerald-700">{sub.amount || 300} ETB</strong>
+                          </span>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200 space-y-0.5 col-span-2 sm:col-span-1">
+                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">Transaction Ref</span>
+                          <span className="text-xs font-mono font-black text-blue-900 block truncate" title={sub.transactionRef}>
+                            {sub.transactionRef}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Admin Notes & Status Details */}
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-600 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Verification Notes</span>
+                          <span className="text-slate-700 font-medium">{sub.adminNotes || 'Awaiting admin review.'}</span>
+                        </div>
+                        {sub.studentEmail && (
+                          <div className="text-[11px] text-slate-500">
+                            Email: <strong className="text-slate-800">{sub.studentEmail}</strong>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ACTION BUTTONS (NO WHATSAPP!) */}
+                      <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-slate-100">
+                        {sub.status !== 'verified' ? (
+                          <button
+                            onClick={() => {
+                              verifyPaymentSubmission(sub.id);
+                              showToast(`Verified payment for ${sub.studentName}! Full access unlocked across student devices.`, 'success');
+                            }}
+                            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-2 shadow-sm shadow-emerald-600/30 transition cursor-pointer"
+                          >
+                            <Check className="w-4 h-4" />
+                            <span>Verify & Unlock (300 ETB)</span>
+                          </button>
+                        ) : (
+                          <span className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            <span>Full Access Activated</span>
                           </span>
                         )}
 
-                        <span className="text-slate-400 text-[11px]">
-                          • {new Date(sub.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
+                        {/* Direct Mobile Phone Call */}
+                        {sub.studentPhone && (
+                          <a
+                            href={`tel:${sub.studentPhone}`}
+                            className="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition"
+                            title="Call student on mobile phone"
+                          >
+                            <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Call</span>
+                          </a>
+                        )}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-1 text-slate-600 text-[11px]">
-                        <div>
-                          Phone: <strong className="font-mono text-slate-800">{sub.studentPhone}</strong>
-                        </div>
-                        <div>
-                          Method: <strong>{sub.paymentMethod} ({sub.amount} ETB)</strong>
-                        </div>
-                        <div>
-                          Ref: <strong className="font-mono text-blue-700">{sub.transactionRef}</strong>
-                        </div>
-                      </div>
+                        {/* Direct Mobile SMS */}
+                        {sub.studentPhone && (
+                          <a
+                            href={`sms:${sub.studentPhone}?&body=${encodeURIComponent(`Hello ${sub.studentName}, your 300 ETB Smart Study Freshman Tutorial access has been verified and activated by Admin Guduru Alemayehu!`)}`}
+                            className="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition"
+                            title="Send SMS to student"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                            <span>SMS</span>
+                          </a>
+                        )}
 
-                      <div className="text-[11px] text-slate-500 pt-1">
-                        Notes: {sub.adminNotes || 'No notes added.'}
+                        {/* Email Student */}
+                        {sub.studentEmail && (
+                          <a
+                            href={`mailto:${sub.studentEmail}?subject=${encodeURIComponent('Smart Study Freshman Access Activated (300 ETB Verified)')}&body=${encodeURIComponent(`Hello ${sub.studentName},\n\nYour 300 ETB payment via ${sub.paymentMethod} (Transaction Reference: ${sub.transactionRef}) has been successfully verified by Guduru Alemayehu!\n\nYour full access to all Video Tutorials, Lecture Notes, and CBT Question Banks has been unlocked. Open the app to enjoy unlimited study resources.\n\nBest wishes,\nSmart Study Tutorial`)}`}
+                            className="px-3 py-2 rounded-xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100 text-blue-800 text-xs font-semibold flex items-center gap-1.5 transition"
+                            title="Email confirmation to student"
+                          >
+                            <Mail className="w-3.5 h-3.5 text-blue-600" />
+                            <span>Email</span>
+                          </a>
+                        )}
+
+                        {sub.status === 'pending' && (
+                          <button
+                            onClick={() => {
+                              const reason = prompt('Reason for rejection (e.g. invalid transaction code or wrong amount):');
+                              if (reason) {
+                                rejectPaymentSubmission(sub.id, reason);
+                              }
+                            }}
+                            className="px-3 py-2 rounded-xl border border-rose-200 bg-white hover:bg-rose-50 text-rose-600 text-xs font-semibold transition"
+                          >
+                            Reject
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => {
+                            if (confirm(`Delete record for ${sub.studentName}?`)) {
+                              deletePaymentSubmission(sub.id);
+                            }
+                          }}
+                          className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition ml-auto"
+                          title="Delete Record"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-wrap items-center gap-2 self-end md:self-auto shrink-0">
-                    {sub.studentPhone && (
-                      <a
-                        href={`https://wa.me/251${sub.studentPhone.replace(/^0/, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1"
-                        title="Chat with student on WhatsApp"
-                      >
-                        <span>WhatsApp</span>
-                      </a>
-                    )}
-
-                    {sub.screenshotUrl && sub.screenshotUrl.trim() !== '' && (
-                      <button
-                        onClick={() => setViewingScreenshot(sub.screenshotUrl)}
-                        className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>View Receipt</span>
-                      </button>
-                    )}
-
-                    {sub.status !== 'verified' && (
-                      <button
-                        onClick={() => {
-                          verifyPaymentSubmission(sub.id);
-                          showToast(`Verified payment for ${sub.studentName}! Full access unlocked across student devices.`, 'success');
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 shadow-xs transition"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Verify & Unlock</span>
-                      </button>
-                    )}
-
-                    {sub.status === 'verified' && (
-                      <span className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Access Unlocked</span>
-                      </span>
-                    )}
-
-                    {sub.status === 'pending' && (
-                      <button
-                        onClick={() => {
-                          const reason = prompt('Reason for rejection (e.g. invalid transaction code or wrong amount):');
-                          if (reason) {
-                            rejectPaymentSubmission(sub.id, reason);
-                          }
-                        }}
-                        className="px-2.5 py-1.5 rounded-lg border border-red-200 bg-white hover:bg-red-50 text-red-600 text-xs font-semibold"
-                      >
-                        Reject
-                      </button>
-                    )}
-
-                    <button
-                      onClick={() => {
-                        if (confirm(`Delete record for ${sub.studentName}?`)) {
-                          deletePaymentSubmission(sub.id);
-                        }
-                      }}
-                      className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-red-50 text-slate-400 hover:text-red-600"
-                      title="Delete Record"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
                   </div>
                 </div>
               ))}

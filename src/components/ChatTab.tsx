@@ -379,7 +379,7 @@ export const ChatTab: React.FC = () => {
                         isAdminMsg ? 'bg-amber-500 ring-2 ring-amber-300 text-slate-950 font-black' : msg.avatarColor || 'bg-indigo-600'
                       }`}
                     >
-                      {isAdminMsg ? '👑' : msg.senderName.charAt(0).toUpperCase()}
+                      {isAdminMsg ? '👑' : ((msg.senderName || 'S').charAt(0) || 'S').toUpperCase()}
                     </div>
 
                     {/* Bubble */}

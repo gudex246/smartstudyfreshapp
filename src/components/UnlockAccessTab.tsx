@@ -26,7 +26,6 @@ import { useApp, ADMIN_EMAIL } from '../context/AppContext';
 import { PaymentSubmission } from '../types';
 import {
   createTelegramDispatchUrl,
-  createWhatsAppDispatchUrl,
   createGmailWebDispatchUrl,
   createMailtoDispatchUrl,
   createSmsDispatchUrl,
@@ -56,6 +55,8 @@ export const UnlockAccessTab: React.FC = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [lastSubmitted, setLastSubmitted] = useState<PaymentSubmission | null>(null);
   const [copiedDetails, setCopiedDetails] = useState(false);
+  const [copiedReceiptLink, setCopiedReceiptLink] = useState(false);
+  const [compressionInfo, setCompressionInfo] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   // Find active student submission
@@ -76,21 +77,65 @@ export const UnlockAccessTab: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check size limit (under 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setFormError('Screenshot size must be under 5MB.');
+    if (file.size > 25 * 1024 * 1024) {
+      setFormError('Screenshot file is too large. Please select an image under 25MB.');
       return;
     }
     setFormError(null);
+    setCompressionInfo('Compressing screenshot for instant delivery...');
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      setScreenshotPreview(event.target?.result as string);
+      const rawDataUrl = event.target?.result as string;
+      if (!rawDataUrl) return;
+
+      // Automatically compress and resize to max 800px width/height and JPEG 0.65 for ultra-fast instant sending (<35KB)
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const maxDim = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL('image/jpeg', 0.65);
+            setScreenshotPreview(compressed);
+            const sizeKB = Math.round((compressed.length * 3) / 4 / 1024);
+            setCompressionInfo(`✓ Screenshot optimized to ${sizeKB} KB (Ready for instant sending)`);
+          } else {
+            setScreenshotPreview(rawDataUrl);
+            setCompressionInfo(null);
+          }
+        } catch {
+          setScreenshotPreview(rawDataUrl);
+          setCompressionInfo(null);
+        }
+      };
+      img.onerror = () => {
+        setScreenshotPreview(rawDataUrl);
+        setCompressionInfo(null);
+      };
+      img.src = rawDataUrl;
     };
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
     if (!studentName.trim() || !studentPhone.trim() || !transactionRef.trim()) {
@@ -98,15 +143,17 @@ export const UnlockAccessTab: React.FC = () => {
       return;
     }
 
-    // Fallback sample image if user didn't attach file
-    const finalScreenshot =
-      screenshotPreview ||
-      'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80';
+    if (!screenshotPreview) {
+      setFormError('Please select and attach your payment receipt screenshot before submitting.');
+      return;
+    }
+
+    const finalScreenshot = screenshotPreview;
 
     setIsSubmitting(true);
 
     try {
-      const created = addPaymentSubmission({
+      const created = await addPaymentSubmission({
         studentName,
         studentEmail: studentEmail || 'student@university.edu.et',
         studentPhone,
@@ -549,13 +596,45 @@ export const UnlockAccessTab: React.FC = () => {
               </div>
 
               {lastSubmitted.screenshotUrl && (
-                <div className="flex flex-wrap items-center justify-between pt-1 text-[11px] text-slate-300 gap-1">
-                  <span>📷 Attach your payment screenshot to the email so Admin Guduru can verify immediately.</span>
+                <div className="space-y-2 pt-2 border-t border-red-500/20">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={lastSubmitted.screenshotUrl}
+                      alt="Receipt Thumbnail"
+                      className="w-16 h-16 rounded-xl object-cover border border-white/20 bg-black/40"
+                    />
+                    <div className="text-xs space-y-1">
+                      <span className="text-white font-bold block">✓ Screenshot Attached & Ready</span>
+                      <span className="text-[11px] text-slate-300 block">
+                        Compressed & uploaded for Admin Guduru Alemayehu to review immediately.
+                      </span>
+                    </div>
+                  </div>
+
+                  {lastSubmitted.screenshotUrl.startsWith('/') && typeof window !== 'undefined' && (
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-2 text-xs">
+                      <span className="text-[11px] text-slate-300 truncate">
+                        Link: <strong className="text-emerald-400">{window.location.origin}{lastSubmitted.screenshotUrl}</strong>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}${lastSubmitted.screenshotUrl}`);
+                          setCopiedReceiptLink(true);
+                          setTimeout(() => setCopiedReceiptLink(false), 2500);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-[10px] shrink-0"
+                      >
+                        {copiedReceiptLink ? 'Copied!' : 'Copy Link'}
+                      </button>
+                    </div>
+                  )}
+
                   {lastSubmitted.screenshotUrl.startsWith('data:') && (
                     <a
                       href={lastSubmitted.screenshotUrl}
                       download={`Payment_Screenshot_${lastSubmitted.studentName.replace(/\s+/g, '_')}.png`}
-                      className="text-amber-400 hover:text-amber-300 font-bold underline"
+                      className="text-amber-400 hover:text-amber-300 font-bold underline text-xs block"
                     >
                       Download Screenshot File
                     </a>
@@ -574,7 +653,7 @@ export const UnlockAccessTab: React.FC = () => {
                 <span className="text-[10px] text-slate-400">Backup channels</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {/* 1. Direct Mobile SMS to 0953201048 */}
                 <a
                   href={createSmsDispatchUrl(lastSubmitted)}
@@ -602,17 +681,6 @@ export const UnlockAccessTab: React.FC = () => {
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Telegram Admin</span>
-                </a>
-
-                {/* 4. WhatsApp Dispatch */}
-                <a
-                  href={createWhatsAppDispatchUrl(lastSubmitted)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs shadow-md shadow-green-600/30 transition text-center"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>WhatsApp Admin</span>
                 </a>
               </div>
             </div>
@@ -744,23 +812,33 @@ export const UnlockAccessTab: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/50 hover:bg-slate-50 hover:border-blue-400 cursor-pointer transition">
-                <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3">
+              <label className="relative flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/40 hover:bg-blue-50/80 hover:border-blue-500 cursor-pointer transition overflow-hidden group">
+                <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-110 transition">
                   <Upload className="w-6 h-6" />
                 </div>
                 <span className="text-xs font-bold text-slate-800">
-                  Click to select screenshot or drag & drop
+                  Tap to upload CBE / Telebirr receipt screenshot
                 </span>
-                <span className="text-[11px] text-slate-500 mt-1">
-                  Supports PNG, JPG, JPEG (Max 5MB)
+                <span className="text-[11px] text-blue-700 font-semibold mt-1">
+                  Required: Select receipt image from gallery or take photo
+                </span>
+                <span className="text-[10px] text-slate-400 mt-0.5">
+                  Automatically compressed for instant admin review
                 </span>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleFileUpload}
-                  className="hidden"
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                 />
               </label>
+            )}
+
+            {compressionInfo && (
+              <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{compressionInfo}</span>
+              </div>
             )}
           </div>
 

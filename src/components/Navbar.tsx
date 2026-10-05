@@ -228,7 +228,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
                   >
                     {isAdmin
                       ? 'AD'
-                      : (studentProfile.name ? studentProfile.name.slice(0, 2).toUpperCase() : 'ST')}
+                      : (studentProfile?.name ? String(studentProfile.name).slice(0, 2).toUpperCase() : 'ST')}
                   </div>
                   <span
                     className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-[#0f172a] ${

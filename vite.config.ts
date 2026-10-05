@@ -184,6 +184,9 @@ function apiDevServerPlugin(): Plugin {
         if (pathname === '/api/submissions') {
           if (req.method === 'GET') {
             res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            // Always reload from file to ensure fresh submissions
+            devSubmissions = loadSubmissions();
             return res.end(JSON.stringify(devSubmissions));
           }
           if (req.method === 'POST') {
@@ -192,6 +195,29 @@ function apiDevServerPlugin(): Plugin {
             req.on('end', () => {
               try {
                 const sub = JSON.parse(body);
+                
+                // If screenshot is a base64 Data URL, extract and save to public/uploads/receipts
+                if (sub.screenshotUrl && typeof sub.screenshotUrl === 'string' && sub.screenshotUrl.startsWith('data:image/')) {
+                  try {
+                    const matches = sub.screenshotUrl.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+                    if (matches && matches[2]) {
+                      const ext = matches[1] === 'png' ? 'png' : 'jpg';
+                      const safeId = (sub.id || `receipt-${Date.now()}`).replace(/[^a-zA-Z0-9_-]/g, '');
+                      const receiptDir = path.resolve(__dirname, 'public', 'uploads', 'receipts');
+                      if (!fs.existsSync(receiptDir)) {
+                        fs.mkdirSync(receiptDir, { recursive: true });
+                      }
+                      const fileName = `${safeId}.${ext}`;
+                      const filePath = path.resolve(receiptDir, fileName);
+                      fs.writeFileSync(filePath, Buffer.from(matches[2], 'base64'));
+                      sub.screenshotUrl = `/uploads/receipts/${fileName}`;
+                    }
+                  } catch (imgErr) {
+                    console.warn('Could not write receipt image to disk:', imgErr);
+                  }
+                }
+
+                devSubmissions = loadSubmissions();
                 const existingIdx = devSubmissions.findIndex(s => s.id === sub.id);
                 if (existingIdx >= 0) {
                   devSubmissions[existingIdx] = { ...devSubmissions[existingIdx], ...sub };
@@ -214,6 +240,7 @@ function apiDevServerPlugin(): Plugin {
             req.on('end', () => {
               try {
                 const { id, status, adminNotes, verifiedAt } = JSON.parse(body);
+                devSubmissions = loadSubmissions();
                 const target = devSubmissions.find(s => s.id === id);
                 if (target) {
                   if (status) target.status = status;
@@ -382,8 +409,11 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,json}'],
+          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          globIgnores: ['**/data/**', '**/uploads/**'],
           navigateFallback: '/index.html',
+          navigateFallbackDenylist: [/^\/api\/.*/, /^\/uploads\/.*/, /^\/data\/.*/],
           cleanupOutdatedCaches: true,
           runtimeCaching: [
             {
@@ -417,7 +447,7 @@ export default defineConfig(() => {
           ],
         },
         devOptions: {
-          enabled: true,
+          enabled: false,
           type: 'module',
         },
       }),
