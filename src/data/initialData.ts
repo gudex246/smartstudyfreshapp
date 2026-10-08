@@ -8216,6 +8216,34 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     addedAt: '2026-09-20'
   },
   {
+    id: 'vid-math-u1-p6-set-theory',
+    courseId: 'math-1011',
+    courseCode: 'Math 1011',
+    title: 'math u 1 p6 set theory',
+    description: 'Here is the mathematics video prepared by smart study tutorial covering Unit 1 Set Theory concepts, elements, subsets, and representations.',
+    videoUrl: 'https://www.youtube.com/embed/q4cR5yGaQcY',
+    duration: '32:15',
+    topic: 'Unit 1: Set Theory (Part 6)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: false,
+    views: 860,
+    addedAt: '2026-10-08'
+  },
+  {
+    id: 'vid-math-u1-p7-venn-diagram',
+    courseId: 'math-1011',
+    courseCode: 'Math 1011',
+    title: 'MATH u 1 p 7 operations and venn diagram',
+    description: 'Here is the mathematics video prepared by smart study tutorial covering set operations (union, intersection, difference, complement) and Venn diagrams.',
+    videoUrl: 'https://www.youtube.com/embed/Vlm_WtgTGME',
+    duration: '29:45',
+    topic: 'Unit 1: Set Operations & Venn Diagrams (Part 7)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: false,
+    views: 920,
+    addedAt: '2026-10-08'
+  },
+  {
     id: 'vid-econ-1',
     courseId: 'econ-1011',
     courseCode: 'Econ 1011',
