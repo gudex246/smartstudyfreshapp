@@ -270,19 +270,24 @@ app.get('/api/videos', (_req, res) => {
 
 app.post('/api/videos', (req, res) => {
   try {
-    const video = req.body;
-    if (!video || !video.id) {
-      return res.status(400).json({ error: 'Missing video fields' });
+    const payload = req.body;
+    if (!payload) {
+      return res.status(400).json({ error: 'Missing video payload' });
     }
     const currentVideos = loadVideos();
-    const existingIndex = currentVideos.findIndex((v: any) => v.id === video.id);
-    if (existingIndex >= 0) {
-      currentVideos[existingIndex] = { ...currentVideos[existingIndex], ...video };
-    } else {
-      currentVideos.push(video);
-    }
+    const items = Array.isArray(payload) ? payload : [payload];
+    items.forEach((video: any) => {
+      if (video && video.id) {
+        const existingIndex = currentVideos.findIndex((v: any) => v.id === video.id);
+        if (existingIndex >= 0) {
+          currentVideos[existingIndex] = { ...currentVideos[existingIndex], ...video };
+        } else {
+          currentVideos.push(video);
+        }
+      }
+    });
     saveVideos(currentVideos);
-    res.json({ success: true, video });
+    res.json({ success: true, count: currentVideos.length });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -325,11 +330,28 @@ async function startServer() {
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
-        hmr: { server }
+        hmr: false
       },
       appType: 'spa'
     });
     app.use(vite.middlewares);
+
+    app.use('*', async (req, res, next) => {
+      const url = req.originalUrl;
+      if (url.startsWith('/api') || url.startsWith('/uploads') || (url.includes('.') && !url.endsWith('.html'))) {
+        return next();
+      }
+      try {
+        let template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
+        template = await vite.transformIndexHtml(url, template);
+        res.status(200).set({
+          'Content-Type': 'text/html',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
+        }).end(template);
+      } catch (e: any) {
+        next(e);
+      }
+    });
   } else {
     const distPath = path.resolve(__dirname, 'dist');
     app.use(express.static(distPath));

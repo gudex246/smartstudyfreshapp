@@ -8314,6 +8314,48 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     addedAt: '2026-10-04'
   },
   {
+    id: 'vid-phys-u2-n2law',
+    courseId: 'phys-1011',
+    courseCode: 'Phys 1011',
+    title: 'phy u 2 N2law',
+    description: 'Here is the physics video prepared by smart study tutorial covering Newton\'s Second Law of Motion (N2 law), force, acceleration, and practical examples.',
+    videoUrl: 'https://www.youtube.com/embed/9xLVYMyXJEY',
+    duration: '24:30',
+    topic: 'Unit 2: Newton\'s Second Law of Motion (N2 Law & Dynamics)',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: false,
+    views: 1650,
+    addedAt: '2026-10-08'
+  },
+  {
+    id: 'vid-phys-u2-newtons-law',
+    courseId: 'phys-1011',
+    courseCode: 'Phys 1011',
+    title: 'phy u 2 Newtons law',
+    description: 'Here is the physics video prepared by smart study tutorial covering Newton\'s laws of motion, inertia, equilibrium, action-reaction pairs, and applications.',
+    videoUrl: 'https://www.youtube.com/embed/MwQ_O3Ftvp8',
+    duration: '28:15',
+    topic: 'Unit 2: Newton\'s Laws of Motion',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: false,
+    views: 1580,
+    addedAt: '2026-10-08'
+  },
+  {
+    id: 'vid-phys-u2-projectile',
+    courseId: 'phys-1011',
+    courseCode: 'Phys 1011',
+    title: 'phy projectile motion',
+    description: 'Here is the physics video prepared by smart study tutorial covering Projectile Motion, trajectory calculations, time of flight, maximum height, and range.',
+    videoUrl: 'https://www.youtube.com/embed/z39pbgUzJtk',
+    duration: '29:40',
+    topic: 'Unit 2: Projectile Motion',
+    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
+    isPremium: false,
+    views: 1720,
+    addedAt: '2026-10-08'
+  },
+  {
     id: 'vid-phys-u2-p2',
     courseId: 'phys-1011',
     courseCode: 'Phys 1011',

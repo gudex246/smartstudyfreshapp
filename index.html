@@ -2,6 +2,11 @@
 <html lang="en">
   <head>
     <script>
+      // Fix @vitejs/plugin-react preamble detection in custom dev server & SSR
+      window.$RefreshReg$ = () => {};
+      window.$RefreshSig$ = () => (type) => type;
+      window.__vite_plugin_react_preamble_installed__ = true;
+
       // Suppress harmless WebSocket HMR warning in preview iframe (per AI Studio guidelines: HMR is disabled, ignore WebSocket errors)
       (function() {
         const origError = console.error;
