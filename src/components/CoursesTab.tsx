@@ -157,6 +157,7 @@ export const CoursesTab: React.FC = () => {
               <div className="space-y-2">
                 {activeCourse.chapters.map((ch, idx) => {
                   const isSelected = activeChapter?.id === ch.id;
+                  const isLocked = !isUnlocked && (idx >= 1 || ch.number > 1 || ch.isPremium);
                   return (
                     <button
                       key={ch.id}
@@ -190,7 +191,7 @@ export const CoursesTab: React.FC = () => {
                           {ch.keyFormulas && ch.keyFormulas.length > 0 && (
                             <span>• {ch.keyFormulas.length} formulas</span>
                           )}
-                          {ch.isPremium && !isUnlocked && (
+                          {isLocked && (
                             <span className="text-amber-500 font-bold flex items-center gap-0.5">
                               <Lock className="w-2.5 h-2.5" /> 300 ETB
                             </span>
@@ -223,13 +224,13 @@ export const CoursesTab: React.FC = () => {
                       <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
                         Chapter {activeChapter.number}
                       </span>
-                      {activeChapter.isPremium && !isUnlocked ? (
+                      {(!isUnlocked && (activeChapter.number > 1 || activeCourse.chapters.findIndex(c => c.id === activeChapter.id) >= 1)) ? (
                         <span className="text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1">
-                          <Lock className="w-3 h-3 text-amber-700" /> Premium Content
+                          <Lock className="w-3 h-3 text-amber-700" /> Chapter {activeChapter.number} Locked
                         </span>
                       ) : (
                         <span className="text-[10px] font-bold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full">
-                          Full Access
+                          Chapter 1 Free Access
                         </span>
                       )}
                     </div>
@@ -283,17 +284,17 @@ export const CoursesTab: React.FC = () => {
                   )}
 
                   {/* Core Content or Locked Content Gating */}
-                  {activeChapter.isPremium && !isUnlocked ? (
+                  {(!isUnlocked && (activeChapter.number > 1 || activeCourse.chapters.findIndex(c => c.id === activeChapter.id) >= 1)) ? (
                     <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-slate-50 to-amber-50/40 border border-amber-200 text-center space-y-4 my-4">
                       <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center mx-auto shadow-sm">
                         <Lock className="w-6 h-6" />
                       </div>
                       <div className="max-w-md mx-auto space-y-1">
                         <h3 className="text-base font-bold text-slate-900">
-                          This Chapter is Part of Smart Study Tutorial Package
+                          Chapter {activeChapter.number} is Locked (Smart Study Pro Package)
                         </h3>
                         <p className="text-xs text-slate-600">
-                          Complete lecture notes, worked examples, and exam step-by-step proofs require verified 300 ETB access.
+                          Chapter 1 is free for all subjects. From Chapter 2 to the end of all subjects requires verified 300 ETB full access.
                         </p>
                       </div>
 

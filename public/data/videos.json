@@ -476,6 +476,20 @@
     "addedAt": "2026-10-09"
   },
   {
+    "id": "vid-phys-u2-work-energy-momentum",
+    "courseId": "phys-1011",
+    "courseCode": "Phys 1011",
+    "title": "chapter 2 work,energy and momentum",
+    "description": "Here is the physics video prepared by smart study tutorial covering Chapter 2: Work done by forces, energy conservation, work-energy theorem, and linear momentum principles.",
+    "videoUrl": "https://www.youtube.com/embed/CMhtTk8qeVA",
+    "duration": "31:20",
+    "topic": "Unit 2: Work, Energy and Linear Momentum",
+    "instructor": "Guduru Alemayehu (Smart Study Tutorial)",
+    "isPremium": false,
+    "views": 1540,
+    "addedAt": "2026-10-10"
+  },
+  {
     "id": "vid-phys-u3-p1",
     "courseId": "phys-1011",
     "courseCode": "Phys 1011",

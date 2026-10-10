@@ -115,11 +115,11 @@ export const NotesTab: React.FC = () => {
                   Student Free Preview Mode Active
                 </span>
                 <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  First 2 Chapters Free
+                  Chapter 1 Free for All Subjects
                 </span>
               </div>
               <p className="text-xs text-slate-300">
-                Chapters 1 and 2 are open for reading. Chapters 3+ are part of the Smart Study Pro Curriculum.
+                Chapter 1 is free for all subjects. From Chapter 2 to the end of each subject are locked for Smart Study Pro (300 ETB).
               </p>
             </div>
           </div>
@@ -129,7 +129,7 @@ export const NotesTab: React.FC = () => {
             className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shrink-0 transition flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98]"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Unlock Pro Curriculum (300 ETB)</span>
+            <span>Unlock All Chapters (300 ETB)</span>
           </button>
         </div>
       )}
@@ -175,7 +175,7 @@ export const NotesTab: React.FC = () => {
               <div className="space-y-2">
                 {activeCourse.chapters.map((ch, chIdx) => {
                   const isChActive = activeChapter?.id === ch.id;
-                  const isLockedChapter = !isUnlocked && chIdx >= 2;
+                  const isLockedChapter = !isUnlocked && (chIdx >= 1 || ch.number > 1);
                   return (
                     <div
                       key={ch.id}
@@ -192,7 +192,7 @@ export const NotesTab: React.FC = () => {
                           <span>{ch.title}</span>
                           {isLockedChapter && (
                             <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9px] font-extrabold px-1.5 py-0.5 rounded flex items-center gap-0.5 ml-1">
-                              <Lock className="w-2.5 h-2.5 text-amber-400" /> Pro
+                              <Lock className="w-2.5 h-2.5 text-amber-400" /> Pro (Locked)
                             </span>
                           )}
                         </div>
@@ -228,7 +228,7 @@ export const NotesTab: React.FC = () => {
           <div className="lg:col-span-8">
             {activeChapter ? (() => {
               const activeChapterIndex = activeCourse.chapters.findIndex((ch) => ch.id === activeChapter.id);
-              const isCurrentChapterLocked = !isUnlocked && (activeChapterIndex >= 0 ? activeChapterIndex >= 2 : false);
+              const isCurrentChapterLocked = !isUnlocked && (activeChapterIndex >= 1 || (activeChapter && activeChapter.number > 1));
 
               return (
               <div className="bg-[#0f172a]/95 border border-[#1e293b] rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
@@ -241,11 +241,11 @@ export const NotesTab: React.FC = () => {
                       </span>
                       {isCurrentChapterLocked ? (
                         <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                          <Lock className="w-3 h-3 text-amber-400" /> Pro Curriculum
+                          <Lock className="w-3 h-3 text-amber-400" /> Chapter {activeChapter.number} Locked
                         </span>
                       ) : (
                         <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                          Free Preview
+                          Chapter 1 Free Access
                         </span>
                       )}
                     </div>
@@ -277,17 +277,18 @@ export const NotesTab: React.FC = () => {
                     </div>
                     <div className="space-y-1.5">
                       <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                        This lecture note is part of the Smart Study Pro Curriculum
+                        Chapter {activeChapter.number} is Locked (Smart Study Pro Curriculum)
                       </h3>
                       <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-                        Unlock complete question explanations, video lectures, and notes with a subscription fee.
+                        Chapter 1 is free for all subjects. From Chapter 2 to the end of each subject are reserved for Smart Study Pro members. Unlock full access to all lecture notes, worked formula cards, and masterclasses for 300 ETB.
                       </p>
                     </div>
                     <button
                       onClick={() => setActiveTab('unlock')}
                       className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm inline-flex items-center gap-2 shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
                     >
-                      Unlock Full Access
+                      <Sparkles className="w-4 h-4" />
+                      <span>Unlock All Chapters (300 ETB)</span>
                     </button>
                   </div>
                 ) : (
