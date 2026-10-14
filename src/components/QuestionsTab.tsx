@@ -382,7 +382,21 @@ export const QuestionsTab: React.FC = () => {
             <select
               value={selectedCourse}
               onChange={(e) => {
-                setSelectedCourse(e.target.value);
+                const newCourse = e.target.value;
+                setSelectedCourse(newCourse);
+                if (newCourse === 'FLEn 1011') {
+                  if (selectedExamType === 'final') {
+                    setSelectedYear('2013');
+                  } else if (selectedExamType === 'midterm') {
+                    setSelectedYear('2016');
+                  } else {
+                    setSelectedYear('all');
+                  }
+                } else if (newCourse === 'Psyc 1011') {
+                  setSelectedYear('2015');
+                } else {
+                  setSelectedYear('all');
+                }
                 setCurrentQuestionIndex(0);
               }}
               className="w-full sm:w-auto appearance-none bg-[#0a0f1d] border border-[#1e293b] text-slate-200 text-xs sm:text-sm font-semibold rounded-xl pl-4 pr-9 py-2.5 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -406,8 +420,19 @@ export const QuestionsTab: React.FC = () => {
             <select
               value={selectedExamType}
               onChange={(e) => {
-                setSelectedExamType(e.target.value as any);
-                setSelectedYear('all');
+                const newExamType = e.target.value as any;
+                setSelectedExamType(newExamType);
+                if (selectedCourse === 'FLEn 1011') {
+                  if (newExamType === 'final') {
+                    setSelectedYear('2013');
+                  } else if (newExamType === 'midterm') {
+                    setSelectedYear('2016');
+                  } else {
+                    setSelectedYear('all');
+                  }
+                } else {
+                  setSelectedYear('all');
+                }
                 setCurrentQuestionIndex(0);
               }}
               className={`w-full sm:w-auto appearance-none bg-[#0a0f1d] border text-xs sm:text-sm font-bold rounded-xl pl-4 pr-9 py-2.5 focus:outline-none cursor-pointer ${
@@ -452,61 +477,93 @@ export const QuestionsTab: React.FC = () => {
               }}
               className="w-full sm:w-auto appearance-none bg-[#0a0f1d] border border-[#1e293b] text-amber-400 text-xs sm:text-sm font-bold rounded-xl pl-4 pr-9 py-2.5 focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              {selectedExamType === 'midterm' && (
+              {selectedCourse === 'FLEn 1011' ? (
+                // Dedicated year & exam options for Communicative English
+                selectedExamType === 'final' ? (
+                  <>
+                    <option value="all">All Final Terms (2013 Final • 50 Questions)</option>
+                    <option value="2013">2013 Final Exam (2013 E.C. Haramaya • 50 Questions)</option>
+                  </>
+                ) : selectedExamType === 'midterm' ? (
+                  <>
+                    <option value="all">All Mid Terms (2016 & 2014 • 68 Questions)</option>
+                    <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • 37 Questions)</option>
+                    <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya • 31 Questions)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="all">All Communicative English Exams (118 Questions)</option>
+                    <optgroup label="🎓 Final Terms Exam">
+                      <option value="final-2013">2013 Final Exam (2013 E.C. Haramaya • 50 Questions)</option>
+                    </optgroup>
+                    <optgroup label="📝 Mid Terms Exam">
+                      <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • 37 Questions)</option>
+                      <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • 31 Questions)</option>
+                    </optgroup>
+                  </>
+                )
+              ) : (
+                // General year & category options across courses
                 <>
-                  <option value="all">All Mid Terms Years</option>
-                  <option value="2013">2013 Midterm Exam (2013 E.C. Haramaya)</option>
-                  <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya)</option>
-                  <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya)</option>
-                  <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya)</option>
-                  <option value="2024">2024 Midterm Exam (2016 E.C.)</option>
-                  <option value="2023">2023 Midterm Exam (2015 E.C.)</option>
-                  <option value="2022">2022 Midterm Exam (2014 E.C.)</option>
-                </>
-              )}
-              {selectedExamType === 'final' && (
-                <>
-                  <option value="all">All Final Terms Years</option>
-                  <option value="2024">2024 Final Exam (2016 E.C.)</option>
-                  <option value="2023">2023 Final Exam (2015 E.C.)</option>
-                  <option value="2022">2022 Final Exam (2014 E.C.)</option>
-                </>
-              )}
-              {selectedExamType === 'model' && (
-                <>
-                  <option value="all">All Smart Study Model Exams</option>
-                  <option value="2026">2026 Smart Study Model Exam (General Psychology • Unit 1 - 3 • 50 Qs)</option>
-                  <option value="2025">2025 Smart Study Model Exam (Economics 50 Qs • Geography 50 Qs • Math 30 Qs • Logic 30 Qs • Unit 1 - 3)</option>
-                  <option value="2024">2024 Smart Study Model Exam</option>
-                  <option value="2023">2023 Smart Study Model Exam</option>
-                </>
-              )}
-              {selectedExamType === 'all' && (
-                <>
-                  <option value="all">All Exam Years & Categories</option>
-                  <optgroup label="📝 Mid Terms Exam">
-                    <option value="midterm-all">All Mid Terms Years</option>
-                    <option value="midterm-2013">2013 Midterm Exam (2013 E.C. Haramaya)</option>
-                    <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya)</option>
-                    <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya)</option>
-                    <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya)</option>
-                    <option value="midterm-2024">2024 Midterm Exam (2016 E.C.)</option>
-                    <option value="midterm-2023">2023 Midterm Exam (2015 E.C.)</option>
-                    <option value="midterm-2022">2022 Midterm Exam (2014 E.C.)</option>
-                  </optgroup>
-                  <optgroup label="🎓 Final Terms Exam">
-                    <option value="final-all">All Final Terms Years</option>
-                    <option value="final-2024">2024 Final Exam (2016 E.C.)</option>
-                    <option value="final-2023">2023 Final Exam (2015 E.C.)</option>
-                    <option value="final-2022">2022 Final Exam (2014 E.C.)</option>
-                  </optgroup>
-                  <optgroup label="⚡ Smart Study Model Exam">
-                    <option value="model-all">All Smart Study Model Exams</option>
-                    <option value="model-2026">2026 Smart Study Model Exam (General Psychology • Unit 1 - 3 • 50 Qs)</option>
-                    <option value="model-2025">2025 Smart Study Model Exam (Economics 50 Qs • Geography 50 Qs • Math 30 Qs • Logic 30 Qs • Unit 1 - 3)</option>
-                    <option value="model-2024">2024 Smart Study Model Exam</option>
-                    <option value="model-2023">2023 Smart Study Model Exam</option>
-                  </optgroup>
+                  {selectedExamType === 'midterm' && (
+                    <>
+                      <option value="all">All Mid Terms Years</option>
+                      <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya)</option>
+                      <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya)</option>
+                      <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya)</option>
+                      <option value="2013">2013 Midterm Exam (2013 E.C. Haramaya)</option>
+                      <option value="2024">2024 Midterm Exam (2016 E.C.)</option>
+                      <option value="2023">2023 Midterm Exam (2015 E.C.)</option>
+                      <option value="2022">2022 Midterm Exam (2014 E.C.)</option>
+                    </>
+                  )}
+                  {selectedExamType === 'final' && (
+                    <>
+                      <option value="all">All Final Terms Years</option>
+                      <option value="2013">2013 Final Exam (2013 E.C. Haramaya • Communicative English 50 Qs)</option>
+                      <option value="2024">2024 Final Exam (2016 E.C.)</option>
+                      <option value="2023">2023 Final Exam (2015 E.C.)</option>
+                      <option value="2022">2022 Final Exam (2014 E.C.)</option>
+                    </>
+                  )}
+                  {selectedExamType === 'model' && (
+                    <>
+                      <option value="all">All Smart Study Model Exams</option>
+                      <option value="2026">2026 Smart Study Model Exam (General Psychology • Unit 1 - 3 • 50 Qs)</option>
+                      <option value="2025">2025 Smart Study Model Exam (Economics 50 Qs • Geography 50 Qs • Math 30 Qs • Logic 30 Qs • Unit 1 - 3)</option>
+                      <option value="2024">2024 Smart Study Model Exam</option>
+                      <option value="2023">2023 Smart Study Model Exam</option>
+                    </>
+                  )}
+                  {selectedExamType === 'all' && (
+                    <>
+                      <option value="all">All Exam Years & Categories</option>
+                      <optgroup label="🎓 Final Terms Exam">
+                        <option value="final-all">All Final Terms Years</option>
+                        <option value="final-2013">2013 Final Exam (2013 E.C. Haramaya • Communicative English 50 Qs)</option>
+                        <option value="final-2024">2024 Final Exam (2016 E.C.)</option>
+                        <option value="final-2023">2023 Final Exam (2015 E.C.)</option>
+                        <option value="final-2022">2022 Final Exam (2014 E.C.)</option>
+                      </optgroup>
+                      <optgroup label="📝 Mid Terms Exam">
+                        <option value="midterm-all">All Mid Terms Years</option>
+                        <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya)</option>
+                        <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya)</option>
+                        <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya)</option>
+                        <option value="midterm-2013">2013 Midterm Exam (2013 E.C. Haramaya)</option>
+                        <option value="midterm-2024">2024 Midterm Exam (2016 E.C.)</option>
+                        <option value="midterm-2023">2023 Midterm Exam (2015 E.C.)</option>
+                        <option value="midterm-2022">2022 Midterm Exam (2014 E.C.)</option>
+                      </optgroup>
+                      <optgroup label="⚡ Smart Study Model Exam">
+                        <option value="model-all">All Smart Study Model Exams</option>
+                        <option value="model-2026">2026 Smart Study Model Exam (General Psychology • Unit 1 - 3 • 50 Qs)</option>
+                        <option value="model-2025">2025 Smart Study Model Exam (Economics 50 Qs • Geography 50 Qs • Math 30 Qs • Logic 30 Qs • Unit 1 - 3)</option>
+                        <option value="model-2024">2024 Smart Study Model Exam</option>
+                        <option value="model-2023">2023 Smart Study Model Exam</option>
+                      </optgroup>
+                    </>
+                  )}
                 </>
               )}
             </select>
@@ -571,9 +628,9 @@ export const QuestionsTab: React.FC = () => {
         </div>
 
         <div className="text-[11px] text-slate-400 flex items-center gap-2">
-          {selectedCourse === 'Math 1011' || selectedCourse === 'Phys 1011' ? (
+          {selectedCourse === 'Math 1011' || selectedCourse === 'Phys 1011' || selectedCourse === 'FLEn 1011' ? (
             <span className="px-2.5 py-1 rounded-lg bg-cyan-950/70 text-cyan-300 border border-cyan-800/50 font-semibold flex items-center gap-1.5">
-              <span>📐 English Solutions Only (Step-by-Step Derivations)</span>
+              <span>{selectedCourse === 'FLEn 1011' ? '📖 English Solutions & Explanations Only' : '📐 English Solutions Only (Step-by-Step Derivations)'}</span>
             </span>
           ) : (
             <span className="px-2.5 py-1 rounded-lg bg-emerald-950/70 text-emerald-300 border border-emerald-800/50 font-semibold flex items-center gap-1.5">
@@ -615,7 +672,7 @@ export const QuestionsTab: React.FC = () => {
                 <span>
                   {areAllExplanationsOpen
                     ? "Hide All Explanations"
-                    : selectedCourse === 'Math 1011' || selectedCourse === 'Phys 1011'
+                    : selectedCourse === 'Math 1011' || selectedCourse === 'Phys 1011' || selectedCourse === 'FLEn 1011'
                     ? "View All Explanations (English)"
                     : "View All Explanations (3 Languages)"}
                 </span>
