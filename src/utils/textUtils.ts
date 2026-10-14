@@ -82,3 +82,20 @@ export function cleanOptionText(raw: string): string {
   text = text.replace(/^[A-Da-d][\.\)\:\-]\s*/, '').trim();
   return text;
 }
+
+/**
+ * Extracts reading passage and separated question prompt for reading comprehension items.
+ */
+export function extractReadingPassage(raw: string): { passage: string | null; prompt: string } {
+  if (!raw) return { passage: null, prompt: '' };
+  const cleaned = cleanSymbols(raw).trim();
+  if (cleaned.startsWith('[Reading Passage:')) {
+    const splitIndex = cleaned.lastIndexOf('\n\n');
+    if (splitIndex > 0) {
+      const passage = cleaned.substring(0, splitIndex).trim();
+      const prompt = cleanQuestionText(cleaned.substring(splitIndex + 2).trim());
+      return { passage, prompt };
+    }
+  }
+  return { passage: null, prompt: cleanQuestionText(raw) };
+}

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ExamQuestion, QuizAttempt } from '../types';
-import { cleanQuestionText } from '../utils/textUtils';
+import { cleanQuestionText, extractReadingPassage } from '../utils/textUtils';
 
 export const QuizTab: React.FC = () => {
   const { questions, courses, saveQuizAttempt, quizAttempts, streamFilter, isUnlocked, setActiveTab } = useApp();
@@ -435,9 +435,27 @@ export const QuizTab: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             {/* Left/Center: Question & Options */}
             <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-2xs space-y-6">
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
-                {currentIndex + 1}. {cleanQuestionText(currentQ.question)}
-              </h2>
+              {(() => {
+                const { passage, prompt } = extractReadingPassage(currentQ.question);
+                return (
+                  <>
+                    {passage && (
+                      <div className="bg-slate-50 border border-indigo-200 rounded-xl p-4 sm:p-5 text-slate-800 text-sm sm:text-base leading-relaxed space-y-2 mb-4">
+                        <div className="flex items-center gap-2 text-indigo-700 font-bold text-xs tracking-wider uppercase border-b border-indigo-100 pb-2">
+                          <BookOpen className="w-4 h-4 text-indigo-600 shrink-0" />
+                          <span>Reading Comprehension Passage</span>
+                        </div>
+                        <div className="whitespace-pre-line text-slate-700 font-normal leading-relaxed text-sm sm:text-[15px]">
+                          {passage.replace(/^\[Reading Passage:[^\]]*\]\s*/i, '').trim()}
+                        </div>
+                      </div>
+                    )}
+                    <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                      {currentIndex + 1}. {prompt}
+                    </h2>
+                  </>
+                );
+              })()}
 
               {/* Options */}
               <div className="space-y-3">

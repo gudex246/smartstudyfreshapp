@@ -297,7 +297,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsed: ExamQuestion[] = JSON.parse(saved);
         const initialMap = new Map(INITIAL_QUESTIONS.map((q) => [q.id, q]));
         const merged = parsed.map((q) => {
-          const base = initialMap.has(q.id) ? { ...initialMap.get(q.id)!, ...q } : q;
+          const base = initialMap.has(q.id) ? { ...q, ...initialMap.get(q.id)! } : q;
           return { ...base, question: cleanQuestionText(base.question) };
         });
         const existingIds = new Set(merged.map((q) => q.id));

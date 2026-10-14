@@ -13,6 +13,9 @@ import { GEOGRAPHY_2025_MODEL_QUESTIONS } from './geographyQuestions2025Model';
 import { ECONOMICS_2025_MODEL_QUESTIONS } from './economicsQuestions2025Model';
 import { MATH_2025_MODEL_QUESTIONS } from './mathQuestions2025Model';
 import { PHYSICS_2025_MODEL_QUESTIONS } from './physicsQuestions2025Model';
+import { ENGLISH_2014_MIDTERM_QUESTIONS } from './englishQuestions2014Midterm';
+import { ENGLISH_2016_MIDTERM_QUESTIONS } from './englishQuestions2016Midterm';
+import { ENGLISH_2013_FINAL_QUESTIONS } from './englishQuestions2013Final';
 
 export const INITIAL_COURSES: Course[] = [
   {
@@ -109,6 +112,9 @@ export const INITIAL_QUESTIONS: ExamQuestion[] = [
   ...PSYCHOLOGY_2026_MODEL_QUESTIONS,
   ...LOGIC_2025_MODEL_QUESTIONS,
   ...ECONOMICS_2016_MIDTERM_QUESTIONS,
+  ...ENGLISH_2014_MIDTERM_QUESTIONS,
+  ...ENGLISH_2016_MIDTERM_QUESTIONS,
+  ...ENGLISH_2013_FINAL_QUESTIONS,
   {
     id: 'q-math-1',
     courseId: 'math-1011',

@@ -7,10 +7,11 @@ import {
   HelpCircle,
   CheckCircle2,
   Sparkles,
-  Lock
+  Lock,
+  BookOpen
 } from 'lucide-react';
 import { ExamQuestion } from '../types';
-import { cleanSymbols, cleanQuestionText, cleanOptionText } from '../utils/textUtils';
+import { cleanSymbols, cleanQuestionText, cleanOptionText, extractReadingPassage } from '../utils/textUtils';
 
 interface QuestionCardProps {
   question: ExamQuestion;
@@ -226,12 +227,32 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
         </div>
       ) : (
         <>
-          {/* Question Text */}
-          <div className="pt-0.5">
-            <h2 className="text-white text-base sm:text-lg font-bold tracking-tight leading-relaxed">
-              {index + 1}. {cleanQuestionText(question.question)}
-            </h2>
-          </div>
+          {/* Reading Passage Card if present */}
+          {(() => {
+            const { passage, prompt } = extractReadingPassage(question.question);
+            return (
+              <>
+                {passage && (
+                  <div className="bg-[#070d1c] border border-indigo-500/30 rounded-xl p-4 sm:p-5 text-slate-200 text-sm sm:text-base leading-relaxed space-y-3 mb-2 shadow-inner">
+                    <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs tracking-wider uppercase border-b border-indigo-500/20 pb-2">
+                      <BookOpen className="w-4 h-4 text-indigo-400 shrink-0" />
+                      <span>Reading Comprehension Passage</span>
+                    </div>
+                    <div className="whitespace-pre-line text-slate-300 font-normal leading-relaxed text-sm sm:text-[15px]">
+                      {passage.replace(/^\[Reading Passage:[^\]]*\]\s*/i, '').trim()}
+                    </div>
+                  </div>
+                )}
+
+                {/* Question Text */}
+                <div className="pt-0.5">
+                  <h2 className="text-white text-base sm:text-lg font-bold tracking-tight leading-relaxed">
+                    {index + 1}. {prompt}
+                  </h2>
+                </div>
+              </>
+            );
+          })()}
 
           {/* 3. Options Grid */}
           <div
