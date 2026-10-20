@@ -16,6 +16,9 @@ import { PHYSICS_2025_MODEL_QUESTIONS } from './physicsQuestions2025Model';
 import { ENGLISH_2014_MIDTERM_QUESTIONS } from './englishQuestions2014Midterm';
 import { ENGLISH_2016_MIDTERM_QUESTIONS } from './englishQuestions2016Midterm';
 import { ENGLISH_2013_FINAL_QUESTIONS } from './englishQuestions2013Final';
+import { LOGIC_2018_MIDTERM_QUESTIONS } from './logicQuestions2018Midterm';
+import { MATH_2018_MIDTERM_QUESTIONS } from './mathQuestions2018Midterm';
+import { PHYSICS_2018_MIDTERM_QUESTIONS } from './physicsQuestions2018Midterm';
 
 export const INITIAL_COURSES: Course[] = [
   {
@@ -115,6 +118,9 @@ export const INITIAL_QUESTIONS: ExamQuestion[] = [
   ...ENGLISH_2014_MIDTERM_QUESTIONS,
   ...ENGLISH_2016_MIDTERM_QUESTIONS,
   ...ENGLISH_2013_FINAL_QUESTIONS,
+  ...LOGIC_2018_MIDTERM_QUESTIONS,
+  ...MATH_2018_MIDTERM_QUESTIONS,
+  ...PHYSICS_2018_MIDTERM_QUESTIONS,
   {
     id: 'q-math-1',
     courseId: 'math-1011',
