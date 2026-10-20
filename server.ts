@@ -7,7 +7,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 3000;
+
+// Port resolution: prioritize CLI --port, DEFAULT_APP_PORT, or PORT (if not in Nginx proxy setup)
+let port = 3000;
+const portArgIndex = process.argv.indexOf('--port');
+if (portArgIndex !== -1 && process.argv[portArgIndex + 1]) {
+  port = parseInt(process.argv[portArgIndex + 1], 10);
+} else if (process.env.DEFAULT_APP_PORT) {
+  port = parseInt(process.env.DEFAULT_APP_PORT, 10);
+} else if (process.env.PORT && !process.env.NGINX_PORT) {
+  port = parseInt(process.env.PORT, 10);
+}
 
 // High payload limit for compressed screenshots and sync data
 app.use(express.json({ limit: '50mb' }));
@@ -319,7 +329,10 @@ app.delete('/api/videos', (req, res) => {
 });
 
 // --- Mount Vite / Static ---
-const isProduction = process.env.NODE_ENV === 'production';
+const distPath = path.resolve(__dirname, 'dist');
+const hasDist = fs.existsSync(path.resolve(distPath, 'index.html'));
+const isExplicitDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
+const isProduction = process.env.NODE_ENV === 'production' || (hasDist && !isExplicitDev);
 
 async function startServer() {
   const { createServer } = await import('http');
@@ -328,6 +341,8 @@ async function startServer() {
   if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
+      root: __dirname,
+      configFile: path.resolve(__dirname, 'vite.config.ts'),
       server: {
         middlewareMode: true,
         hmr: false
@@ -353,16 +368,26 @@ async function startServer() {
       }
     });
   } else {
-    const distPath = path.resolve(__dirname, 'dist');
     app.use(express.static(distPath));
     app.get('*', (_req, res) => {
       res.sendFile(path.resolve(distPath, 'index.html'));
     });
   }
 
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use. Waiting or exiting...`);
+    } else {
+      console.error('Server error:', err);
+    }
+  });
+
   server.listen(port, '0.0.0.0', () => {
     console.log(`Server running at http://0.0.0.0:${port} [${isProduction ? 'production' : 'development'}]`);
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error('Fatal error during startServer:', err);
+  process.exit(1);
+});
