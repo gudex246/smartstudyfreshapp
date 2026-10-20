@@ -388,7 +388,7 @@ export const QuestionsTab: React.FC = () => {
                   if (selectedExamType === 'final') {
                     setSelectedYear('2013');
                   } else if (selectedExamType === 'midterm') {
-                    setSelectedYear('2016');
+                    setSelectedYear('2018');
                   } else {
                     setSelectedYear('all');
                   }
@@ -450,7 +450,7 @@ export const QuestionsTab: React.FC = () => {
                   if (newExamType === 'final') {
                     setSelectedYear('2013');
                   } else if (newExamType === 'midterm') {
-                    setSelectedYear('2016');
+                    setSelectedYear('2018');
                   } else {
                     setSelectedYear('all');
                   }
@@ -534,17 +534,19 @@ export const QuestionsTab: React.FC = () => {
                   </>
                 ) : selectedExamType === 'midterm' ? (
                   <>
-                    <option value="all">All Mid Terms (2016 & 2014 • 68 Questions)</option>
+                    <option value="all">All Mid Terms (2018, 2016 & 2014 • 98 Questions)</option>
+                    <option value="2018">2018 Midterm Exam (2018 E.C. Haramaya • 30 Questions)</option>
                     <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • 37 Questions)</option>
                     <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya • 31 Questions)</option>
                   </>
                 ) : (
                   <>
-                    <option value="all">All Communicative English Exams (118 Questions)</option>
+                    <option value="all">All Communicative English Exams (148 Questions)</option>
                     <optgroup label="🎓 Final Terms Exam">
                       <option value="final-2013">2013 Final Exam (2013 E.C. Haramaya • 50 Questions)</option>
                     </optgroup>
                     <optgroup label="📝 Mid Terms Exam">
+                      <option value="midterm-2018">2018 Midterm Exam (2018 E.C. Haramaya • 30 Questions)</option>
                       <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • 37 Questions)</option>
                       <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • 31 Questions)</option>
                     </optgroup>
@@ -635,7 +637,7 @@ export const QuestionsTab: React.FC = () => {
                   {selectedExamType === 'midterm' && (
                     <>
                       <option value="all">All Mid Terms Years</option>
-                      <option value="2018">2018 Midterm Exam (2018 E.C. Haramaya • Physics, Math & Logic)</option>
+                      <option value="2018">2018 Midterm Exam (2018 E.C. Haramaya • English, Physics, Math & Logic)</option>
                       <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya)</option>
                       <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya)</option>
                       <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya)</option>

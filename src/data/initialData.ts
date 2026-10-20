@@ -19,6 +19,7 @@ import { ENGLISH_2013_FINAL_QUESTIONS } from './englishQuestions2013Final';
 import { LOGIC_2018_MIDTERM_QUESTIONS } from './logicQuestions2018Midterm';
 import { MATH_2018_MIDTERM_QUESTIONS } from './mathQuestions2018Midterm';
 import { PHYSICS_2018_MIDTERM_QUESTIONS } from './physicsQuestions2018Midterm';
+import { ENGLISH_2018_MIDTERM_QUESTIONS } from './englishQuestions2018Midterm';
 
 export const INITIAL_COURSES: Course[] = [
   {
@@ -121,6 +122,7 @@ export const INITIAL_QUESTIONS: ExamQuestion[] = [
   ...LOGIC_2018_MIDTERM_QUESTIONS,
   ...MATH_2018_MIDTERM_QUESTIONS,
   ...PHYSICS_2018_MIDTERM_QUESTIONS,
+  ...ENGLISH_2018_MIDTERM_QUESTIONS,
   {
     id: 'q-math-1',
     courseId: 'math-1011',
