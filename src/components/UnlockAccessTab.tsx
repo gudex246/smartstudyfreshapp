@@ -117,25 +117,14 @@ export const UnlockAccessTab: React.FC = () => {
             const compressed = canvas.toDataURL('image/jpeg', 0.65);
             setScreenshotPreview(compressed);
             const sizeKB = Math.round((compressed.length * 3) / 4 / 1024);
-            setCompressionInfo(`✓ Compressed to ${sizeKB} KB. Uploading to cloud...`);
-
-            // Immediately pre-upload to cloud CDN in background
-            const tempId = 'rec-' + Date.now();
-            uploadReceiptToCloud(compressed, tempId)
-              .then((cloudUrl) => {
-                if (cloudUrl) {
-                  setScreenshotPreview(cloudUrl);
-                  setCompressionInfo(`✓ Screenshot securely synced to cloud CDN (${sizeKB} KB)`);
-                }
-              })
-              .catch(() => {});
+            setCompressionInfo(`✓ Screenshot ready (${sizeKB} KB) • Ready for instant submission`);
           } else {
             setScreenshotPreview(rawDataUrl);
-            setCompressionInfo(null);
+            setCompressionInfo('✓ Screenshot ready');
           }
         } catch {
           setScreenshotPreview(rawDataUrl);
-          setCompressionInfo(null);
+          setCompressionInfo('✓ Screenshot ready');
         }
       };
       img.onerror = () => {
@@ -161,21 +150,7 @@ export const UnlockAccessTab: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    let finalScreenshot = screenshotPreview;
-
-    // If still in data: base64, ensure cloud upload completes
-    if (finalScreenshot && finalScreenshot.startsWith('data:')) {
-      setCompressionInfo('Uploading receipt to cloud relay...');
-      try {
-        const cloudUrl = await uploadReceiptToCloud(finalScreenshot, 'sub-' + Date.now());
-        if (cloudUrl) {
-          finalScreenshot = cloudUrl;
-          setScreenshotPreview(cloudUrl);
-        }
-      } catch (e) {
-        console.warn('Pre-upload during submit failed, fallback to local buffer', e);
-      }
-    }
+    setCompressionInfo('Submitting verification to administrator...');
 
     try {
       const created = await addPaymentSubmission({
@@ -185,12 +160,13 @@ export const UnlockAccessTab: React.FC = () => {
         paymentMethod,
         accountOrPhoneUsed: paymentMethod === 'CBE' ? '1000521750255' : '0953201048',
         transactionRef,
-        screenshotUrl: finalScreenshot
+        screenshotUrl: screenshotPreview
       });
 
       setLastSubmitted(created);
       setIsSubmitting(false);
       setSubmitSuccess(true);
+      setCompressionInfo(null);
     } catch (err) {
       setIsSubmitting(false);
       setFormError('Error submitting payment verification. Please try again.');

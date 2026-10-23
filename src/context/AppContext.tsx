@@ -973,19 +973,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       deliveryChannel: 'cloud_sync'
     };
 
-    // Dispatch to API & Cloud and retrieve server image URL if available
-    try {
-      const dispatchRes = await dispatchPaymentSubmissionToCloud(newSubmission);
-      if (dispatchRes && dispatchRes.updatedSubmission) {
-        newSubmission = dispatchRes.updatedSubmission;
-      }
-    } catch (err) {
-      console.warn('Cross-device dispatch notification:', err);
-    }
-
+    // 1. Update local state & student profile immediately for instant UI response (0ms)
     setPaymentSubmissions(prev => [newSubmission, ...prev.filter(p => p.id !== newSubmission.id)]);
-
-    // Link submission to current student profile
     setStudentProfile(prev => ({
       ...prev,
       name: data.studentName || prev.name,
@@ -993,6 +982,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       phone: data.studentPhone || prev.phone,
       submissionId: newSubmission.id
     }));
+
+    // 2. Dispatch to local API and background sync
+    try {
+      const dispatchRes = await dispatchPaymentSubmissionToCloud(newSubmission);
+      if (dispatchRes && dispatchRes.updatedSubmission) {
+        newSubmission = dispatchRes.updatedSubmission;
+        setPaymentSubmissions(prev => [newSubmission, ...prev.filter(p => p.id !== newSubmission.id)]);
+      }
+    } catch (err) {
+      console.warn('Cross-device dispatch notification:', err);
+    }
 
     return newSubmission;
   };
