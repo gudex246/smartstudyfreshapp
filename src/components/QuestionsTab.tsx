@@ -418,6 +418,12 @@ export const QuestionsTab: React.FC = () => {
                   }
                 } else if (newCourse === 'Psyc 1011') {
                   setSelectedYear('2015');
+                } else if (newCourse === 'Anth 1012' || newCourse === 'MCiE 1012' || newCourse === 'Hist 1012') {
+                  if (selectedExamType === 'model') {
+                    setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
                 } else {
                   setSelectedYear('all');
                 }
@@ -433,6 +439,9 @@ export const QuestionsTab: React.FC = () => {
               <option value="Phys 1011">General Physics</option>
               <option value="FLEn 1011">Communicative English 1</option>
               <option value="Econ 1011">Economics for Social</option>
+              <option value="Anth 1012">Social Anthropology</option>
+              <option value="MCiE 1012">Moral & Civic Education</option>
+              <option value="Hist 1012">History of Ethiopia & the Horn</option>
             </select>
             <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
               ▼
@@ -474,6 +483,12 @@ export const QuestionsTab: React.FC = () => {
                   if (newExamType === 'midterm') {
                     setSelectedYear('2018');
                   } else if (newExamType === 'model') {
+                    setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
+                } else if (selectedCourse === 'Anth 1012' || selectedCourse === 'MCiE 1012' || selectedCourse === 'Hist 1012') {
+                  if (newExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
                     setSelectedYear('all');
@@ -631,6 +646,51 @@ export const QuestionsTab: React.FC = () => {
                     </optgroup>
                   </>
                 )
+              ) : selectedCourse === 'Anth 1012' ? (
+                // Dedicated year & exam options for Social Anthropology
+                selectedExamType === 'model' ? (
+                  <>
+                    <option value="all">All Model Exams (2025 Model • 25 Questions)</option>
+                    <option value="2025">2025 Smart Study Model Exam (25 Questions)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="all">All Social Anthropology Exams (25 Questions)</option>
+                    <optgroup label="⚡ Smart Study Model Exam">
+                      <option value="model-2025">2025 Smart Study Model Exam (Chapters 1 - 6 • 25 Questions)</option>
+                    </optgroup>
+                  </>
+                )
+              ) : selectedCourse === 'MCiE 1012' ? (
+                // Dedicated year & exam options for Moral & Civic Education
+                selectedExamType === 'model' ? (
+                  <>
+                    <option value="all">All Model Exams (2025 Model • 25 Questions)</option>
+                    <option value="2025">2025 Smart Study Model Exam (25 Questions)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="all">All Moral & Civic Education Exams (25 Questions)</option>
+                    <optgroup label="⚡ Smart Study Model Exam">
+                      <option value="model-2025">2025 Smart Study Model Exam (Chapters 1 - 6 • 25 Questions)</option>
+                    </optgroup>
+                  </>
+                )
+              ) : selectedCourse === 'Hist 1012' ? (
+                // Dedicated year & exam options for History of Ethiopia and the Horn
+                selectedExamType === 'model' ? (
+                  <>
+                    <option value="all">All Model Exams (2025 Model • 25 Questions)</option>
+                    <option value="2025">2025 Smart Study Model Exam (25 Questions)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="all">All History of Ethiopia & Horn Exams (25 Questions)</option>
+                    <optgroup label="⚡ Smart Study Model Exam">
+                      <option value="model-2025">2025 Smart Study Model Exam (Chapters 1 - 7 • 25 Questions)</option>
+                    </optgroup>
+                  </>
+                )
               ) : (
                 // General year & category options across courses
                 <>
@@ -660,7 +720,7 @@ export const QuestionsTab: React.FC = () => {
                     <>
                       <option value="all">All Smart Study Model Exams</option>
                       <option value="2026">2026 Smart Study Model Exam (General Psychology • Unit 1 - 3 • 50 Qs)</option>
-                      <option value="2025">2025 Smart Study Model Exam (Economics 50 Qs • Geography 50 Qs • Math 30 Qs • Logic 30 Qs • Unit 1 - 3)</option>
+                      <option value="2025">2025 Smart Study Model Exam (Anth • Civics • Hist • Econ • Geog • Math • Logic • 25-50 Qs)</option>
                       <option value="2024">2024 Smart Study Model Exam</option>
                       <option value="2023">2023 Smart Study Model Exam</option>
                     </>
@@ -689,7 +749,7 @@ export const QuestionsTab: React.FC = () => {
                       <optgroup label="⚡ Smart Study Model Exam">
                         <option value="model-all">All Smart Study Model Exams</option>
                         <option value="model-2026">2026 Smart Study Model Exam (General Psychology • Unit 1 - 3 • 50 Qs)</option>
-                        <option value="model-2025">2025 Smart Study Model Exam (Economics 50 Qs • Geography 50 Qs • Math 30 Qs • Logic 30 Qs • Unit 1 - 3)</option>
+                        <option value="model-2025">2025 Smart Study Model Exam (Anth • Civics • Hist • Econ • Geog • Math • Logic • 25-50 Qs)</option>
                         <option value="model-2024">2024 Smart Study Model Exam</option>
                         <option value="model-2023">2023 Smart Study Model Exam</option>
                       </optgroup>

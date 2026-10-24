@@ -20,6 +20,12 @@ import { LOGIC_2018_MIDTERM_QUESTIONS } from './logicQuestions2018Midterm';
 import { MATH_2018_MIDTERM_QUESTIONS } from './mathQuestions2018Midterm';
 import { PHYSICS_2018_MIDTERM_QUESTIONS } from './physicsQuestions2018Midterm';
 import { ENGLISH_2018_MIDTERM_QUESTIONS } from './englishQuestions2018Midterm';
+import { ANTHROPOLOGY_MODULE_CHAPTERS } from './anthropologyNotes';
+import { CIVICS_MODULE_CHAPTERS } from './civicsNotes';
+import { HISTORY_MODULE_CHAPTERS } from './historyNotes';
+import { ANTHROPOLOGY_QUESTIONS } from './anthropologyQuestions';
+import { CIVICS_QUESTIONS } from './civicsQuestions';
+import { HISTORY_QUESTIONS } from './historyQuestions';
 
 export const INITIAL_COURSES: Course[] = [
   {
@@ -105,10 +111,49 @@ export const INITIAL_COURSES: Course[] = [
     color: '#059669',
     iconName: 'TrendingUp',
     chapters: ECONOMICS_MODULE_CHAPTERS
+  },
+  {
+    id: 'anth-1012',
+    code: 'Anth 1012',
+    name: 'Social Anthropology',
+    stream: 'both',
+    creditHours: 2,
+    semester: 2,
+    description: 'Study of human societies, cultures, kinship systems, human diversity, ethnic relations, and indigenous conflict resolution mechanisms in Ethiopia.',
+    color: '#0d9488',
+    iconName: 'Users',
+    chapters: ANTHROPOLOGY_MODULE_CHAPTERS
+  },
+  {
+    id: 'mcie-1012',
+    code: 'MCiE 1012',
+    name: 'Moral and Civic Education',
+    stream: 'both',
+    creditHours: 2,
+    semester: 2,
+    description: 'Foundations of ethical philosophy, constitutionalism, human rights, democracy, state structures, citizenship, and conflict transformation.',
+    color: '#ea580c',
+    iconName: 'Scale',
+    chapters: CIVICS_MODULE_CHAPTERS
+  },
+  {
+    id: 'hist-1012',
+    code: 'Hist 1012',
+    name: 'History of Ethiopia and the Horn',
+    stream: 'both',
+    creditHours: 3,
+    semester: 2,
+    description: 'Comprehensive historical development from prehistoric hominid evolution through Aksum, Zagwe, medieval sultanates, Gondar, Battle of Adwa, to 1991.',
+    color: '#b45309',
+    iconName: 'Landmark',
+    chapters: HISTORY_MODULE_CHAPTERS
   }
 ];
 
 export const INITIAL_QUESTIONS: ExamQuestion[] = [
+  ...ANTHROPOLOGY_QUESTIONS,
+  ...CIVICS_QUESTIONS,
+  ...HISTORY_QUESTIONS,
   ...PHYSICS_2025_MODEL_QUESTIONS,
   ...MATH_2025_MODEL_QUESTIONS,
   ...ECONOMICS_2025_MODEL_QUESTIONS,
