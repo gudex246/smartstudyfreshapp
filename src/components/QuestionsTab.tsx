@@ -418,7 +418,7 @@ export const QuestionsTab: React.FC = () => {
                   }
                 } else if (newCourse === 'Psyc 1011') {
                   setSelectedYear('2015');
-                } else if (newCourse === 'Anth 1012' || newCourse === 'MCiE 1012' || newCourse === 'Hist 1012') {
+                } else if (newCourse === 'Anth 1012' || newCourse === 'MCiE 1012' || newCourse === 'Hist 1012' || newCourse === 'SNIE 1012') {
                   if (selectedExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
@@ -442,6 +442,7 @@ export const QuestionsTab: React.FC = () => {
               <option value="Anth 1012">Social Anthropology</option>
               <option value="MCiE 1012">Moral & Civic Education</option>
               <option value="Hist 1012">History of Ethiopia & the Horn</option>
+              <option value="SNIE 1012">Inclusiveness (Special Needs)</option>
             </select>
             <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
               ▼
@@ -487,7 +488,7 @@ export const QuestionsTab: React.FC = () => {
                   } else {
                     setSelectedYear('all');
                   }
-                } else if (selectedCourse === 'Anth 1012' || selectedCourse === 'MCiE 1012' || selectedCourse === 'Hist 1012') {
+                } else if (selectedCourse === 'Anth 1012' || selectedCourse === 'MCiE 1012' || selectedCourse === 'Hist 1012' || selectedCourse === 'SNIE 1012') {
                   if (newExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
@@ -691,6 +692,21 @@ export const QuestionsTab: React.FC = () => {
                     </optgroup>
                   </>
                 )
+              ) : selectedCourse === 'SNIE 1012' ? (
+                // Dedicated year & exam options for Inclusiveness
+                selectedExamType === 'model' ? (
+                  <>
+                    <option value="all">All Model Exams (2025 Model • 25 Questions)</option>
+                    <option value="2025">2025 Smart Study Model Exam (25 Questions)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="all">All Inclusiveness Exams (25 Questions)</option>
+                    <optgroup label="⚡ Smart Study Model Exam">
+                      <option value="model-2025">2025 Smart Study Model Exam (Chapters 1 - 5 • 25 Questions)</option>
+                    </optgroup>
+                  </>
+                )
               ) : (
                 // General year & category options across courses
                 <>
@@ -720,7 +736,7 @@ export const QuestionsTab: React.FC = () => {
                     <>
                       <option value="all">All Smart Study Model Exams</option>
                       <option value="2026">2026 Smart Study Model Exam (General Psychology • Unit 1 - 3 • 50 Qs)</option>
-                      <option value="2025">2025 Smart Study Model Exam (Anth • Civics • Hist • Econ • Geog • Math • Logic • 25-50 Qs)</option>
+                      <option value="2025">2025 Smart Study Model Exam (Anth • Civics • Hist • Inclusiveness • Econ • Geog • Math • Logic • 25-50 Qs)</option>
                       <option value="2024">2024 Smart Study Model Exam</option>
                       <option value="2023">2023 Smart Study Model Exam</option>
                     </>

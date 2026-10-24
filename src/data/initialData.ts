@@ -23,9 +23,11 @@ import { ENGLISH_2018_MIDTERM_QUESTIONS } from './englishQuestions2018Midterm';
 import { ANTHROPOLOGY_MODULE_CHAPTERS } from './anthropologyNotes';
 import { CIVICS_MODULE_CHAPTERS } from './civicsNotes';
 import { HISTORY_MODULE_CHAPTERS } from './historyNotes';
+import { INCLUSIVENESS_MODULE_CHAPTERS } from './inclusivenessNotes';
 import { ANTHROPOLOGY_QUESTIONS } from './anthropologyQuestions';
 import { CIVICS_QUESTIONS } from './civicsQuestions';
 import { HISTORY_QUESTIONS } from './historyQuestions';
+import { INCLUSIVENESS_QUESTIONS } from './inclusivenessQuestions';
 
 export const INITIAL_COURSES: Course[] = [
   {
@@ -147,6 +149,18 @@ export const INITIAL_COURSES: Course[] = [
     color: '#b45309',
     iconName: 'Landmark',
     chapters: HISTORY_MODULE_CHAPTERS
+  },
+  {
+    id: 'snie-1012',
+    code: 'SNIE 1012',
+    name: 'Inclusiveness',
+    stream: 'both',
+    creditHours: 2,
+    semester: 2,
+    description: 'Foundational study of disabilities, vulnerabilities, models of disability, historical shift to inclusion, Universal Design for Learning (UDL), assistive technologies, and inclusive legal frameworks in Ethiopia.',
+    color: '#8b5cf6',
+    iconName: 'HeartHandshake',
+    chapters: INCLUSIVENESS_MODULE_CHAPTERS
   }
 ];
 
@@ -154,6 +168,7 @@ export const INITIAL_QUESTIONS: ExamQuestion[] = [
   ...ANTHROPOLOGY_QUESTIONS,
   ...CIVICS_QUESTIONS,
   ...HISTORY_QUESTIONS,
+  ...INCLUSIVENESS_QUESTIONS,
   ...PHYSICS_2025_MODEL_QUESTIONS,
   ...MATH_2025_MODEL_QUESTIONS,
   ...ECONOMICS_2025_MODEL_QUESTIONS,
