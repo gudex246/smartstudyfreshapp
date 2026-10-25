@@ -416,7 +416,15 @@ export const QuestionsTab: React.FC = () => {
                   } else {
                     setSelectedYear('all');
                   }
-                } else if (newCourse === 'Anth 1012' || newCourse === 'MCiE 1012' || newCourse === 'Hist 1012' || newCourse === 'SNIE 1012') {
+                } else if (newCourse === 'Anth 1012') {
+                  if (selectedExamType === 'midterm') {
+                    setSelectedYear('2017');
+                  } else if (selectedExamType === 'model') {
+                    setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
+                } else if (newCourse === 'MCiE 1012' || newCourse === 'Hist 1012' || newCourse === 'SNIE 1012') {
                   if (selectedExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
@@ -486,7 +494,15 @@ export const QuestionsTab: React.FC = () => {
                   } else {
                     setSelectedYear('all');
                   }
-                } else if (selectedCourse === 'Anth 1012' || selectedCourse === 'MCiE 1012' || selectedCourse === 'Hist 1012' || selectedCourse === 'SNIE 1012') {
+                } else if (selectedCourse === 'Anth 1012') {
+                  if (newExamType === 'midterm') {
+                    setSelectedYear('2017');
+                  } else if (newExamType === 'model') {
+                    setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
+                } else if (selectedCourse === 'MCiE 1012' || selectedCourse === 'Hist 1012' || selectedCourse === 'SNIE 1012') {
                   if (newExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
@@ -693,15 +709,24 @@ export const QuestionsTab: React.FC = () => {
                   </>
                 )
               ) : selectedCourse === 'Anth 1012' ? (
-                // Dedicated year & exam options for Social Anthropology
-                selectedExamType === 'model' ? (
+                // Dedicated year & exam options for Social Anthropology (Haramaya University & Model)
+                selectedExamType === 'midterm' ? (
+                  <>
+                    <option value="all">All Mid Terms (2017 Midterm • 30 Questions)</option>
+                    <option value="2017">2017 Midterm Exam (2017 E.C. Haramaya • 30 Questions)</option>
+                  </>
+                ) : selectedExamType === 'model' ? (
                   <>
                     <option value="all">All Model Exams (2025 Model • 25 Questions)</option>
                     <option value="2025">2025 Smart Study Model Exam (25 Questions)</option>
                   </>
                 ) : (
                   <>
-                    <option value="all">All Social Anthropology Exams (25 Questions)</option>
+                    <option value="all">All Social Anthropology Exams (55 Questions)</option>
+                    <optgroup label="📝 Mid Terms Exam (Haramaya University)">
+                      <option value="midterm-all">All Mid Terms (2017 Midterm • 30 Questions)</option>
+                      <option value="midterm-2017">2017 Midterm Exam (2017 E.C. Haramaya • 30 Questions)</option>
+                    </optgroup>
                     <optgroup label="⚡ Smart Study Model Exam">
                       <option value="model-2025">2025 Smart Study Model Exam (Chapters 1 - 6 • 25 Questions)</option>
                     </optgroup>
@@ -759,6 +784,7 @@ export const QuestionsTab: React.FC = () => {
                     <>
                       <option value="all">All Mid Terms Years</option>
                       <option value="2018">2018 Midterm Exam (2018 E.C. Haramaya • Math, Physics, Logic & English)</option>
+                      <option value="2017">2017 Midterm Exam (2017 E.C. Haramaya • Social Anthropology 30 Qs)</option>
                       <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • Math, Psychology, Physics, Logic, Economics & English)</option>
                       <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya • Math, Psychology, Physics & Logic)</option>
                       <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya • Math, Psychology, Logic & English)</option>
@@ -792,6 +818,7 @@ export const QuestionsTab: React.FC = () => {
                       <optgroup label="📝 Mid Terms Exam">
                         <option value="midterm-all">All Mid Terms Years</option>
                         <option value="midterm-2018">2018 Midterm Exam (2018 E.C. Haramaya • Math, Physics, Logic & English)</option>
+                        <option value="midterm-2017">2017 Midterm Exam (2017 E.C. Haramaya • Social Anthropology 30 Qs)</option>
                         <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • Math, Psychology, Physics, Logic, Economics & English)</option>
                         <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya • Math, Psychology, Physics & Logic)</option>
                         <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • Math, Psychology, Logic & English)</option>

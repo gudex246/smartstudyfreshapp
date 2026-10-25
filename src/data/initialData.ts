@@ -25,6 +25,7 @@ import { CIVICS_MODULE_CHAPTERS } from './civicsNotes';
 import { HISTORY_MODULE_CHAPTERS } from './historyNotes';
 import { INCLUSIVENESS_MODULE_CHAPTERS } from './inclusivenessNotes';
 import { ANTHROPOLOGY_QUESTIONS } from './anthropologyQuestions';
+import { ANTHROPOLOGY_2017_MIDTERM_QUESTIONS } from './anthropologyQuestions2017Midterm';
 import { CIVICS_QUESTIONS } from './civicsQuestions';
 import { HISTORY_QUESTIONS } from './historyQuestions';
 import { INCLUSIVENESS_QUESTIONS } from './inclusivenessQuestions';
@@ -166,6 +167,7 @@ export const INITIAL_COURSES: Course[] = [
 
 export const INITIAL_QUESTIONS: ExamQuestion[] = [
   ...ANTHROPOLOGY_QUESTIONS,
+  ...ANTHROPOLOGY_2017_MIDTERM_QUESTIONS,
   ...CIVICS_QUESTIONS,
   ...HISTORY_QUESTIONS,
   ...INCLUSIVENESS_QUESTIONS,
