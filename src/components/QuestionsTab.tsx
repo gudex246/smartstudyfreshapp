@@ -404,6 +404,12 @@ export const QuestionsTab: React.FC = () => {
                   } else {
                     setSelectedYear('all');
                   }
+                } else if (newCourse === 'GeES 1011') {
+                  if (selectedExamType === 'model') {
+                    setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
                 } else if (newCourse === 'Phys 1011') {
                   if (selectedExamType === 'model') {
                     setSelectedYear('2025');
@@ -477,6 +483,12 @@ export const QuestionsTab: React.FC = () => {
                     setSelectedYear('all');
                   }
                 } else if (selectedCourse === 'Math 1011') {
+                  if (newExamType === 'model') {
+                    setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
+                } else if (selectedCourse === 'GeES 1011') {
                   if (newExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
@@ -650,6 +662,32 @@ export const QuestionsTab: React.FC = () => {
                     </optgroup>
                   </>
                 )
+              ) : selectedCourse === 'GeES 1011' ? (
+                // Dedicated year & exam options for Geography of Ethiopia and the Horn (Haramaya University & Model)
+                selectedExamType === 'midterm' ? (
+                  <>
+                    <option value="all">All Mid Terms (2015 & 2014 • 62 Questions)</option>
+                    <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya • 32 Questions)</option>
+                    <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya • 30 Questions)</option>
+                  </>
+                ) : selectedExamType === 'model' ? (
+                  <>
+                    <option value="all">All Model Exams (2025 Model • 50 Questions)</option>
+                    <option value="2025">2025 Smart Study Model Exam (50 Questions)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="all">All Geography Exams (114 Questions)</option>
+                    <optgroup label="📝 Mid Terms Exam (Haramaya University)">
+                      <option value="midterm-all">All Mid Terms (2015 & 2014 • 62 Questions)</option>
+                      <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya • 32 Questions)</option>
+                      <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • 30 Questions)</option>
+                    </optgroup>
+                    <optgroup label="⚡ Smart Study Model Exam">
+                      <option value="model-2025">2025 Smart Study Model Exam (50 Questions)</option>
+                    </optgroup>
+                  </>
+                )
               ) : selectedCourse === 'Phys 1011' ? (
                 // Dedicated year & exam options for General Physics (Haramaya University & Model)
                 selectedExamType === 'midterm' ? (
@@ -786,8 +824,8 @@ export const QuestionsTab: React.FC = () => {
                       <option value="2018">2018 Midterm Exam (2018 E.C. Haramaya • Math, Physics, Logic & English)</option>
                       <option value="2017">2017 Midterm Exam (2017 E.C. Haramaya • Social Anthropology 30 Qs)</option>
                       <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • Math, Psychology, Physics, Logic, Economics & English)</option>
-                      <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya • Math, Psychology, Physics & Logic)</option>
-                      <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya • Math, Psychology, Logic & English)</option>
+                      <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya • Geography, Math, Psychology, Physics & Logic)</option>
+                      <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya • Geography, Math, Psychology, Logic & English)</option>
                       <option value="2013">2013 Midterm Exam (2013 E.C. Haramaya • Psychology)</option>
                       <option value="2024">2024 Midterm Exam (2016 E.C.)</option>
                       <option value="2023">2023 Midterm Exam (2015 E.C.)</option>
@@ -820,8 +858,8 @@ export const QuestionsTab: React.FC = () => {
                         <option value="midterm-2018">2018 Midterm Exam (2018 E.C. Haramaya • Math, Physics, Logic & English)</option>
                         <option value="midterm-2017">2017 Midterm Exam (2017 E.C. Haramaya • Social Anthropology 30 Qs)</option>
                         <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • Math, Psychology, Physics, Logic, Economics & English)</option>
-                        <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya • Math, Psychology, Physics & Logic)</option>
-                        <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • Math, Psychology, Logic & English)</option>
+                        <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya • Geography, Math, Psychology, Physics & Logic)</option>
+                        <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • Geography, Math, Psychology, Logic & English)</option>
                         <option value="midterm-2013">2013 Midterm Exam (2013 E.C. Haramaya • Psychology)</option>
                         <option value="midterm-2024">2024 Midterm Exam (2016 E.C.)</option>
                         <option value="midterm-2023">2023 Midterm Exam (2015 E.C.)</option>
