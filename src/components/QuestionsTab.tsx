@@ -393,31 +393,29 @@ export const QuestionsTab: React.FC = () => {
                     setSelectedYear('all');
                   }
                 } else if (newCourse === 'LoCT 1011') {
-                  if (selectedExamType === 'midterm') {
-                    setSelectedYear('2018');
-                  } else if (selectedExamType === 'model') {
+                  if (selectedExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
                     setSelectedYear('all');
                   }
                 } else if (newCourse === 'Math 1011') {
-                  if (selectedExamType === 'midterm') {
-                    setSelectedYear('2018');
-                  } else if (selectedExamType === 'model') {
+                  if (selectedExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
                     setSelectedYear('all');
                   }
                 } else if (newCourse === 'Phys 1011') {
-                  if (selectedExamType === 'midterm') {
-                    setSelectedYear('2018');
-                  } else if (selectedExamType === 'model') {
+                  if (selectedExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
                     setSelectedYear('all');
                   }
                 } else if (newCourse === 'Psyc 1011') {
-                  setSelectedYear('2015');
+                  if (selectedExamType === 'model') {
+                    setSelectedYear('2026');
+                  } else {
+                    setSelectedYear('all');
+                  }
                 } else if (newCourse === 'Anth 1012' || newCourse === 'MCiE 1012' || newCourse === 'Hist 1012' || newCourse === 'SNIE 1012') {
                   if (selectedExamType === 'model') {
                     setSelectedYear('2025');
@@ -465,26 +463,26 @@ export const QuestionsTab: React.FC = () => {
                     setSelectedYear('all');
                   }
                 } else if (selectedCourse === 'LoCT 1011') {
-                  if (newExamType === 'midterm') {
-                    setSelectedYear('2018');
-                  } else if (newExamType === 'model') {
+                  if (newExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
                     setSelectedYear('all');
                   }
                 } else if (selectedCourse === 'Math 1011') {
-                  if (newExamType === 'midterm') {
-                    setSelectedYear('2018');
-                  } else if (newExamType === 'model') {
+                  if (newExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
                     setSelectedYear('all');
                   }
                 } else if (selectedCourse === 'Phys 1011') {
-                  if (newExamType === 'midterm') {
-                    setSelectedYear('2018');
-                  } else if (newExamType === 'model') {
+                  if (newExamType === 'model') {
                     setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
+                } else if (selectedCourse === 'Psyc 1011') {
+                  if (newExamType === 'model') {
+                    setSelectedYear('2026');
                   } else {
                     setSelectedYear('all');
                   }
@@ -569,11 +567,14 @@ export const QuestionsTab: React.FC = () => {
                   </>
                 )
               ) : selectedCourse === 'LoCT 1011' ? (
-                // Dedicated year & exam options for Critical Thinking & Logic
+                // Dedicated year & exam options for Critical Thinking & Logic (Haramaya University & Model)
                 selectedExamType === 'midterm' ? (
                   <>
-                    <option value="all">All Mid Terms (2018 Midterm • 30 Questions)</option>
+                    <option value="all">All Mid Terms (2018, 2016, 2015 & 2014 • 104 Questions)</option>
                     <option value="2018">2018 Midterm Exam (2018 E.C. Haramaya • 30 Questions)</option>
+                    <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • 24 Questions)</option>
+                    <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya • 20 Questions)</option>
+                    <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya • 30 Questions)</option>
                   </>
                 ) : selectedExamType === 'model' ? (
                   <>
@@ -582,9 +583,13 @@ export const QuestionsTab: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <option value="all">All Logic & Critical Thinking Exams (60 Questions)</option>
-                    <optgroup label="📝 Mid Terms Exam">
+                    <option value="all">All Logic & Critical Thinking Exams (134 Questions)</option>
+                    <optgroup label="📝 Mid Terms Exam (Haramaya University)">
+                      <option value="midterm-all">All Mid Terms (2018, 2016, 2015 & 2014 • 104 Questions)</option>
                       <option value="midterm-2018">2018 Midterm Exam (2018 E.C. Haramaya • 30 Questions)</option>
+                      <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • 24 Questions)</option>
+                      <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya • 20 Questions)</option>
+                      <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • 30 Questions)</option>
                     </optgroup>
                     <optgroup label="⚡ Smart Study Model Exam">
                       <option value="model-2025">2025 Smart Study Model Exam (30 Questions)</option>
@@ -592,12 +597,14 @@ export const QuestionsTab: React.FC = () => {
                   </>
                 )
               ) : selectedCourse === 'Math 1011' ? (
-                // Dedicated year & exam options for Mathematics for Natural Science
+                // Dedicated year & exam options for Mathematics for Natural Science (Haramaya University & Model)
                 selectedExamType === 'midterm' ? (
                   <>
-                    <option value="all">All Mid Terms (2018 & 2023 • 25 Questions)</option>
+                    <option value="all">All Mid Terms (2018, 2016, 2015 & 2014 • 81 Questions)</option>
                     <option value="2018">2018 Midterm Exam (2018 E.C. Haramaya • 20 Questions)</option>
-                    <option value="2023">2023 Midterm Exam (5 Questions)</option>
+                    <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • 19 Questions)</option>
+                    <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya • 22 Questions)</option>
+                    <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya • 20 Questions)</option>
                   </>
                 ) : selectedExamType === 'final' ? (
                   <>
@@ -611,10 +618,13 @@ export const QuestionsTab: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <option value="all">All Mathematics Exams (60 Questions)</option>
-                    <optgroup label="📝 Mid Terms Exam">
+                    <option value="all">All Mathematics Exams (114 Questions)</option>
+                    <optgroup label="📝 Mid Terms Exam (Haramaya University)">
+                      <option value="midterm-all">All Mid Terms (2018, 2016, 2015 & 2014 • 81 Questions)</option>
                       <option value="midterm-2018">2018 Midterm Exam (2018 E.C. Haramaya • 20 Questions)</option>
-                      <option value="midterm-2023">2023 Midterm Exam</option>
+                      <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • 19 Questions)</option>
+                      <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya • 22 Questions)</option>
+                      <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • 20 Questions)</option>
                     </optgroup>
                     <optgroup label="🎓 Final Terms Exam">
                       <option value="final-2024">2024 Final Exam (2016 E.C.)</option>
@@ -625,11 +635,13 @@ export const QuestionsTab: React.FC = () => {
                   </>
                 )
               ) : selectedCourse === 'Phys 1011' ? (
-                // Dedicated year & exam options for General Physics
+                // Dedicated year & exam options for General Physics (Haramaya University & Model)
                 selectedExamType === 'midterm' ? (
                   <>
-                    <option value="all">All Mid Terms (2018 Midterm • 20 Questions)</option>
+                    <option value="all">All Mid Terms (2018, 2016 & 2015 • 62 Questions)</option>
                     <option value="2018">2018 Midterm Exam (2018 E.C. Haramaya • 20 Questions)</option>
+                    <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • 25 Questions)</option>
+                    <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya • 17 Questions)</option>
                   </>
                 ) : selectedExamType === 'model' ? (
                   <>
@@ -638,12 +650,45 @@ export const QuestionsTab: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <option value="all">All General Physics Exams (50 Questions)</option>
-                    <optgroup label="📝 Mid Terms Exam">
+                    <option value="all">All General Physics Exams (92 Questions)</option>
+                    <optgroup label="📝 Mid Terms Exam (Haramaya University)">
+                      <option value="midterm-all">All Mid Terms (2018, 2016 & 2015 • 62 Questions)</option>
                       <option value="midterm-2018">2018 Midterm Exam (2018 E.C. Haramaya • 20 Questions)</option>
+                      <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • 25 Questions)</option>
+                      <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya • 17 Questions)</option>
                     </optgroup>
                     <optgroup label="⚡ Smart Study Model Exam">
                       <option value="model-2025">2025 Smart Study Model Exam (30 Questions)</option>
+                    </optgroup>
+                  </>
+                )
+              ) : selectedCourse === 'Psyc 1011' ? (
+                // Dedicated year & exam options for General Psychology (Haramaya University & Model)
+                selectedExamType === 'midterm' ? (
+                  <>
+                    <option value="all">All Mid Terms (2016, 2015, 2014 & 2013 • 92 Questions)</option>
+                    <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • 30 Questions)</option>
+                    <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya • 27 Questions)</option>
+                    <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya • 15 Questions)</option>
+                    <option value="2013">2013 Midterm Exam (2013 E.C. Haramaya • 20 Questions)</option>
+                  </>
+                ) : selectedExamType === 'model' ? (
+                  <>
+                    <option value="all">All Model Exams (2026 Model • 50 Questions)</option>
+                    <option value="2026">2026 Smart Study Model Exam (General Psychology • 50 Questions)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="all">All General Psychology Exams (142 Questions)</option>
+                    <optgroup label="📝 Mid Terms Exam (Haramaya University)">
+                      <option value="midterm-all">All Mid Terms (2016, 2015, 2014 & 2013 • 92 Questions)</option>
+                      <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • 30 Questions)</option>
+                      <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya • 27 Questions)</option>
+                      <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • 15 Questions)</option>
+                      <option value="midterm-2013">2013 Midterm Exam (2013 E.C. Haramaya • 20 Questions)</option>
+                    </optgroup>
+                    <optgroup label="⚡ Smart Study Model Exam">
+                      <option value="model-2026">2026 Smart Study Model Exam (General Psychology • 50 Questions)</option>
                     </optgroup>
                   </>
                 )
@@ -713,11 +758,11 @@ export const QuestionsTab: React.FC = () => {
                   {selectedExamType === 'midterm' && (
                     <>
                       <option value="all">All Mid Terms Years</option>
-                      <option value="2018">2018 Midterm Exam (2018 E.C. Haramaya • English, Physics, Math & Logic)</option>
-                      <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya)</option>
-                      <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya)</option>
-                      <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya)</option>
-                      <option value="2013">2013 Midterm Exam (2013 E.C. Haramaya)</option>
+                      <option value="2018">2018 Midterm Exam (2018 E.C. Haramaya • Math, Physics, Logic & English)</option>
+                      <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • Math, Psychology, Physics, Logic, Economics & English)</option>
+                      <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya • Math, Psychology, Physics & Logic)</option>
+                      <option value="2014">2014 Midterm Exam (2014 E.C. Haramaya • Math, Psychology, Logic & English)</option>
+                      <option value="2013">2013 Midterm Exam (2013 E.C. Haramaya • Psychology)</option>
                       <option value="2024">2024 Midterm Exam (2016 E.C.)</option>
                       <option value="2023">2023 Midterm Exam (2015 E.C.)</option>
                       <option value="2022">2022 Midterm Exam (2014 E.C.)</option>
@@ -746,11 +791,11 @@ export const QuestionsTab: React.FC = () => {
                       <option value="all">All Exam Years & Categories</option>
                       <optgroup label="📝 Mid Terms Exam">
                         <option value="midterm-all">All Mid Terms Years</option>
-                        <option value="midterm-2018">2018 Midterm Exam (2018 E.C. Haramaya • Math & Logic)</option>
-                        <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya)</option>
-                        <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya)</option>
-                        <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya)</option>
-                        <option value="midterm-2013">2013 Midterm Exam (2013 E.C. Haramaya)</option>
+                        <option value="midterm-2018">2018 Midterm Exam (2018 E.C. Haramaya • Math, Physics, Logic & English)</option>
+                        <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • Math, Psychology, Physics, Logic, Economics & English)</option>
+                        <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya • Math, Psychology, Physics & Logic)</option>
+                        <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • Math, Psychology, Logic & English)</option>
+                        <option value="midterm-2013">2013 Midterm Exam (2013 E.C. Haramaya • Psychology)</option>
                         <option value="midterm-2024">2024 Midterm Exam (2016 E.C.)</option>
                         <option value="midterm-2023">2023 Midterm Exam (2015 E.C.)</option>
                         <option value="midterm-2022">2022 Midterm Exam (2014 E.C.)</option>
