@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
   CheckCircle2,
@@ -20,7 +20,9 @@ import {
   ExternalLink,
   MessageCircle,
   Share2,
-  Check
+  Check,
+  Zap,
+  Search
 } from 'lucide-react';
 import { useApp, ADMIN_EMAIL } from '../context/AppContext';
 import { PaymentSubmission } from '../types';
@@ -30,7 +32,8 @@ import {
   createMailtoDispatchUrl,
   createSmsDispatchUrl,
   createPhoneCallUrl,
-  uploadReceiptToCloud
+  uploadReceiptToCloud,
+  checkStudentUnlockStatus
 } from '../utils/cloudSync';
 
 export const UnlockAccessTab: React.FC = () => {
@@ -41,7 +44,8 @@ export const UnlockAccessTab: React.FC = () => {
     addPaymentSubmission,
     toggleStudentUnlock,
     setActiveTab,
-    adminEmail
+    adminEmail,
+    checkAndActivateUnlock
   } = useApp();
 
   // Form State
@@ -60,13 +64,139 @@ export const UnlockAccessTab: React.FC = () => {
   const [compressionInfo, setCompressionInfo] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Find active student submission
-  const mySubmission = paymentSubmissions.find(
-    (s) =>
-      s.id === studentProfile.submissionId ||
-      (studentProfile.email && s.studentEmail.toLowerCase() === studentProfile.email.toLowerCase()) ||
-      (studentProfile.phone && s.studentPhone === studentProfile.phone)
-  ) || paymentSubmissions[0];
+  // Active status check state
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
+  const [statusMsg, setStatusMsg] = useState<{ text: string; type: 'success' | 'info' | 'error' } | null>(null);
+
+  // Restore access state
+  const [restoreInput, setRestoreInput] = useState('');
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [restoreFeedback, setRestoreFeedback] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [showRestoreBox, setShowRestoreBox] = useState(false);
+
+  // Helper to extract clean digits (e.g. 0953201048 -> 953201048)
+  const getDigits = (p?: string) => (p || '').replace(/\D/g, '').slice(-9);
+
+  const savedSubId = typeof window !== 'undefined' ? localStorage.getItem('smart_study_last_submission_id') : null;
+  const savedPhone = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_phone') : null;
+  const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_email') : null;
+  const savedRef = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_ref') : null;
+
+  // Find active student submission accurately without falsely matching unrelated submissions
+  const mySubmission = paymentSubmissions.find((s) => {
+    if (lastSubmitted && s.id === lastSubmitted.id) return true;
+    if (studentProfile.submissionId && s.id === studentProfile.submissionId) return true;
+    if (savedSubId && s.id === savedSubId) return true;
+    if (savedRef && s.transactionRef && s.transactionRef.trim().toLowerCase() === savedRef.trim().toLowerCase()) return true;
+
+    const myPhoneDigits = getDigits(studentPhone || studentProfile.phone || savedPhone || undefined);
+    const subPhoneDigits = getDigits(s.studentPhone);
+    if (myPhoneDigits && subPhoneDigits && myPhoneDigits === subPhoneDigits) return true;
+
+    const myEmail = (studentEmail || studentProfile.email || savedEmail || '').trim().toLowerCase();
+    const subEmail = (s.studentEmail || '').trim().toLowerCase();
+    if (myEmail && subEmail && myEmail === subEmail) return true;
+
+    return false;
+  }) || (lastSubmitted ? lastSubmitted : undefined);
+
+  // Instant Manual check trigger
+  const handleManualCheck = async () => {
+    setIsCheckingStatus(true);
+    setStatusMsg(null);
+    try {
+      const result = await checkAndActivateUnlock(mySubmission?.id);
+      if (result.unlocked) {
+        setStatusMsg({
+          type: 'success',
+          text: `🎉 Access Confirmed & Unlocked! ${result.reason || 'Welcome to full freshman tutorial package.'}`
+        });
+      } else {
+        setStatusMsg({
+          type: 'info',
+          text: result.status === 'pending'
+            ? '⏳ Payment is recorded and waiting for Admin Guduru Alemayehu to tap Approve. Live stream is listening!'
+            : result.reason || 'Verification in progress. Checking server every 2 seconds.'
+        });
+      }
+    } catch {
+      setStatusMsg({
+        type: 'error',
+        text: 'Network check timed out. Retrying automatically in background...'
+      });
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+
+  // Restore access by phone or reference
+  const handleRestoreAccess = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanInput = restoreInput.trim();
+    if (!cleanInput) {
+      setRestoreFeedback({ type: 'error', text: 'Please enter your phone number or transaction reference.' });
+      return;
+    }
+    setIsRestoring(true);
+    setRestoreFeedback(null);
+    try {
+      const digitsOnly = cleanInput.replace(/\D/g, '');
+      const isDigits = digitsOnly.length >= 8;
+      const isEmail = cleanInput.includes('@');
+
+      const res = await checkStudentUnlockStatus({
+        phone: isDigits ? cleanInput : undefined,
+        email: isEmail ? cleanInput : undefined,
+        ref: (!isDigits && !isEmail) ? cleanInput : undefined,
+      });
+
+      if (res.isUnlocked || (res.submission && res.submission.status === 'verified')) {
+        toggleStudentUnlock(true);
+        if (res.submission?.id) {
+          localStorage.setItem('smart_study_last_submission_id', res.submission.id);
+        }
+        setRestoreFeedback({
+          type: 'success',
+          text: `🎉 Found verified payment for ${res.submission?.studentName || 'Student'}! Full access has been unlocked.`
+        });
+      } else if (res.found && res.submission?.status === 'pending') {
+        setRestoreFeedback({
+          type: 'info',
+          text: `Found submission for ${res.submission.studentName}. Status is currently Under Review. Live monitoring active!`
+        });
+      } else {
+        setRestoreFeedback({
+          type: 'error',
+          text: 'No approved payment found matching this phone or reference. Please check details or submit payment below.'
+        });
+      }
+    } catch {
+      setRestoreFeedback({
+        type: 'error',
+        text: 'Could not connect to verification server. Please retry.'
+      });
+    } finally {
+      setIsRestoring(false);
+    }
+  };
+
+  // Automatic high-frequency status check when student is waiting for approval
+  useEffect(() => {
+    if (isUnlocked) return;
+
+    const hasIdentifier = mySubmission || savedSubId || savedPhone || savedEmail || savedRef;
+    if (!hasIdentifier) return;
+
+    // Check once immediately on mount
+    checkAndActivateUnlock(mySubmission?.id);
+
+    // Active live interval check every 2 seconds
+    const interval = setInterval(() => {
+      checkAndActivateUnlock(mySubmission?.id);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isUnlocked, mySubmission?.id, savedSubId, savedPhone, savedEmail, savedRef, checkAndActivateUnlock]);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -276,32 +406,40 @@ export const UnlockAccessTab: React.FC = () => {
 
       {/* Verification Status Tracking Box (If student has a pending/verified submission) */}
       {mySubmission && !isUnlocked && (
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-3xl border-2 border-amber-300 p-6 shadow-md space-y-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-amber-400 via-blue-500 to-emerald-400 animate-pulse" />
+
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-amber-500" />
-              <h2 className="text-sm font-bold text-slate-900">
-                Payment Verification Status
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              </span>
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                Active Payment Verification Stream
               </h2>
             </div>
-            {mySubmission.status === 'pending' && (
-              <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 animate-spin" />
-                Under Review
-              </span>
-            )}
-            {mySubmission.status === 'verified' && (
-              <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Verified
-              </span>
-            )}
-            {mySubmission.status === 'rejected' && (
-              <span className="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5" />
-                Needs Resubmission
-              </span>
-            )}
+            
+            <div className="flex items-center gap-2">
+              {mySubmission.status === 'pending' && (
+                <span className="bg-amber-100 text-amber-900 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-2xs">
+                  <Clock className="w-3.5 h-3.5 animate-spin text-amber-700" />
+                  Awaiting Admin Approval
+                </span>
+              )}
+              {mySubmission.status === 'verified' && (
+                <span className="bg-emerald-100 text-emerald-900 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-2xs">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  Approved & Unlocked
+                </span>
+              )}
+              {mySubmission.status === 'rejected' && (
+                <span className="bg-red-100 text-red-900 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-2xs">
+                  <AlertCircle className="w-3.5 h-3.5 text-red-600" />
+                  Needs Resubmission
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-2">
@@ -319,23 +457,74 @@ export const UnlockAccessTab: React.FC = () => {
                 <span className="font-mono font-bold text-blue-700">{mySubmission.transactionRef}</span>
               </div>
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Submitted</span>
-                <span className="text-slate-600">{new Date(mySubmission.submittedAt).toLocaleDateString()}</span>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Phone</span>
+                <span className="font-mono text-slate-700">{mySubmission.studentPhone || 'N/A'}</span>
               </div>
             </div>
 
             <div className="pt-2 border-t border-slate-200/80 text-[11px] text-slate-500 flex flex-wrap items-center justify-between gap-1">
-              <span>Admin Reviewer: <strong className="text-slate-800">{ADMIN_EMAIL}</strong></span>
-              <span className="text-emerald-700 font-medium flex items-center gap-1">
+              <span>Admin: <strong className="text-slate-800">{ADMIN_EMAIL}</strong> (Guduru Alemayehu)</span>
+              <span className="text-emerald-700 font-medium flex items-center gap-1.5">
                 <RefreshCw className="w-3 h-3 animate-spin text-emerald-600" />
-                Auto-Unlock Sync Active (Unlocks automatically upon approval)
+                Active SSE Stream Connected (Unlocks automatically within milliseconds of approval)
               </span>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs">
+          {/* Instant Active Check Action Bar */}
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/90 rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+            <div className="text-xs text-amber-950 space-y-0.5 text-center sm:text-left">
+              <p className="font-bold flex items-center gap-1.5 justify-center sm:justify-start">
+                <Zap className="w-4 h-4 text-amber-600 fill-amber-500" />
+                Did Admin Guduru already approve your payment?
+              </p>
+              <p className="text-[11px] text-amber-800">
+                Click below to instantly ping the server and unlock full access now.
+              </p>
+            </div>
+            
+            <button
+              type="button"
+              onClick={handleManualCheck}
+              disabled={isCheckingStatus}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition active:scale-95 disabled:opacity-60 cursor-pointer"
+            >
+              {isCheckingStatus ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  Checking Server Status...
+                </>
+              ) : (
+                <>
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  ⚡ Check / Activate Unlock Now
+                </>
+              )}
+            </button>
+          </div>
+
+          {statusMsg && (
+            <div
+              className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                statusMsg.type === 'success'
+                  ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                  : statusMsg.type === 'error'
+                  ? 'bg-red-100 text-red-900 border border-red-300'
+                  : 'bg-blue-50 text-blue-900 border border-blue-200'
+              }`}
+            >
+              {statusMsg.type === 'success' ? (
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+              ) : (
+                <Clock className="w-4 h-4 shrink-0 text-blue-600" />
+              )}
+              <span>{statusMsg.text}</span>
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
             <p className="text-slate-500 text-[11px]">
-              Need faster approval? Send your payment confirmation screenshot directly to admin email:
+              Want even faster manual priority? Send your receipt screenshot to the admin:
             </p>
             <div className="flex items-center gap-2">
               <a
@@ -355,6 +544,79 @@ export const UnlockAccessTab: React.FC = () => {
               </a>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Restore Access Quick Card (For students who cleared browser cache or switched devices) */}
+      {!isUnlocked && (
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+              <Search className="w-4 h-4 text-blue-600" />
+              <span>Already paid or switched devices?</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowRestoreBox(!showRestoreBox)}
+              className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+            >
+              <span>{showRestoreBox ? 'Hide' : 'Restore Access Instantly'}</span>
+              <span className="text-[10px]">{showRestoreBox ? '▲' : '▼'}</span>
+            </button>
+          </div>
+
+          {showRestoreBox && (
+            <form onSubmit={handleRestoreAccess} className="mt-3 pt-3 border-t border-slate-200 space-y-3">
+              <p className="text-xs text-slate-600">
+                Enter your Ethiopian phone number (e.g. <strong>0953201048</strong>) or bank transaction reference ID used during payment to instantly restore full access:
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={restoreInput}
+                  onChange={(e) => setRestoreInput(e.target.value)}
+                  placeholder="Enter Phone Number or Transaction Ref (e.g. 0912345678 or CBE1234)"
+                  className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500 font-mono"
+                />
+                <button
+                  type="submit"
+                  disabled={isRestoring || !restoreInput.trim()}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
+                >
+                  {isRestoring ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-3.5 h-3.5" />
+                      Restore Access
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {restoreFeedback && (
+                <div
+                  className={`p-2.5 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                    restoreFeedback.type === 'success'
+                      ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                      : restoreFeedback.type === 'error'
+                      ? 'bg-red-100 text-red-900 border border-red-300'
+                      : 'bg-blue-100 text-blue-900 border border-blue-300'
+                  }`}
+                >
+                  {restoreFeedback.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0 text-slate-700" />
+                  )}
+                  <span>{restoreFeedback.text}</span>
+                </div>
+              )}
+            </form>
+          )}
         </div>
       )}
 

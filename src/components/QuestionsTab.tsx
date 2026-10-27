@@ -95,7 +95,8 @@ export const QuestionsTab: React.FC = () => {
           q.courseId.toLowerCase().includes(selectedCourse.toLowerCase()) ||
           (selectedCourse.toLowerCase().includes('psyc') && (q.courseCode.toLowerCase().includes('psyc') || q.courseId.toLowerCase().includes('psyc'))) ||
           (selectedCourse.toLowerCase().includes('geog') && (q.courseCode.toLowerCase().includes('gees') || q.courseId.toLowerCase().includes('geog') || q.courseCode.toLowerCase().includes('geog'))) ||
-          (selectedCourse.toLowerCase().includes('gees') && (q.courseCode.toLowerCase().includes('gees') || q.courseId.toLowerCase().includes('geog')));
+          (selectedCourse.toLowerCase().includes('gees') && (q.courseCode.toLowerCase().includes('gees') || q.courseId.toLowerCase().includes('geog'))) ||
+          (selectedCourse.toLowerCase().includes('econ') && (q.courseCode.toLowerCase().includes('econ') || q.courseId.toLowerCase().includes('econ')));
         if (!matchesCourse) return false;
       }
 
@@ -430,6 +431,14 @@ export const QuestionsTab: React.FC = () => {
                   } else {
                     setSelectedYear('all');
                   }
+                } else if (newCourse === 'Econ 1011') {
+                  if (selectedExamType === 'midterm') {
+                    setSelectedYear('2016');
+                  } else if (selectedExamType === 'model') {
+                    setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
                 } else if (newCourse === 'MCiE 1012' || newCourse === 'Hist 1012' || newCourse === 'SNIE 1012') {
                   if (selectedExamType === 'model') {
                     setSelectedYear('2025');
@@ -509,6 +518,14 @@ export const QuestionsTab: React.FC = () => {
                 } else if (selectedCourse === 'Anth 1012') {
                   if (newExamType === 'midterm') {
                     setSelectedYear('2017');
+                  } else if (newExamType === 'model') {
+                    setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
+                } else if (selectedCourse === 'Econ 1011') {
+                  if (newExamType === 'midterm') {
+                    setSelectedYear('2016');
                   } else if (newExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
@@ -767,6 +784,45 @@ export const QuestionsTab: React.FC = () => {
                     </optgroup>
                     <optgroup label="⚡ Smart Study Model Exam">
                       <option value="model-2025">2025 Smart Study Model Exam (Chapters 1 - 6 • 25 Questions)</option>
+                    </optgroup>
+                  </>
+                )
+              ) : selectedCourse === 'Econ 1011' ? (
+                // Dedicated year & exam options for Economics for Social (Haramaya University & Model)
+                selectedExamType === 'midterm' ? (
+                  <>
+                    <option value="all">All Mid Terms (2016 Haramaya • 16-18 Questions)</option>
+                    <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • 16 Questions)</option>
+                    <option value="2024">2024 Midterm Exam (2016 E.C.)</option>
+                    <option value="2023">2023 Midterm Exam (2015 E.C.)</option>
+                  </>
+                ) : selectedExamType === 'final' ? (
+                  <>
+                    <option value="all">All Final Terms (2024 & 2023 Final)</option>
+                    <option value="2024">2024 Final Exam (2016 E.C.)</option>
+                    <option value="2023">2023 Final Exam (2015 E.C.)</option>
+                  </>
+                ) : selectedExamType === 'model' ? (
+                  <>
+                    <option value="all">All Model Exams (2025 Model • 50 Questions)</option>
+                    <option value="2025">2025 Smart Study Model Exam (50 Questions)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="all">All Economics Exams (71 Questions)</option>
+                    <optgroup label="📝 Mid Terms Exam (Haramaya University)">
+                      <option value="midterm-all">All Mid Terms (2016, 2024 & 2023 • 18 Questions)</option>
+                      <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • 16 Questions)</option>
+                      <option value="midterm-2024">2024 Midterm Exam (2016 E.C.)</option>
+                      <option value="midterm-2023">2023 Midterm Exam (2015 E.C.)</option>
+                    </optgroup>
+                    <optgroup label="🎓 Final Terms Exam">
+                      <option value="final-all">All Final Terms</option>
+                      <option value="final-2024">2024 Final Exam (2016 E.C.)</option>
+                      <option value="final-2023">2023 Final Exam (2015 E.C.)</option>
+                    </optgroup>
+                    <optgroup label="⚡ Smart Study Model Exam">
+                      <option value="model-2025">2025 Smart Study Model Exam (50 Questions)</option>
                     </optgroup>
                   </>
                 )

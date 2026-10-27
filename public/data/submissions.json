@@ -8,8 +8,9 @@
     "transactionRef": "TL-894210",
     "amount": 300,
     "submittedAt": "2026-10-05T06:39:00.000Z",
-    "status": "pending",
-    "screenshotUrl": "/uploads/receipts/sub-verify-student-receipt.png"
+    "status": "verified",
+    "screenshotUrl": "/uploads/receipts/sub-verify-student-receipt.png",
+    "adminNotes": "Verified active test"
   },
   {
     "id": "pay-demo-blen",

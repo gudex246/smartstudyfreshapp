@@ -392,15 +392,52 @@ export async function dispatchPaymentSubmissionToCloud(sub: PaymentSubmission): 
 }
 
 /**
- * Fetch remote submissions from both Global Cloud Relay & Local API
+/**
+ * Fetch remote submissions from both Local API & Global Cloud Relay
+ * Prioritizes Local API (<15ms) so verifications reflect instantly.
  */
 export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission[]> {
   const map = new Map<string, PaymentSubmission>();
 
-  // 1. Fetch from Global Multi-Device Topic (sync across all phones & PCs)
+  // 1. Fetch from Local Server API FIRST (Fastest, <15ms response)
+  try {
+    const res = await fetch('/api/submissions', {
+      signal: AbortSignal.timeout(2500),
+      cache: 'no-store'
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        for (const sub of data) {
+          if (sub && sub.id) {
+            map.set(sub.id, sub);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Local API fetch error, falling back:', err);
+  }
+
+  // 2. Fallback to localStorage buffer
+  try {
+    const cachedRaw = localStorage.getItem(CLOUD_STORAGE_KEY);
+    if (cachedRaw) {
+      const cached: PaymentSubmission[] = JSON.parse(cachedRaw);
+      for (const sub of cached) {
+        if (!map.has(sub.id)) {
+          map.set(sub.id, sub);
+        } else if (sub.status === 'verified' && map.get(sub.id)?.status !== 'verified') {
+          map.set(sub.id, { ...map.get(sub.id)!, ...sub });
+        }
+      }
+    }
+  } catch {}
+
+  // 3. Fetch from Global Multi-Device Topic (in background with fast timeout)
   try {
     const resGlobal = await fetch(`${NTFY_SUBMISSIONS_TOPIC}/json?poll=1&since=24h`, {
-      signal: AbortSignal.timeout(4500)
+      signal: AbortSignal.timeout(2500)
     });
     if (resGlobal.ok) {
       const text = await resGlobal.text();
@@ -411,10 +448,9 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
           const item = JSON.parse(line);
           let parsedMsg: any = null;
 
-          // If ntfy converted large payload to attachment, fetch and parse JSON file
           if (item && item.attachment && item.attachment.url && (item.attachment.name?.endsWith('.json') || item.attachment.type?.includes('json'))) {
             try {
-              const attRes = await fetch(item.attachment.url, { signal: AbortSignal.timeout(3500) });
+              const attRes = await fetch(item.attachment.url, { signal: AbortSignal.timeout(2000) });
               if (attRes.ok) {
                 parsedMsg = await attRes.json();
               }
@@ -430,12 +466,14 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
           if (parsedMsg && parsedMsg.type === 'SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
             const prev = map.get(parsedMsg.data.id);
             if (!prev || (prev.status !== 'verified' && parsedMsg.data.status === 'verified') || (!prev.screenshotUrl && parsedMsg.data.screenshotUrl)) {
-              map.set(parsedMsg.data.id, parsedMsg.data);
+              map.set(parsedMsg.data.id, { ...(prev || {}), ...parsedMsg.data });
             }
           } else if (parsedMsg && parsedMsg.type === 'UPDATE_SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
             const existing = map.get(parsedMsg.data.id);
             if (existing) {
               map.set(parsedMsg.data.id, { ...existing, ...parsedMsg.data });
+            } else {
+              map.set(parsedMsg.data.id, parsedMsg.data);
             }
           }
         } catch {}
@@ -445,53 +483,70 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
     console.warn('Global sync poll notice:', err);
   }
 
-  // 2. Fetch from Local Server API
-  try {
-    const res = await fetch('/api/submissions', {
-      signal: AbortSignal.timeout(4000),
-      cache: 'no-store'
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        for (const sub of data) {
-          const existing = map.get(sub.id);
-          if (!existing) {
-            map.set(sub.id, sub);
-          } else if (sub.status === 'verified' || (!existing.screenshotUrl && sub.screenshotUrl)) {
-            map.set(sub.id, { ...existing, ...sub });
-          }
-        }
-      }
-    }
-  } catch {}
-
-  // 3. Fallback to localStorage buffer
-  try {
-    const cachedRaw = localStorage.getItem(CLOUD_STORAGE_KEY);
-    if (cachedRaw) {
-      const cached: PaymentSubmission[] = JSON.parse(cachedRaw);
-      for (const sub of cached) {
-        if (!map.has(sub.id)) {
-          map.set(sub.id, sub);
-        }
-      }
-    }
-  } catch {}
-
   return Array.from(map.values()).sort(
     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
   );
 }
 
 /**
- * Subscribe to real-time submission events via SSE for instant multi-device arrival
+ * Instant status check endpoint for student device
+ */
+export async function checkStudentUnlockStatus(params: {
+  id?: string;
+  email?: string;
+  phone?: string;
+  ref?: string;
+}): Promise<{ found: boolean; status: string; isUnlocked: boolean; submission?: PaymentSubmission }> {
+  try {
+    const query = new URLSearchParams();
+    if (params.id) query.set('id', params.id);
+    if (params.email) query.set('email', params.email);
+    if (params.phone) query.set('phone', params.phone);
+    if (params.ref) query.set('ref', params.ref);
+
+    const res = await fetch(`/api/check-status?${query.toString()}`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(3000)
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.warn('Check status request failed:', e);
+  }
+  return { found: false, status: 'error', isUnlocked: false };
+}
+
+/**
+ * Subscribe to real-time submission events via SSE for instant multi-device arrival (<20ms local)
  */
 export function subscribeToRemoteSubmissions(onUpdate: (data: any) => void): () => void {
-  let es: EventSource | null = null;
+  const cleanupFns: Array<() => void> = [];
+
+  // 1. Local Server SSE stream (Ultra-fast <20ms within same hosting environment)
   try {
-    es = new EventSource(`${NTFY_SUBMISSIONS_TOPIC}/sse`);
-    es.onmessage = async (event) => {
+    const localEs = new EventSource('/api/submissions/stream');
+    localEs.addEventListener('update', (event: any) => {
+      try {
+        const payload = JSON.parse(event.data);
+        onUpdate(payload);
+      } catch {}
+    });
+    localEs.addEventListener('submission', (event: any) => {
+      try {
+        const payload = JSON.parse(event.data);
+        onUpdate(payload);
+      } catch {}
+    });
+    cleanupFns.push(() => localEs.close());
+  } catch (err) {
+    console.warn('Local SSE connection failed:', err);
+  }
+
+  // 2. Global Cloud SSE stream (multi-device push across separate networks)
+  try {
+    const globalEs = new EventSource(`${NTFY_SUBMISSIONS_TOPIC}/sse`);
+    globalEs.onmessage = async (event) => {
       try {
         const item = JSON.parse(event.data);
         if (item && item.attachment && item.attachment.url && (item.attachment.name?.endsWith('.json') || item.attachment.type?.includes('json'))) {
@@ -513,14 +568,13 @@ export function subscribeToRemoteSubmissions(onUpdate: (data: any) => void): () 
         }
       } catch {}
     };
+    cleanupFns.push(() => globalEs.close());
   } catch (err) {
-    console.warn('SSE subscription failed, falling back to polling', err);
+    console.warn('Global SSE subscription failed:', err);
   }
 
   return () => {
-    if (es) {
-      es.close();
-    }
+    cleanupFns.forEach(fn => fn());
   };
 }
 

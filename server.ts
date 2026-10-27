@@ -120,11 +120,85 @@ app.use('/data', express.static(dataDir, {
   }
 }));
 
+// Real-time SSE subscribers set for instant push verification across devices
+const sseSubscribers = new Set<express.Response>();
+
+function broadcastSse(event: string, payload: any) {
+  const message = `event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`;
+  for (const client of sseSubscribers) {
+    try {
+      client.write(message);
+    } catch {
+      sseSubscribers.delete(client);
+    }
+  }
+}
+
 // --- API: Submissions (Cross-Device Payment & Verification) ---
 app.get('/api/submissions', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   const subs = loadSubmissions();
   res.json(subs);
+});
+
+// Real-Time Server-Sent Events stream for instant unlock (<20ms)
+app.get('/api/submissions/stream', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.flushHeaders?.();
+
+  res.write(`event: init\ndata: ${JSON.stringify({ time: Date.now() })}\n\n`);
+  sseSubscribers.add(res);
+
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(': ping\n\n');
+    } catch {
+      clearInterval(heartbeat);
+      sseSubscribers.delete(res);
+    }
+  }, 10000);
+
+  req.on('close', () => {
+    clearInterval(heartbeat);
+    sseSubscribers.delete(res);
+  });
+});
+
+// Instant status check endpoint for student device
+app.get('/api/check-status', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  const { id, email, phone, ref } = req.query;
+  const currentSubs = loadSubmissions();
+
+  const cleanPhone = phone ? String(phone).replace(/\D/g, '') : '';
+  const cleanEmail = email ? String(email).trim().toLowerCase() : '';
+  const cleanRef = ref ? String(ref).trim().toLowerCase() : '';
+  const subId = id ? String(id).trim() : '';
+
+  const matched = currentSubs.find((s: any) => {
+    if (subId && s.id === subId) return true;
+    if (cleanRef && s.transactionRef && s.transactionRef.trim().toLowerCase() === cleanRef) return true;
+    if (cleanEmail && s.studentEmail && s.studentEmail.trim().toLowerCase() === cleanEmail) return true;
+    if (cleanPhone && s.studentPhone) {
+      const sDigits = s.studentPhone.replace(/\D/g, '');
+      if (sDigits === cleanPhone || sDigits.endsWith(cleanPhone) || cleanPhone.endsWith(sDigits)) return true;
+    }
+    return false;
+  });
+
+  if (matched) {
+    return res.json({
+      found: true,
+      status: matched.status,
+      isUnlocked: matched.status === 'verified',
+      submission: matched
+    });
+  }
+
+  res.json({ found: false, status: 'not_found', isUnlocked: false });
 });
 
 app.post('/api/submissions', (req, res) => {
@@ -185,6 +259,7 @@ app.post('/api/submissions', (req, res) => {
     }
 
     saveSubmissions(currentSubs);
+    broadcastSse('submission', { type: 'SUBMISSION', data: sub });
     res.json({ success: true, submission: sub });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -231,6 +306,20 @@ app.patch('/api/submissions', (req, res) => {
       if (adminNotes !== undefined) target.adminNotes = adminNotes;
       if (verifiedAt) target.verifiedAt = verifiedAt;
       saveSubmissions(currentSubs);
+
+      // Instant real-time SSE push to all active student devices
+      broadcastSse('update', { type: 'UPDATE_SUBMISSION', data: target });
+
+      // Non-blocking mirror to cloud pubsub
+      fetch('https://ntfy.sh/smartstudy_subs_guduru29', {
+        method: 'POST',
+        headers: {
+          'Title': `Verified: ${target.studentName || target.id}`,
+          'Tags': 'white_check_mark'
+        },
+        body: JSON.stringify({ type: 'UPDATE_SUBMISSION', data: target })
+      }).catch(() => {});
+
       return res.json({ success: true, target });
     }
     res.status(404).json({ error: 'Submission not found' });

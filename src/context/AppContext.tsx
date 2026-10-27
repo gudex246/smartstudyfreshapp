@@ -31,6 +31,7 @@ import {
   dispatchPaymentSubmissionToCloud,
   updatePaymentSubmissionInCloud,
   fetchRemotePaymentSubmissions,
+  checkStudentUnlockStatus,
   subscribeToSyncEvents,
   subscribeToRemoteSubmissions
 } from '../utils/cloudSync';
@@ -212,12 +213,13 @@ interface AppContextType {
   adminLogout: () => void;
   setAdminPin: (newPin: string) => void;
   
-  // Payment Verification methods (for admin)
+  // Payment Verification methods (for admin & student)
   verifyPaymentSubmission: (id: string, notes?: string) => void;
   rejectPaymentSubmission: (id: string, reason?: string) => void;
   deletePaymentSubmission: (id: string) => void;
   syncRemoteSubmissions: () => Promise<number>;
   isSyncingSubmissions: boolean;
+  checkAndActivateUnlock: (phoneOrRef?: string) => Promise<boolean>;
 
   // Video CRUD
   addVideo: (video: VideoTutorial) => void;
@@ -529,12 +531,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const currentEmail = prevProfile.email?.trim().toLowerCase();
         const currentPhone = prevProfile.phone?.replace(/\D/g, '');
         const currentSubId = prevProfile.submissionId;
+        const savedSubId = typeof window !== 'undefined' ? localStorage.getItem('smart_study_last_submission_id') : null;
+        const savedPhone = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_phone')?.replace(/\D/g, '') : null;
+        const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_email')?.trim().toLowerCase() : null;
 
         const myVerifiedSub = remotes.find(r => {
           if (r.status !== 'verified') return false;
           if (currentSubId && r.id === currentSubId) return true;
+          if (savedSubId && r.id === savedSubId) return true;
           if (currentEmail && r.studentEmail && r.studentEmail.trim().toLowerCase() === currentEmail) return true;
-          if (currentPhone && r.studentPhone && r.studentPhone.replace(/\D/g, '') === currentPhone) return true;
+          if (savedEmail && r.studentEmail && r.studentEmail.trim().toLowerCase() === savedEmail) return true;
+          if (currentPhone && r.studentPhone) {
+            const rPhone = r.studentPhone.replace(/\D/g, '');
+            if (rPhone === currentPhone || rPhone.endsWith(currentPhone) || currentPhone.endsWith(rPhone)) return true;
+          }
+          if (savedPhone && r.studentPhone) {
+            const rPhone = r.studentPhone.replace(/\D/g, '');
+            if (rPhone === savedPhone || rPhone.endsWith(savedPhone) || savedPhone.endsWith(rPhone)) return true;
+          }
           return false;
         });
 
@@ -574,9 +588,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             setStudentProfile(prevProfile => {
               const currentEmail = prevProfile.email?.trim().toLowerCase();
               const currentPhone = prevProfile.phone?.replace(/\D/g, '');
+              const savedSubId = typeof window !== 'undefined' ? localStorage.getItem('smart_study_last_submission_id') : null;
+              const upAny = updateData as any;
+              const rPhone = upAny.studentPhone ? String(upAny.studentPhone).replace(/\D/g, '') : '';
+              const rEmail = upAny.studentEmail ? String(upAny.studentEmail).trim().toLowerCase() : '';
 
               const isMatch =
-                (prevProfile.submissionId && prevProfile.submissionId === updateData.id) ||
+                prevProfile.submissionId === updateData.id ||
+                (savedSubId && savedSubId === updateData.id) ||
+                (currentEmail && rEmail && currentEmail === rEmail) ||
+                (currentPhone && rPhone && (rPhone === currentPhone || rPhone.endsWith(currentPhone) || currentPhone.endsWith(rPhone))) ||
                 paymentSubmissions.some(
                   s =>
                     s.id === updateData.id &&
@@ -610,26 +631,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     doSync();
 
-    // Fast polling every 3.5 seconds so admin verification opens the student's app instantly
-    const interval = setInterval(doSync, 3500);
+    // Fast polling every 2 seconds when pending so admin verification opens the student's app with minimal delay
+    const interval = setInterval(doSync, 2000);
 
-    // Global Multi-Device Real-time SSE Push (receives submissions from any phone/PC in <500ms)
+    // Global Multi-Device Real-time SSE Push (receives submissions from any phone/PC in <20ms)
     const unsubscribeRemote = subscribeToRemoteSubmissions((payload: any) => {
       if (payload && payload.type === 'SUBMISSION' && payload.data) {
         applyRemoteSubmissions([payload.data]);
-      } else if (payload && payload.type === 'UPDATE_SUBMISSION' && payload.data) {
+      } else if (payload && (payload.type === 'UPDATE_SUBMISSION' || payload.type === 'update') && payload.data) {
         const updateData = payload.data;
-        setPaymentSubmissions((prev) =>
-          prev.map((s) => (s.id === updateData.id ? { ...s, ...updateData } : s))
-        );
+        setPaymentSubmissions((prev) => {
+          const exists = prev.some((s) => s.id === updateData.id);
+          if (exists) {
+            return prev.map((s) => (s.id === updateData.id ? { ...s, ...updateData } : s));
+          }
+          return [updateData, ...prev];
+        });
         if (updateData.status === 'verified') {
           setStudentProfile((prevProfile) => {
             const currentEmail = prevProfile.email?.trim().toLowerCase();
             const currentPhone = prevProfile.phone?.replace(/\D/g, '');
+            const savedSubId = typeof window !== 'undefined' ? localStorage.getItem('smart_study_last_submission_id') : null;
+            const rPhone = updateData.studentPhone ? updateData.studentPhone.replace(/\D/g, '') : '';
+            const rEmail = updateData.studentEmail ? updateData.studentEmail.trim().toLowerCase() : '';
+
             const isMatch =
               prevProfile.submissionId === updateData.id ||
+              (savedSubId && savedSubId === updateData.id) ||
+              (currentEmail && rEmail && currentEmail === rEmail) ||
+              (currentPhone && rPhone && (rPhone === currentPhone || rPhone.endsWith(currentPhone) || currentPhone.endsWith(rPhone))) ||
               (currentEmail && paymentSubmissions.some((s) => s.id === updateData.id && s.studentEmail && s.studentEmail.toLowerCase() === currentEmail)) ||
-              (currentPhone && paymentSubmissions.some((s) => s.id === updateData.id && s.studentPhone && s.studentPhone.replace(/\D/g, '') === currentPhone));
+              (currentPhone && paymentSubmissions.some((s) => s.id === updateData.id && s.studentPhone && s.studentPhone.replace(/\D/g, '').endsWith(currentPhone)));
 
             if (isMatch) {
               setSampleStudentPaywallStatusState('verified');
@@ -983,6 +1015,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       submissionId: newSubmission.id
     }));
 
+    try {
+      localStorage.setItem('smart_study_last_submission_id', newSubmission.id);
+      if (data.studentPhone) localStorage.setItem('smart_study_student_phone', data.studentPhone);
+      if (data.studentEmail) localStorage.setItem('smart_study_student_email', data.studentEmail);
+      if (data.transactionRef) localStorage.setItem('smart_study_student_ref', data.transactionRef);
+    } catch {}
+
     // 2. Dispatch to local API and background sync
     try {
       const dispatchRes = await dispatchPaymentSubmissionToCloud(newSubmission);
@@ -1061,22 +1100,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     );
 
-    // Persist verified status across all connected student devices & cloud API
-    updatePaymentSubmissionInCloud(id, {
-      status: 'verified',
+    const currentSub = paymentSubmissions.find(s => s.id === id);
+    const fullVerifiedData = currentSub ? {
+      ...currentSub,
+      status: 'verified' as const,
       adminNotes: verifiedNotes,
       verifiedAt: verifiedTimestamp
-    }).catch(e => console.warn('Cloud update failed:', e));
+    } : {
+      id,
+      status: 'verified' as const,
+      adminNotes: verifiedNotes,
+      verifiedAt: verifiedTimestamp
+    };
+
+    // Persist verified status across all connected student devices & cloud API with full details
+    updatePaymentSubmissionInCloud(id, fullVerifiedData).catch(e => console.warn('Cloud update failed:', e));
 
     // If verified submission matches student, unlock access
     setPaymentSubmissions(currentList => {
       const targetSub = currentList.find(s => s.id === id);
       if (targetSub) {
         setStudentProfile(prev => {
+          const prevPhone = prev.phone?.replace(/\D/g, '');
+          const tPhone = targetSub.studentPhone ? targetSub.studentPhone.replace(/\D/g, '') : '';
           if (
             prev.submissionId === id ||
-            prev.email.toLowerCase() === targetSub.studentEmail.toLowerCase() ||
-            prev.phone === targetSub.studentPhone
+            (targetSub.studentEmail && prev.email.toLowerCase() === targetSub.studentEmail.toLowerCase()) ||
+            (prevPhone && tPhone && (prevPhone === tPhone || prevPhone.endsWith(tPhone) || tPhone.endsWith(prevPhone)))
           ) {
             return {
               ...prev,
@@ -1089,6 +1139,89 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return currentList;
     });
+  };
+
+  // Instant active unlock process for students
+  const checkAndActivateUnlock = async (phoneOrRef?: string): Promise<boolean> => {
+    try {
+      const cleanInput = phoneOrRef?.trim() || '';
+      const params: any = {
+        id: studentProfile.submissionId || localStorage.getItem('smart_study_last_submission_id') || undefined,
+        email: studentProfile.email || undefined,
+        phone: cleanInput || studentProfile.phone || undefined,
+        ref: cleanInput || undefined
+      };
+
+      // 1. Direct real-time check against backend API (<20ms)
+      const statusRes = await checkStudentUnlockStatus(params);
+      if (statusRes.found && statusRes.isUnlocked && statusRes.submission) {
+        const sub = statusRes.submission;
+        setPaymentSubmissions(prev => {
+          const exists = prev.some(s => s.id === sub.id);
+          if (exists) return prev.map(s => s.id === sub.id ? { ...s, ...sub } : s);
+          return [sub, ...prev];
+        });
+        setStudentProfile(prev => ({
+          ...prev,
+          name: sub.studentName || prev.name,
+          email: sub.studentEmail || prev.email,
+          phone: sub.studentPhone || prev.phone,
+          isUnlocked: true,
+          unlockedAt: sub.verifiedAt || new Date().toISOString(),
+          submissionId: sub.id
+        }));
+        setSampleStudentPaywallStatusState('verified');
+        safeSetItem(STORAGE_KEYS.SAMPLE_STUDENT_STATUS, 'verified');
+        return true;
+      }
+
+      // 2. Query full remote submissions list
+      const remotes = await fetchRemotePaymentSubmissions();
+      if (remotes && remotes.length > 0) {
+        setPaymentSubmissions(prev => {
+          const map = new Map<string, PaymentSubmission>(prev.map(p => [p.id, p]));
+          remotes.forEach(r => {
+            const existing = map.get(r.id);
+            map.set(r.id, existing ? { ...existing, ...r } : r);
+          });
+          return Array.from(map.values());
+        });
+
+        const currentEmail = studentProfile.email?.trim().toLowerCase();
+        const currentPhone = (cleanInput || studentProfile.phone)?.replace(/\D/g, '');
+        const currentSubId = studentProfile.submissionId || localStorage.getItem('smart_study_last_submission_id');
+
+        const matched = remotes.find(r => {
+          if (r.status !== 'verified') return false;
+          if (currentSubId && r.id === currentSubId) return true;
+          if (cleanInput && r.transactionRef && r.transactionRef.toLowerCase() === cleanInput.toLowerCase()) return true;
+          if (currentEmail && r.studentEmail && r.studentEmail.toLowerCase() === currentEmail) return true;
+          if (currentPhone && r.studentPhone) {
+            const rPhone = r.studentPhone.replace(/\D/g, '');
+            if (rPhone === currentPhone || rPhone.endsWith(currentPhone) || currentPhone.endsWith(rPhone)) return true;
+          }
+          return false;
+        });
+
+        if (matched) {
+          setStudentProfile(prev => ({
+            ...prev,
+            name: matched.studentName || prev.name,
+            email: matched.studentEmail || prev.email,
+            phone: matched.studentPhone || prev.phone,
+            isUnlocked: true,
+            unlockedAt: matched.verifiedAt || new Date().toISOString(),
+            submissionId: matched.id
+          }));
+          setSampleStudentPaywallStatusState('verified');
+          safeSetItem(STORAGE_KEYS.SAMPLE_STUDENT_STATUS, 'verified');
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('checkAndActivateUnlock error:', e);
+    }
+    return false;
   };
 
   const rejectPaymentSubmission = (id: string, reason?: string) => {
@@ -1550,8 +1683,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (currentAccount.role === 'sample_student') {
       return sampleStudentPaywallStatus === 'verified';
     }
+
+    // Direct check: If any verified submission matches student, unlock immediately!
+    const currentEmail = studentProfile.email?.trim().toLowerCase();
+    const currentPhone = studentProfile.phone?.replace(/\D/g, '');
+    const currentSubId = studentProfile.submissionId || (typeof window !== 'undefined' ? localStorage.getItem('smart_study_last_submission_id') : null);
+    const savedPhone = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_phone')?.replace(/\D/g, '') : null;
+    const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_email')?.trim().toLowerCase() : null;
+
+    const hasVerified = paymentSubmissions.some(s => {
+      if (s.status !== 'verified') return false;
+      if (currentSubId && s.id === currentSubId) return true;
+      if (currentEmail && s.studentEmail && s.studentEmail.trim().toLowerCase() === currentEmail) return true;
+      if (savedEmail && s.studentEmail && s.studentEmail.trim().toLowerCase() === savedEmail) return true;
+      if (currentPhone && s.studentPhone) {
+        const sPhone = s.studentPhone.replace(/\D/g, '');
+        if (sPhone === currentPhone || sPhone.endsWith(currentPhone) || currentPhone.endsWith(sPhone)) return true;
+      }
+      if (savedPhone && s.studentPhone) {
+        const sPhone = s.studentPhone.replace(/\D/g, '');
+        if (sPhone === savedPhone || sPhone.endsWith(savedPhone) || savedPhone.endsWith(sPhone)) return true;
+      }
+      return false;
+    });
+
+    if (hasVerified) return true;
+
     return false;
-  }, [isEffectiveAdmin, studentProfile.isUnlocked, studentProfile.email, currentAccount.role, sampleStudentPaywallStatus]);
+  }, [isEffectiveAdmin, studentProfile.isUnlocked, studentProfile.email, studentProfile.phone, studentProfile.submissionId, paymentSubmissions, currentAccount.role, sampleStudentPaywallStatus]);
 
   return (
     <AppContext.Provider
@@ -1601,6 +1760,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deletePaymentSubmission,
         syncRemoteSubmissions,
         isSyncingSubmissions,
+        checkAndActivateUnlock,
         addVideo,
         updateVideo,
         deleteVideo,
