@@ -167,13 +167,28 @@ app.get('/api/submissions/stream', (req, res) => {
   });
 });
 
+function matchEthiopianPhones(p1?: string, p2?: string): boolean {
+  if (!p1 || !p2) return false;
+  const d1 = String(p1).replace(/\D/g, '');
+  const d2 = String(p2).replace(/\D/g, '');
+  if (!d1 || !d2) return false;
+  if (d1 === d2) return true;
+  const s1 = d1.slice(-9);
+  const s2 = d2.slice(-9);
+  if (s1.length >= 8 && s2.length >= 8 && s1 === s2) return true;
+  const s8_1 = d1.slice(-8);
+  const s8_2 = d2.slice(-8);
+  if (s8_1.length >= 8 && s8_2.length >= 8 && s8_1 === s8_2) return true;
+  return false;
+}
+
 // Instant status check endpoint for student device
 app.get('/api/check-status', (req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   const { id, email, phone, ref } = req.query;
   const currentSubs = loadSubmissions();
 
-  const cleanPhone = phone ? String(phone).replace(/\D/g, '') : '';
+  const cleanPhone = phone ? String(phone).trim() : '';
   const cleanEmail = email ? String(email).trim().toLowerCase() : '';
   const cleanRef = ref ? String(ref).trim().toLowerCase() : '';
   const subId = id ? String(id).trim() : '';
@@ -181,11 +196,9 @@ app.get('/api/check-status', (req, res) => {
   const matched = currentSubs.find((s: any) => {
     if (subId && s.id === subId) return true;
     if (cleanRef && s.transactionRef && s.transactionRef.trim().toLowerCase() === cleanRef) return true;
+    if (cleanRef && s.syncCode && s.syncCode.trim().toLowerCase() === cleanRef) return true;
     if (cleanEmail && s.studentEmail && s.studentEmail.trim().toLowerCase() === cleanEmail) return true;
-    if (cleanPhone && s.studentPhone) {
-      const sDigits = s.studentPhone.replace(/\D/g, '');
-      if (sDigits === cleanPhone || sDigits.endsWith(cleanPhone) || cleanPhone.endsWith(sDigits)) return true;
-    }
+    if (cleanPhone && s.studentPhone && matchEthiopianPhones(s.studentPhone, cleanPhone)) return true;
     return false;
   });
 
@@ -299,30 +312,44 @@ app.post('/api/upload-receipt', (req, res) => {
 app.patch('/api/submissions', (req, res) => {
   try {
     const { id, status, adminNotes, verifiedAt } = req.body;
+    if (!id) {
+      return res.status(400).json({ error: 'Missing submission id' });
+    }
     const currentSubs = loadSubmissions();
-    const target = currentSubs.find((s: any) => s.id === id);
-    if (target) {
+    let target = currentSubs.find((s: any) => s.id === id);
+    if (!target) {
+      // Upsert: Create target with all submitted body fields
+      target = {
+        ...req.body,
+        id,
+        status: status || 'verified',
+        verifiedAt: verifiedAt || new Date().toISOString(),
+        adminNotes: adminNotes || 'Verified by Admin Guduru Alemayehu'
+      };
+      currentSubs.unshift(target);
+    } else {
+      // Merge all fields from body (including studentPhone, studentEmail, studentName, etc.)
+      Object.assign(target, req.body);
       if (status) target.status = status;
       if (adminNotes !== undefined) target.adminNotes = adminNotes;
       if (verifiedAt) target.verifiedAt = verifiedAt;
-      saveSubmissions(currentSubs);
-
-      // Instant real-time SSE push to all active student devices
-      broadcastSse('update', { type: 'UPDATE_SUBMISSION', data: target });
-
-      // Non-blocking mirror to cloud pubsub
-      fetch('https://ntfy.sh/smartstudy_subs_guduru29', {
-        method: 'POST',
-        headers: {
-          'Title': `Verified: ${target.studentName || target.id}`,
-          'Tags': 'white_check_mark'
-        },
-        body: JSON.stringify({ type: 'UPDATE_SUBMISSION', data: target })
-      }).catch(() => {});
-
-      return res.json({ success: true, target });
     }
-    res.status(404).json({ error: 'Submission not found' });
+    saveSubmissions(currentSubs);
+
+    // Instant real-time SSE push to all active student devices
+    broadcastSse('update', { type: 'UPDATE_SUBMISSION', data: target });
+
+    // Non-blocking mirror to cloud pubsub
+    fetch('https://ntfy.sh/smartstudy_subs_guduru29', {
+      method: 'POST',
+      headers: {
+        'Title': `Verified: ${target.studentName || target.id}`,
+        'Tags': 'white_check_mark'
+      },
+      body: JSON.stringify({ type: 'UPDATE_SUBMISSION', data: target })
+    }).catch(() => {});
+
+    return res.json({ success: true, target });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

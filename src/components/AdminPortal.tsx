@@ -37,6 +37,7 @@ import { Course, Chapter, ExamQuestion, VideoTutorial, PaymentSubmission, Announ
 import { cleanQuestionText } from '../utils/textUtils';
 import { formatVideoEmbedUrl, isDirectVideoFile } from '../utils/videoUtils';
 import { saveVideoBlob, uploadLocalVideoToServer, uploadFileToServer } from '../utils/videoStorage';
+import { matchEthiopianPhones } from '../utils/cloudSync';
 
 export const AdminPortal: React.FC = () => {
   const {
@@ -142,14 +143,13 @@ export const AdminPortal: React.FC = () => {
 
     const existing = paymentSubmissions.find((s) => {
       const sRef = (s.transactionRef || '').toLowerCase();
-      const sPhone = (s.studentPhone || '').replace(/\D/g, '');
       const sEmail = (s.studentEmail || '').toLowerCase();
       const sCode = (s.syncCode || '').toLowerCase();
       return (
         sRef === cleanQuery ||
-        (cleanDigits.length >= 9 && sPhone.includes(cleanDigits)) ||
         sEmail === cleanQuery ||
-        sCode === cleanQuery
+        sCode === cleanQuery ||
+        matchEthiopianPhones(s.studentPhone, query)
       );
     });
 

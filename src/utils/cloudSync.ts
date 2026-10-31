@@ -241,11 +241,29 @@ export async function uploadReceiptToCloud(dataUrl: string, subId: string): Prom
 }
 
 /**
+ * Ethiopian phone numbers comparator (robustly matches 09..., +2519..., 07..., +2517..., or raw 9 digits)
+ */
+export function matchEthiopianPhones(p1?: string, p2?: string): boolean {
+  if (!p1 || !p2) return false;
+  const d1 = String(p1).replace(/\D/g, '');
+  const d2 = String(p2).replace(/\D/g, '');
+  if (!d1 || !d2) return false;
+  if (d1 === d2) return true;
+  const s1 = d1.slice(-9);
+  const s2 = d2.slice(-9);
+  if (s1.length >= 8 && s2.length >= 8 && s1 === s2) return true;
+  const s8_1 = d1.slice(-8);
+  const s8_2 = d2.slice(-8);
+  if (s8_1.length >= 8 && s8_2.length >= 8 && s8_1 === s8_2) return true;
+  return false;
+}
+
+/**
  * Update payment submission status in cloud/API and broadcast across devices
  */
 export async function updatePaymentSubmissionInCloud(
   id: string,
-  updates: { status: 'verified' | 'rejected' | 'pending'; adminNotes?: string; verifiedAt?: string }
+  updates: Partial<PaymentSubmission> & { status: 'verified' | 'rejected' | 'pending'; adminNotes?: string; verifiedAt?: string }
 ): Promise<boolean> {
   // 1. Broadcast update locally
   if (broadcastChannel) {
