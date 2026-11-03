@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   CheckCircle2,
   Lock,
@@ -13,7 +13,9 @@ import {
   Check,
   BookOpen,
   Video,
-  FileQuestion
+  FileQuestion,
+  Trash2,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useApp, ADMIN_EMAIL } from '../context/AppContext';
 import { PaymentSubmission } from '../types';
@@ -42,6 +44,8 @@ export const UnlockAccessTab: React.FC = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [lastSubmitted, setLastSubmitted] = useState<PaymentSubmission | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [isEditingOrReuploading, setIsEditingOrReuploading] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Status check state
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
@@ -223,14 +227,20 @@ export const UnlockAccessTab: React.FC = () => {
       setLastSubmitted(created);
       setIsSubmitting(false);
       setSubmitSuccess(true);
+      setIsEditingOrReuploading(false);
+      setStatusMsg({
+        type: 'info',
+        text: 'Payment screenshot submitted! Sent to Admin Guduru Alemayehu for verification.'
+      });
     } catch {
       setIsSubmitting(false);
       // Still set success locally so student is never stuck
       setSubmitSuccess(true);
+      setIsEditingOrReuploading(false);
     }
   };
 
-  const isPendingVerification = (submitSuccess || (mySubmission && mySubmission.status === 'pending')) && !isUnlocked;
+  const isPendingVerification = !isEditingOrReuploading && (submitSuccess || (mySubmission && mySubmission.status === 'pending')) && !isUnlocked;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -447,12 +457,45 @@ export const UnlockAccessTab: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                setSubmitSuccess(false);
-                setScreenshotPreview(null);
+                setIsEditingOrReuploading(true);
+                setFormError(null);
+                if (mySubmission) {
+                  if (mySubmission.studentName) setStudentName(mySubmission.studentName);
+                  if (mySubmission.studentPhone) setStudentPhone(mySubmission.studentPhone);
+                  if (mySubmission.paymentMethod) setPaymentMethod(mySubmission.paymentMethod);
+                  if (mySubmission.transactionRef) setTransactionRef(mySubmission.transactionRef);
+                }
+                setTimeout(() => {
+                  fileInputRef.current?.click();
+                }, 150);
               }}
-              className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-sm active:scale-95"
             >
-              Upload a Different Screenshot
+              <Upload className="w-4 h-4" />
+              <span>Change / Re-upload Screenshot</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm('Do you want to remove this submitted screenshot and upload a new one?')) {
+                  try {
+                    localStorage.removeItem('smart_study_last_submission_id');
+                    localStorage.removeItem('smart_study_student_ref');
+                  } catch {}
+                  setLastSubmitted(null);
+                  setSubmitSuccess(false);
+                  setScreenshotPreview(null);
+                  setIsEditingOrReuploading(true);
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                  }
+                }
+              }}
+              className="px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50/70 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Remove &amp; Start Over</span>
             </button>
           </div>
         </div>
@@ -585,13 +628,39 @@ export const UnlockAccessTab: React.FC = () => {
 
           {/* Step 2: Upload Screenshot & Submit (1 Click, Responsive) */}
           <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xs space-y-6">
+            {isEditingOrReuploading && (
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 font-bold shadow-xs">
+                    <Upload className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                      <span>Changing Payment Screenshot</span>
+                      <span className="bg-amber-200 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Active</span>
+                    </h4>
+                    <p className="text-[11px] text-amber-800 mt-0.5">
+                      Choose your new payment confirmation receipt below and tap &quot;Update &amp; Re-Submit&quot;.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingOrReuploading(false)}
+                  className="px-3.5 py-1.5 rounded-xl border border-amber-300 bg-white hover:bg-amber-100 text-amber-900 text-xs font-bold shrink-0 cursor-pointer transition shadow-2xs"
+                >
+                  Cancel &amp; Keep Previous
+                </button>
+              </div>
+            )}
+
             <div className="flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
                 2
               </span>
               <div>
                 <h2 className="text-sm font-bold text-slate-900">
-                  Upload Payment Screenshot for Admin Verification
+                  {isEditingOrReuploading ? 'Upload Replacement Payment Screenshot' : 'Upload Payment Screenshot for Admin Verification'}
                 </h2>
                 <p className="text-xs text-slate-500">
                   Select your transfer confirmation screenshot and click Submit once.
@@ -665,24 +734,62 @@ export const UnlockAccessTab: React.FC = () => {
 
                 {screenshotPreview ? (
                   <div className="relative rounded-2xl border-2 border-emerald-400 p-4 bg-emerald-50/40 flex flex-col items-center justify-center space-y-3">
-                    <img
-                      src={screenshotPreview}
-                      alt="Payment Receipt Preview"
-                      className="max-h-60 rounded-xl object-contain shadow-xs border border-slate-200 bg-white"
-                    />
-                    <div className="flex items-center gap-2">
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="relative group cursor-pointer max-h-64 overflow-hidden rounded-xl shadow-xs"
+                      title="Tap to select a different screenshot"
+                    >
+                      <img
+                        src={screenshotPreview}
+                        alt="Payment Receipt Preview"
+                        className="max-h-60 rounded-xl object-contain border border-slate-200 bg-white"
+                      />
+                      <div className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-xs font-bold gap-1 transition rounded-xl backdrop-blur-2xs cursor-pointer">
+                        <Upload className="w-6 h-6 text-amber-300" />
+                        <span>Tap to Change Screenshot</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                       <span className="text-xs font-bold text-emerald-800 flex items-center gap-1">
                         <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                        Screenshot Ready for Submission
+                        Screenshot Ready
                       </span>
+
+                      {/* Active Change Screenshot Button */}
                       <button
                         type="button"
-                        onClick={() => setScreenshotPreview(null)}
-                        className="px-2.5 py-1 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 text-xs font-semibold cursor-pointer"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
                       >
-                        Remove & Re-upload
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Change / Choose Another</span>
+                      </button>
+
+                      {/* Active Remove Screenshot Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setScreenshotPreview(null);
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = '';
+                          }
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition active:scale-95"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Remove Screenshot</span>
                       </button>
                     </div>
+
+                    {/* Hidden file input for when preview is mounted */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
                   </div>
                 ) : (
                   <label className="relative flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/40 hover:bg-blue-50/80 hover:border-blue-500 cursor-pointer transition overflow-hidden group">
@@ -699,6 +806,7 @@ export const UnlockAccessTab: React.FC = () => {
                       PNG, JPG, or JPEG (Max 25MB)
                     </span>
                     <input
+                      ref={fileInputRef}
                       type="file"
                       accept="image/*"
                       onChange={handleFileUpload}
@@ -734,7 +842,7 @@ export const UnlockAccessTab: React.FC = () => {
                   ) : (
                     <>
                       <Send className="w-4 h-4" />
-                      <span>Submit Payment Screenshot (300 ETB)</span>
+                      <span>{isEditingOrReuploading ? 'Update & Re-Submit Payment Screenshot (300 ETB)' : 'Submit Payment Screenshot (300 ETB)'}</span>
                     </>
                   )}
                 </button>
