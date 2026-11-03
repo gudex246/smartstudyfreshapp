@@ -107,7 +107,7 @@
     "duration": "29:30",
     "topic": "Geology & Structure",
     "instructor": "Guduru Alemayehu (Smart Study Tutorial)",
-    "isPremium": false,
+    "isPremium": true,
     "views": 1640,
     "addedAt": "2025-09-16"
   },
@@ -135,7 +135,7 @@
     "duration": "24:50",
     "topic": "Reading & Paragraph Architecture",
     "instructor": "Smart Study English Team",
-    "isPremium": false,
+    "isPremium": true,
     "views": 1320,
     "addedAt": "2025-09-21"
   },
@@ -163,7 +163,7 @@
     "duration": "28:00",
     "topic": "Unit 1: Vectors & Kinematics (Part 2)",
     "instructor": "Guduru Alemayehu (Smart Study Tutorial)",
-    "isPremium": false,
+    "isPremium": true,
     "views": 1420,
     "addedAt": "2026-10-04"
   },
@@ -177,7 +177,7 @@
     "duration": "24:30",
     "topic": "Unit 2: Newton's Second Law of Motion (N2 Law & Dynamics)",
     "instructor": "Guduru Alemayehu (Smart Study Tutorial)",
-    "isPremium": false,
+    "isPremium": true,
     "views": 1650,
     "addedAt": "2026-10-08"
   },
@@ -194,19 +194,5 @@
     "isPremium": true,
     "views": 1210,
     "addedAt": "2026-10-04"
-  },
-  {
-    "id": "vid-loct-1",
-    "courseId": "loct-1011",
-    "courseCode": "LoCT 1011",
-    "title": "Critical Thinking & Logic: Recognizing 12 Informal Fallacies",
-    "description": "Easy mnemonics to recognize Ad Hominem, Straw Man, Appeal to Force, Equivocation, and Slippery Slope in freshman exam scenarios.",
-    "videoUrl": "https://www.youtube.com/embed/s2_oEFXwbzc",
-    "duration": "24:50",
-    "topic": "Informal Fallacies",
-    "instructor": "Guduru Alemayehu (Smart Study Tutorial)",
-    "isPremium": true,
-    "views": 1120,
-    "addedAt": "2025-09-25"
   }
 ]

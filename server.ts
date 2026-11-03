@@ -105,6 +105,62 @@ const saveVideos = (videos: any[]) => {
   } catch {}
 };
 
+// Explicit video streaming route with HTTP 206 Partial Content (Range request) support
+// Critical for smooth streaming and seeking on iOS Safari, Android Chrome, and Desktop
+app.get('/uploads/videos/:filename', (req, res, next) => {
+  const { filename } = req.params;
+  const filePath = path.resolve(videosUploadDir, filename);
+  if (!fs.existsSync(filePath)) {
+    return next();
+  }
+
+  const stat = fs.statSync(filePath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+
+  const mimeType = filename.endsWith('.webm')
+    ? 'video/webm'
+    : filename.endsWith('.ogg')
+    ? 'video/ogg'
+    : filename.endsWith('.mov')
+    ? 'video/quicktime'
+    : 'video/mp4';
+
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Accept-Ranges', 'bytes');
+  res.setHeader('Content-Type', mimeType);
+
+  if (range) {
+    const parts = range.replace(/bytes=/, '').split('-');
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+    if (start >= fileSize) {
+      res.status(416).setHeader('Content-Range', `bytes */${fileSize}`);
+      return res.end();
+    }
+
+    const chunksize = end - start + 1;
+    const fileStream = fs.createReadStream(filePath, { start, end });
+    res.writeHead(206, {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': mimeType,
+      'Cache-Control': 'public, max-age=3600'
+    });
+    fileStream.pipe(res);
+  } else {
+    res.writeHead(200, {
+      'Content-Length': fileSize,
+      'Content-Type': mimeType,
+      'Accept-Ranges': 'bytes',
+      'Cache-Control': 'public, max-age=3600'
+    });
+    fs.createReadStream(filePath).pipe(res);
+  }
+});
+
 // Serve static uploaded receipts and videos with no-cache headers
 app.use('/uploads', express.static(uploadsDir, {
   setHeaders: (res) => {
@@ -128,6 +184,9 @@ function broadcastSse(event: string, payload: any) {
   for (const client of sseSubscribers) {
     try {
       client.write(message);
+      if (typeof (client as any).flush === 'function') {
+        (client as any).flush();
+      }
     } catch {
       sseSubscribers.delete(client);
     }
@@ -137,6 +196,7 @@ function broadcastSse(event: string, payload: any) {
 // --- API: Submissions (Cross-Device Payment & Verification) ---
 app.get('/api/submissions', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
   const subs = loadSubmissions();
   res.json(subs);
 });
@@ -146,15 +206,24 @@ app.get('/api/submissions/stream', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.flushHeaders?.();
+  if (typeof (res as any).flushHeaders === 'function') {
+    (res as any).flushHeaders();
+  }
 
   res.write(`event: init\ndata: ${JSON.stringify({ time: Date.now() })}\n\n`);
+  if (typeof (res as any).flush === 'function') {
+    (res as any).flush();
+  }
   sseSubscribers.add(res);
 
   const heartbeat = setInterval(() => {
     try {
       res.write(': ping\n\n');
+      if (typeof (res as any).flush === 'function') {
+        (res as any).flush();
+      }
     } catch {
       clearInterval(heartbeat);
       sseSubscribers.delete(res);
@@ -421,11 +490,22 @@ app.post('/api/videos', (req, res) => {
 
 app.post('/api/upload-video', (req, res) => {
   const rawFilename = req.query.filename || req.headers['x-filename'] || `video_${Date.now()}.mp4`;
-  const cleanFilename = String(rawFilename).replace(/[^a-zA-Z0-9._-]/g, '_');
+  let cleanFilename = String(rawFilename).replace(/[^a-zA-Z0-9._-]/g, '_');
+  if (!cleanFilename.includes('.')) {
+    cleanFilename += '.mp4';
+  }
   const filePath = path.resolve(videosUploadDir, cleanFilename);
   const writeStream = fs.createWriteStream(filePath);
   req.pipe(writeStream);
   writeStream.on('finish', () => {
+    // Also mirror to dist if exists
+    try {
+      const distVideosDir = path.resolve(__dirname, 'dist', 'uploads', 'videos');
+      if (fs.existsSync(distVideosDir)) {
+        fs.copyFileSync(filePath, path.resolve(distVideosDir, cleanFilename));
+      }
+    } catch {}
+
     res.json({ success: true, url: `/uploads/videos/${cleanFilename}`, filename: cleanFilename });
   });
   writeStream.on('error', (err: any) => {

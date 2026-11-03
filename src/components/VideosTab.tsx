@@ -98,98 +98,123 @@ export const VideosTab: React.FC = () => {
       .catch(() => {});
   }, []);
 
-  // Resolve video URL for playback (including IndexedDB persistent storage and expired blob check)
+  // Resolve video URL for playback (including IndexedDB persistent storage and uploaded files)
   useEffect(() => {
     let activeObjUrl: string | null = null;
     let isCancelled = false;
     setMediaError(null);
-    setPlayableVideoUrl(null);
+
+    // Watchdog timer: Guarantee isResolvingMedia never stays true indefinitely
+    const watchdogTimer = setTimeout(() => {
+      if (!isCancelled) {
+        setIsResolvingMedia(false);
+      }
+    }, 4000);
 
     async function resolveSource() {
       if (!activeVideo) {
         setPlayableVideoUrl(null);
+        setIsResolvingMedia(false);
         return;
       }
 
-      setIsResolvingMedia(true);
       const videoId = activeVideo.id;
       const url = (activeVideo.videoUrl || '').trim();
 
-      // 1. Check local IndexedDB FIRST (if video file was uploaded on this PC/device)
-      try {
-        const localBlob = (await getVideoBlob(videoId)) || (url.startsWith('idb://') ? await getVideoBlob(url) : null);
-        if (localBlob && !isCancelled) {
-          activeObjUrl = URL.createObjectURL(localBlob);
-          setPlayableVideoUrl(activeObjUrl);
-          setIsResolvingMedia(false);
-
-          // Auto-sync this local file to server in background so other devices (like mobile) can stream it!
-          uploadLocalVideoToServer(videoId, `${videoId}.mp4`).then((serverUrl) => {
-            if (serverUrl) {
-              const updated = { ...activeVideo, videoUrl: serverUrl };
-              updateVideo(updated);
-            }
-          }).catch(() => {});
-          return;
-        }
-      } catch {}
-
-      // 2. Check if the server has the uploaded video at /uploads/videos/${videoId}.mp4
-      try {
-        const serverPath = url.startsWith('/uploads/videos/') ? url : `/uploads/videos/${videoId}.mp4`;
-        const chk = await fetch(serverPath, { method: 'HEAD' });
-        if (chk.ok && !isCancelled) {
-          setPlayableVideoUrl(serverPath);
-          setIsResolvingMedia(false);
-          if (activeVideo.videoUrl !== serverPath) {
-            updateVideo({ ...activeVideo, videoUrl: serverPath });
-          }
-          return;
-        }
-      } catch {}
-
-      // 3. If url is an external URL (YouTube / Vimeo / Google Drive / direct MP4)
-      if (url && !url.startsWith('idb://') && !url.startsWith('blob:') && !url.startsWith('/uploads/videos/')) {
+      // 1. If it's an external URL (YouTube / Vimeo / Google Drive / direct web MP4)
+      if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
         const formatted = formatVideoEmbedUrl(url);
         if (formatted && !isCancelled) {
           setPlayableVideoUrl(formatted);
           setIsResolvingMedia(false);
+          setMediaError(null);
           return;
         }
       }
 
-      // 4. Check if curriculum has a verified online streaming link (e.g. YouTube)
+      // 2. If it's an uploaded video file on our server (/uploads/videos/...)
+      if (url.startsWith('/uploads/')) {
+        if (!isCancelled) {
+          setPlayableVideoUrl(url);
+          setIsResolvingMedia(false);
+          setMediaError(null);
+          return;
+        }
+      }
+
+      // 3. If temporary blob or data URL exists
+      if (url.startsWith('blob:') || url.startsWith('data:')) {
+        if (!isCancelled) {
+          setPlayableVideoUrl(url);
+          setIsResolvingMedia(false);
+          setMediaError(null);
+          return;
+        }
+      }
+
+      setIsResolvingMedia(true);
+
+      // 4. Check local IndexedDB FIRST (if video file was uploaded on this device)
+      try {
+        const cleanId = videoId.replace(/^idb:\/\//, '');
+        const targetKey = url.startsWith('idb://') ? url.replace(/^idb:\/\//, '') : cleanId;
+        const localBlob = (await getVideoBlob(targetKey)) || (await getVideoBlob(cleanId));
+        if (localBlob && !isCancelled) {
+          activeObjUrl = URL.createObjectURL(localBlob);
+          setPlayableVideoUrl(activeObjUrl);
+          setIsResolvingMedia(false);
+          setMediaError(null);
+
+          // Asynchronously sync local file to server in background without blocking player
+          uploadLocalVideoToServer(cleanId, `${cleanId}.mp4`).then((serverUrl) => {
+            if (serverUrl && !isCancelled) {
+              fetch('/api/videos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: videoId, videoUrl: serverUrl })
+              }).catch(() => {});
+            }
+          }).catch(() => {});
+          return;
+        }
+      } catch (err) {
+        console.warn('IndexedDB check note:', err);
+      }
+
+      // 5. Check if the server has the uploaded video at /uploads/videos/${videoId}.mp4
+      try {
+        const cleanId = videoId.replace(/^idb:\/\//, '');
+        const serverPath = `/uploads/videos/${cleanId}.mp4`;
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 2000);
+        const chk = await fetch(serverPath, { method: 'HEAD', signal: ctrl.signal });
+        clearTimeout(timeout);
+        if (chk.ok && !isCancelled) {
+          setPlayableVideoUrl(serverPath);
+          setIsResolvingMedia(false);
+          setMediaError(null);
+          return;
+        }
+      } catch {}
+
+      // 6. Check if curriculum has a default online streaming link (e.g. YouTube)
       const defaultVideo = INITIAL_VIDEOS.find((iv) => iv.id === videoId);
       if (defaultVideo?.videoUrl && defaultVideo.videoUrl.startsWith('http')) {
         const formatted = formatVideoEmbedUrl(defaultVideo.videoUrl);
         if (formatted && !isCancelled) {
           setPlayableVideoUrl(formatted);
           setIsResolvingMedia(false);
-          if (activeVideo.videoUrl !== defaultVideo.videoUrl) {
-            updateVideo({ ...activeVideo, videoUrl: defaultVideo.videoUrl });
-          }
+          setMediaError(null);
           return;
         }
       }
 
-      // 5. If temporary blob URL exists
-      if (url.startsWith('blob:')) {
-        try {
-          const res = await fetch(url, { method: 'HEAD' });
-          if (res.ok && !isCancelled) {
-            setPlayableVideoUrl(url);
-            setIsResolvingMedia(false);
-            return;
-          }
-        } catch {}
-      }
-
-      // 5. If it's a local video not yet synced to this device
+      // 7. If video could not be resolved, show clear guidance with upload option
       if (!isCancelled) {
         setIsResolvingMedia(false);
         setPlayableVideoUrl(null);
         setMediaError(
-          `Original Smart Study Tutorial video ("${activeVideo.title}") by Guduru Alemayehu. This video file was uploaded on your computer browser. Please open the website on that computer once to finish auto-uploading to the server, or tap below to upload the MP4 file directly from this phone.`
+          `Smart Study Tutorial: "${activeVideo.title}". Video file not found in device storage. Please select the MP4 file from your device below or paste a YouTube / Google Drive link to play.`
         );
       }
     }
@@ -198,6 +223,7 @@ export const VideosTab: React.FC = () => {
 
     return () => {
       isCancelled = true;
+      clearTimeout(watchdogTimer);
       if (activeObjUrl) {
         URL.revokeObjectURL(activeObjUrl);
       }
@@ -208,24 +234,41 @@ export const VideosTab: React.FC = () => {
   const handleReuploadVideoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !activeVideo) return;
+
+    // IMMEDIATE PLAYBACK: Create local object URL right now so student never waits
+    const instantUrl = URL.createObjectURL(file);
+    setPlayableVideoUrl(instantUrl);
+    setIsResolvingMedia(false);
+    setMediaError(null);
+
+    const videoId = activeVideo.id;
     try {
-      setIsResolvingMedia(true);
-      const videoId = activeVideo.id;
+      // 1. Persist in IndexedDB for permanent offline access on this device
       const idbUri = await saveVideoBlob(videoId, file);
-      // Also upload to cloud server so mobile devices can stream it immediately
-      const serverUrl = await uploadFileToServer(file, `${videoId}.mp4`, videoId);
-      const updated: VideoTutorial = {
-        ...activeVideo,
-        videoUrl: serverUrl || idbUri
-      };
-      updateVideo(updated);
-      setActiveVideo(updated);
-      setMediaError(null);
+
+      // 2. Upload to server in background so mobile devices can also stream it
+      uploadFileToServer(file, `${videoId}.mp4`, videoId).then(async (serverUrl) => {
+        const finalUrl = serverUrl || idbUri;
+        const updated: VideoTutorial = {
+          ...activeVideo,
+          videoUrl: finalUrl
+        };
+        updateVideo(updated);
+        // Persist to server API
+        await fetch('/api/videos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated)
+        }).catch(() => {});
+      }).catch(async () => {
+        const updated: VideoTutorial = {
+          ...activeVideo,
+          videoUrl: idbUri
+        };
+        updateVideo(updated);
+      });
     } catch (err) {
-      console.warn('Failed to save video into persistent storage:', err);
-      setMediaError('Could not save video file into browser storage.');
-    } finally {
-      setIsResolvingMedia(false);
+      console.warn('Background storage note:', err);
     }
   };
 
@@ -494,7 +537,7 @@ export const VideosTab: React.FC = () => {
                   </div>
                 )}
               </div>
-            ) : isResolvingMedia || (!playableVideoUrl && !mediaError) ? (
+            ) : isResolvingMedia ? (
               <div className="p-8 text-center text-slate-400 space-y-3">
                 <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mx-auto" />
                 <p className="text-xs font-semibold">Loading video media...</p>
@@ -505,13 +548,23 @@ export const VideosTab: React.FC = () => {
                 src={playableVideoUrl}
                 controls
                 playsInline
+                preload="metadata"
                 className="w-full h-full object-contain bg-black"
+                onLoadedData={() => {
+                  setIsResolvingMedia(false);
+                  setMediaError(null);
+                }}
+                onCanPlay={() => {
+                  setIsResolvingMedia(false);
+                }}
                 onError={() => {
                   setMediaError(
-                    'Video failed to play. If this was a local file uploaded yesterday, temporary browser memory expires when closed. Please re-select the file to save it permanently.'
+                    'Unable to play this video format. Please select an MP4 or WebM video file, or paste a YouTube / Google Drive link.'
                   );
                 }}
               >
+                <source src={playableVideoUrl} type="video/mp4" />
+                <source src={playableVideoUrl} type="video/webm" />
                 Your browser does not support HTML5 video playback.
               </video>
             ) : playableVideoUrl ? (
@@ -523,7 +576,38 @@ export const VideosTab: React.FC = () => {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
               />
-            ) : null}
+            ) : (
+              <div className="p-6 sm:p-8 text-center text-white max-w-md space-y-4">
+                <div className="w-12 h-12 rounded-full bg-indigo-600/20 border border-indigo-500/40 text-indigo-400 mx-auto flex items-center justify-center">
+                  <Video className="w-6 h-6 text-indigo-400" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm sm:text-base font-bold text-white">{activeVideo.title}</h3>
+                  <p className="text-xs text-slate-400">
+                    Video tutorial ready. Select a file or paste a link to start streaming.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                  <label className="cursor-pointer px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs inline-flex items-center gap-1.5 transition shadow-sm">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload MP4 Video</span>
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/ogg"
+                      className="hidden"
+                      onChange={handleReuploadVideoFile}
+                    />
+                  </label>
+                  <button
+                    onClick={() => setShowUrlInput(!showUrlInput)}
+                    className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs inline-flex items-center gap-1.5 transition"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Paste Link</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="p-5 sm:p-6 space-y-3">

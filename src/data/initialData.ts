@@ -8301,7 +8301,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '32:15',
     topic: 'Unit 1: Set Theory (Part 6)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 860,
     addedAt: '2026-10-08'
   },
@@ -8315,7 +8315,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '29:45',
     topic: 'Unit 1: Set Operations & Venn Diagrams (Part 7)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 920,
     addedAt: '2026-10-08'
   },
@@ -8329,7 +8329,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '28:10',
     topic: 'Chapter 2: Number Systems (Part 1 - Primes up to GCF)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 940,
     addedAt: '2026-10-09'
   },
@@ -8343,7 +8343,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '25:30',
     topic: 'Chapter 2: Greatest Common Factor - GCF (Part 2)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 890,
     addedAt: '2026-10-09'
   },
@@ -8357,7 +8357,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '24:45',
     topic: 'Chapter 2: Least Common Multiple - LCM (Part 3)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 870,
     addedAt: '2026-10-09'
   },
@@ -8371,7 +8371,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '27:20',
     topic: 'Chapter 2: The Set of Integers Z (Part 4)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 820,
     addedAt: '2026-10-09'
   },
@@ -8385,7 +8385,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '31:15',
     topic: 'Chapter 2: The Set of Rational Numbers Q (Part 5)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 910,
     addedAt: '2026-10-09'
   },
@@ -8399,7 +8399,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '26:40',
     topic: 'Chapter 2: Real Numbers & Intervals (Part 6)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 890,
     addedAt: '2026-10-09'
   },
@@ -8413,7 +8413,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '30:20',
     topic: 'Chapter 2: Complex Numbers Introduction & Operations (Part 7)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 930,
     addedAt: '2026-10-09'
   },
@@ -8427,7 +8427,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '28:50',
     topic: 'Chapter 2: Complex Conjugates & Division (Part 8)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 860,
     addedAt: '2026-10-09'
   },
@@ -8441,7 +8441,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '33:10',
     topic: 'Chapter 2: Modulus & Argument of Complex Numbers (Part 9)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 950,
     addedAt: '2026-10-09'
   },
@@ -8455,7 +8455,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '32:40',
     topic: 'Chapter 3: Functions & Relations (Part 1)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 910,
     addedAt: '2026-10-09'
   },
@@ -8469,7 +8469,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '29:50',
     topic: 'Chapter 3: Types of Functions & Inverses (Part 2)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 880,
     addedAt: '2026-10-09'
   },
@@ -8483,7 +8483,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '27:15',
     topic: 'Chapter 3: Composition of Functions (Part 3)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 850,
     addedAt: '2026-10-09'
   },
@@ -8497,7 +8497,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '28:30',
     topic: 'Chapter 3: Remainder & Factor Theorems',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 920,
     addedAt: '2026-10-09'
   },
@@ -8511,7 +8511,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '31:45',
     topic: 'Chapter 3: Polynomial Functions & Zeros',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 940,
     addedAt: '2026-10-09'
   },
@@ -8553,7 +8553,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '29:30',
     topic: 'Geology & Structure',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 1640,
     addedAt: '2025-09-16'
   },
@@ -8581,7 +8581,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '24:50',
     topic: 'Reading & Paragraph Architecture',
     instructor: 'Smart Study English Team',
-    isPremium: false,
+    isPremium: true,
     views: 1320,
     addedAt: '2025-09-21'
   },
@@ -8609,7 +8609,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '28:00',
     topic: 'Unit 1: Vectors & Kinematics (Part 2)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false, // Free preview
+    isPremium: true, // Free preview
     views: 1420,
     addedAt: '2026-10-04'
   },
@@ -8623,7 +8623,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '24:30',
     topic: 'Unit 2: Newton\'s Second Law of Motion (N2 Law & Dynamics)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 1650,
     addedAt: '2026-10-08'
   },
@@ -8637,7 +8637,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '28:15',
     topic: 'Unit 2: Newton\'s Laws of Motion',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 1580,
     addedAt: '2026-10-08'
   },
@@ -8651,7 +8651,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '29:40',
     topic: 'Unit 2: Projectile Motion',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 1720,
     addedAt: '2026-10-08'
   },
@@ -8679,7 +8679,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '27:40',
     topic: 'Unit 2: Particle Dynamics & Forces',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 1450,
     addedAt: '2026-10-09'
   },
@@ -8693,7 +8693,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '29:15',
     topic: 'Unit 2: Newton\'s Third Law & Friction Force',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 1390,
     addedAt: '2026-10-09'
   },
@@ -8707,7 +8707,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '31:20',
     topic: 'Unit 2: Work, Energy and Linear Momentum',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 1540,
     addedAt: '2026-10-10'
   },
@@ -8721,7 +8721,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '30:10',
     topic: 'Unit 3: Work, Energy and Power (Part 1)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 1520,
     addedAt: '2026-10-09'
   },
@@ -8735,7 +8735,7 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '28:45',
     topic: 'Unit 3: Work-Energy Theorem (Part 2)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 1480,
     addedAt: '2026-10-09'
   },
@@ -8749,23 +8749,9 @@ export const INITIAL_VIDEOS: VideoTutorial[] = [
     duration: '32:20',
     topic: 'Unit 3: Conservation of Energy & Power (Part 3)',
     instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: false,
+    isPremium: true,
     views: 1610,
     addedAt: '2026-10-09'
-  },
-  {
-    id: 'vid-loct-1',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    title: 'Critical Thinking & Logic: Recognizing 12 Informal Fallacies',
-    description: 'Easy mnemonics to recognize Ad Hominem, Straw Man, Appeal to Force, Equivocation, and Slippery Slope in freshman exam scenarios.',
-    videoUrl: 'https://www.youtube.com/embed/s2_oEFXwbzc',
-    duration: '24:50',
-    topic: 'Informal Fallacies',
-    instructor: 'Guduru Alemayehu (Smart Study Tutorial)',
-    isPremium: true,
-    views: 1120,
-    addedAt: '2025-09-25'
   }
 ];
 
@@ -8802,15 +8788,14 @@ export const INITIAL_PAYMENT_SUBMISSIONS: PaymentSubmission[] = [
     id: 'pay-demo-2',
     studentName: 'Tigist Hailu Bekele',
     studentEmail: 'tigist.hailu@aastu.edu.et',
-    studentPhone: '0953201048',
+    studentPhone: '0977889900',
     paymentMethod: 'Telebirr',
-    accountOrPhoneUsed: '0953201048',
+    accountOrPhoneUsed: '0977889900',
     transactionRef: 'TB9943201994',
     amount: 300,
     screenshotUrl: 'https://images.unsplash.com/photo-1556742049-0a67c5574f73?auto=format&fit=crop&w=600&q=80',
     submittedAt: '2025-10-01T09:15:00Z',
-    status: 'verified',
-    verifiedAt: '2025-10-01T10:00:00Z',
-    adminNotes: 'Verified by Guduru Alemayehu'
+    status: 'pending',
+    adminNotes: 'Awaiting admin verification'
   }
 ];

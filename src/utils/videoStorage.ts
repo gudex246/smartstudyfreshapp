@@ -34,13 +34,14 @@ function openDB(): Promise<IDBDatabase> {
  */
 export async function saveVideoBlob(id: string, file: Blob | File): Promise<string> {
   try {
+    const cleanId = (id || `vid_${Date.now()}`).replace(/^idb:\/\//, '');
     const db = await openDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
-      const req = store.put(file, id);
+      const req = store.put(file, cleanId);
 
-      req.onsuccess = () => resolve(`idb://${id}`);
+      req.onsuccess = () => resolve(`idb://${cleanId}`);
       req.onerror = () => reject(req.error);
     });
   } catch (err) {
@@ -54,12 +55,13 @@ export async function saveVideoBlob(id: string, file: Blob | File): Promise<stri
  */
 export async function getVideoBlob(idOrUri: string): Promise<Blob | null> {
   try {
-    const id = idOrUri.replace(/^idb:\/\//, '');
+    if (!idOrUri) return null;
+    const cleanId = idOrUri.replace(/^idb:\/\//, '');
     const db = await openDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readonly');
       const store = tx.objectStore(STORE_NAME);
-      const req = store.get(id);
+      const req = store.get(cleanId);
 
       req.onsuccess = () => resolve((req.result as Blob) || null);
       req.onerror = () => reject(req.error);
@@ -75,12 +77,13 @@ export async function getVideoBlob(idOrUri: string): Promise<Blob | null> {
  */
 export async function deleteVideoBlob(idOrUri: string): Promise<void> {
   try {
-    const id = idOrUri.replace(/^idb:\/\//, '');
+    if (!idOrUri) return;
+    const cleanId = idOrUri.replace(/^idb:\/\//, '');
     const db = await openDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
-      const req = store.delete(id);
+      const req = store.delete(cleanId);
 
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
@@ -114,15 +117,25 @@ export async function getAllVideoBlobKeys(): Promise<string[]> {
  */
 export async function uploadFileToServer(file: Blob | File, filename?: string, id?: string): Promise<string | null> {
   try {
-    const cleanName = filename || (file instanceof File ? file.name : `video_${Date.now()}.mp4`);
-    const cleanId = id || `vid_${Date.now()}`;
+    let cleanName = filename || (file instanceof File ? file.name : `video_${Date.now()}.mp4`);
+    if (!cleanName.includes('.')) {
+      cleanName += '.mp4';
+    }
+    const cleanId = (id || `vid_${Date.now()}`).replace(/^idb:\/\//, '');
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
     const res = await fetch(`/api/upload-video?filename=${encodeURIComponent(cleanName)}&id=${encodeURIComponent(cleanId)}`, {
       method: 'POST',
       headers: {
         'Content-Type': file.type || 'video/mp4'
       },
-      body: file
+      body: file,
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
+
     if (res.ok) {
       const data = await res.json();
       if (data.success && data.url) {
@@ -130,7 +143,7 @@ export async function uploadFileToServer(file: Blob | File, filename?: string, i
       }
     }
   } catch (err) {
-    console.warn('Upload to server failed (offline or local dev):', err);
+    console.warn('Upload to server failed or timed out:', err);
   }
   return null;
 }

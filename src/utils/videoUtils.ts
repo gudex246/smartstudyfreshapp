@@ -8,17 +8,25 @@
 export function isDirectVideoFile(url: string): boolean {
   if (!url) return false;
   const clean = url.trim().toLowerCase();
-  return (
-    clean.startsWith('idb://') ||
-    clean.startsWith('blob:') ||
-    clean.startsWith('data:video/') ||
-    clean.endsWith('.mp4') ||
-    clean.endsWith('.webm') ||
-    clean.endsWith('.ogg') ||
-    clean.endsWith('.mov') ||
-    clean.includes('.mp4?') ||
-    clean.includes('.webm?')
-  );
+  
+  // If it's a blob object URL or inline video data
+  if (clean.startsWith('blob:') || clean.startsWith('data:video/')) {
+    return true;
+  }
+
+  // If it's an uploaded video file on our server
+  if (clean.includes('/uploads/videos/') || clean.startsWith('/uploads/')) {
+    return true;
+  }
+
+  // Common direct video extensions
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.m4v', '.mkv', '.3gp', '.avi'];
+  const hasExt = videoExtensions.some(ext => clean.endsWith(ext) || clean.includes(`${ext}?`));
+  if (hasExt) {
+    return true;
+  }
+
+  return false;
 }
 
 export function formatVideoEmbedUrl(url: string): string {
@@ -48,19 +56,26 @@ export function formatVideoEmbedUrl(url: string): string {
     return `https://www.youtube.com/embed/${ytShortsMatch[1]}`;
   }
 
-  // 4. YouTube already embed: https://www.youtube.com/embed/VIDEO_ID
+  // 4. YouTube Live: https://www.youtube.com/live/VIDEO_ID
+  const ytLiveMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?youtube\.com\/live\/([a-zA-Z0-9_-]{11})/i);
+  if (ytLiveMatch && ytLiveMatch[1]) {
+    return `https://www.youtube.com/embed/${ytLiveMatch[1]}`;
+  }
+
+  // 5. YouTube already embed: https://www.youtube.com/embed/VIDEO_ID
   const ytEmbedMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/i);
   if (ytEmbedMatch && ytEmbedMatch[1]) {
     return `https://www.youtube.com/embed/${ytEmbedMatch[1]}`;
   }
 
-  // 5. Google Drive: https://drive.google.com/file/d/FILE_ID/view... -> /preview
-  const gDriveMatch = trimmed.match(/(?:https?:\/\/)?drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+  // 6. Google Drive: https://drive.google.com/file/d/FILE_ID/view... or open?id=FILE_ID -> /preview
+  const gDriveMatch = trimmed.match(/(?:https?:\/\/)?drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i) ||
+                      trimmed.match(/(?:https?:\/\/)?drive\.google\.com\/(?:open|uc)\?(?:.*&)?id=([a-zA-Z0-9_-]+)/i);
   if (gDriveMatch && gDriveMatch[1]) {
     return `https://drive.google.com/file/d/${gDriveMatch[1]}/preview`;
   }
 
-  // 6. Vimeo: https://vimeo.com/VIDEO_ID
+  // 7. Vimeo: https://vimeo.com/VIDEO_ID
   const vimeoMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/i);
   if (vimeoMatch && vimeoMatch[1]) {
     return `https://player.vimeo.com/video/${vimeoMatch[1]}`;

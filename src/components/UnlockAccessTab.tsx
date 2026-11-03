@@ -111,10 +111,19 @@ export const UnlockAccessTab: React.FC = () => {
     // Check once immediately on mount
     checkAndActivateUnlock(targetQuery);
 
-    // Active live interval check every 2 seconds
+    // Active live interval check every 1.5 seconds
     const interval = setInterval(() => {
-      checkAndActivateUnlock(targetQuery);
-    }, 2000);
+      checkAndActivateUnlock(targetQuery)
+        .then((res) => {
+          if (res?.unlocked) {
+            setStatusMsg({
+              type: 'success',
+              text: '🎉 Access Confirmed & Unlocked! Full freshman tutorial package is ready.'
+            });
+          }
+        })
+        .catch(() => {});
+    }, 1500);
 
     return () => clearInterval(interval);
   }, [isUnlocked, mySubmission?.id, studentPhone, studentProfile.phone, savedSubId, savedPhone, savedEmail, savedRef, checkAndActivateUnlock]);

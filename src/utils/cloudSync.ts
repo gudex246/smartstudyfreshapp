@@ -420,17 +420,20 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
   // 1. Fetch from Local Server API FIRST (Fastest, <15ms response)
   try {
     const res = await fetch('/api/submissions', {
-      signal: AbortSignal.timeout(2500),
+      signal: AbortSignal.timeout(1500),
       cache: 'no-store'
     });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data)) {
+      if (Array.isArray(data) && data.length > 0) {
         for (const sub of data) {
           if (sub && sub.id) {
             map.set(sub.id, sub);
           }
         }
+        return Array.from(map.values()).sort(
+          (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+        );
       }
     }
   } catch (err) {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Shield,
   Lock,
@@ -125,6 +125,15 @@ export const AdminPortal: React.FC = () => {
     }
     setTimeout(() => setSyncFeedback(null), 4000);
   };
+
+  // Active real-time live sync polling while admin portal is open (fetches submissions every 2s)
+  useEffect(() => {
+    if (!isAdmin) return;
+    const interval = setInterval(() => {
+      syncRemoteSubmissions().catch(() => {});
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [isAdmin, syncRemoteSubmissions]);
 
   const [isSyncingVideos, setIsSyncingVideos] = useState<boolean>(false);
   const [quickVerifyInput, setQuickVerifyInput] = useState<string>('');
@@ -874,31 +883,47 @@ export const AdminPortal: React.FC = () => {
                   (sub.syncCode && sub.syncCode.toLowerCase().includes(q))
                 );
               })
-              .map((sub) => (
-                <div
-                  key={sub.id}
-                  className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-2xs hover:shadow-xs transition space-y-4"
-                >
-                  {/* Top Header Row */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-extrabold text-slate-900 text-base">{sub.studentName}</span>
-                      <span
-                        className={`text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-                          sub.status === 'verified'
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                            : sub.status === 'pending'
-                            ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse'
-                            : 'bg-rose-100 text-rose-800 border border-rose-300'
-                        }`}
-                      >
-                        {(sub.status || 'pending').toUpperCase()}
-                      </span>
-                      {sub.syncCode && (
-                        <span className="bg-indigo-50 text-indigo-700 font-mono font-bold text-[11px] px-2.5 py-0.5 rounded-md border border-indigo-200">
-                          Sync Code: {sub.syncCode}
+              .sort((a, b) => {
+                if (a.status === 'pending' && b.status !== 'pending') return -1;
+                if (a.status !== 'pending' && b.status === 'pending') return 1;
+                return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+              })
+              .map((sub) => {
+                const isPending = sub.status === 'pending';
+                return (
+                  <div
+                    key={sub.id}
+                    className={`p-5 sm:p-6 rounded-2xl transition space-y-4 ${
+                      isPending
+                        ? 'border-2 border-amber-400 bg-amber-50/20 shadow-md ring-2 ring-amber-400/20'
+                        : 'border border-slate-200 bg-white shadow-2xs hover:shadow-xs'
+                    }`}
+                  >
+                    {/* Top Header Row */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-extrabold text-slate-900 text-base">{sub.studentName}</span>
+                        <span
+                          className={`text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                            sub.status === 'verified'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                              : isPending
+                              ? 'bg-amber-100 text-amber-900 border border-amber-400 animate-pulse'
+                              : 'bg-rose-100 text-rose-800 border border-rose-300'
+                          }`}
+                        >
+                          {(sub.status || 'pending').toUpperCase()}
                         </span>
-                      )}
+                        {isPending && (
+                          <span className="bg-amber-400 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse flex items-center gap-1 shadow-xs">
+                            ⚡ ACTION: UNLOCK ACCESS
+                          </span>
+                        )}
+                        {sub.syncCode && (
+                          <span className="bg-indigo-50 text-indigo-700 font-mono font-bold text-[11px] px-2.5 py-0.5 rounded-md border border-indigo-200">
+                            Sync Code: {sub.syncCode}
+                          </span>
+                        )}
                     </div>
 
                     <span className="text-slate-400 text-xs">
@@ -1078,7 +1103,8 @@ export const AdminPortal: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
 
             {paymentSubmissions.length === 0 && (
               <div className="text-center py-12 text-slate-400 text-xs">
@@ -1886,6 +1912,8 @@ export const AdminPortal: React.FC = () => {
                       addedAt: new Date().toISOString().slice(0, 10)
                     } as VideoTutorial);
                   }
+                  syncVideosWithServer().catch(() => {});
+                  showToast('Video saved and synced to cloud server!', 'success');
                   setEditingVideo(null);
                 }}
                 className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold"

@@ -326,7 +326,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(parsed) && parsed.length > 0) {
           const foreignMathIds = new Set([
             'vid-math-u1-p1', 'vid-math-u1-p2', 'vid-math-u1-p3', 'vid-math-u1-p4', 'vid-math-u1-p5',
-            'vid-math-1', 'vid-math-2', 'vid-math-3', 'vid-1789749788676', 'vid-phys-1'
+            'vid-math-1', 'vid-math-2', 'vid-math-3', 'vid-1789749788676', 'vid-phys-1', 'vid-loct-1'
           ]);
           const filtered = parsed.filter((item: any) => !foreignMathIds.has(item.id));
           const initialMap = new Map(INITIAL_VIDEOS.map((v) => [v.id, v]));
@@ -363,18 +363,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_VIDEOS;
   });
 
-  // Load payment submissions
+  // Load payment submissions (clean out dummy test verifications)
   const [paymentSubmissions, setPaymentSubmissions] = useState<PaymentSubmission[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.PAYMENTS);
-    return saved ? JSON.parse(saved) : INITIAL_PAYMENT_SUBMISSIONS;
+    if (saved) {
+      try {
+        const parsed: PaymentSubmission[] = JSON.parse(saved);
+        return parsed.map(s => {
+          if (s.id === 'pay-demo-2' || s.id === 'test-student-1' || s.id === 'sub-verify-student-receipt') {
+            return { ...s, status: 'pending' as const };
+          }
+          return s;
+        });
+      } catch {}
+    }
+    return INITIAL_PAYMENT_SUBMISSIONS;
   });
 
-  // Load current student profile
+  // Load current student profile (strictly locked by default unless user is admin)
   const [studentProfile, setStudentProfile] = useState<StudentProfile>(() => {
-    const isPersistentlyUnlocked = typeof window !== 'undefined' && (
-      localStorage.getItem('smart_study_full_access_unlocked') === 'true' ||
-      localStorage.getItem(STORAGE_KEYS.SAMPLE_STUDENT_STATUS) === 'verified'
-    );
     const saved = localStorage.getItem(STORAGE_KEYS.STUDENT);
     if (saved) {
       try {
@@ -383,7 +390,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const isUserAdminEmail = parsed.email && parsed.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase();
           return {
             ...parsed,
-            isUnlocked: isUserAdminEmail ? true : (isPersistentlyUnlocked || Boolean(parsed.isUnlocked))
+            phone: parsed.phone === '0953201048' && !isUserAdminEmail ? '' : (parsed.phone || ''),
+            isUnlocked: Boolean(isUserAdminEmail)
           };
         }
       } catch {}
@@ -397,9 +405,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return {
             name: parsed.name || (isUserAdminEmail ? 'Guduru Alemayehu' : 'Freshman Student'),
             email: parsed.email || (isUserAdminEmail ? ADMIN_EMAIL : 'student@university.edu.et'),
-            phone: parsed.phone || '0953201048',
+            phone: parsed.phone === '0953201048' && !isUserAdminEmail ? '' : (parsed.phone || ''),
             university: parsed.university || 'Addis Ababa University (AAU)',
-            isUnlocked: isUserAdminEmail ? true : isPersistentlyUnlocked
+            isUnlocked: Boolean(isUserAdminEmail)
           };
         }
       } catch {}
@@ -407,8 +415,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return {
       name: 'Freshman Student',
       email: 'student@university.edu.et',
-      phone: '0953201048',
-      isUnlocked: isPersistentlyUnlocked
+      phone: '',
+      isUnlocked: false
     };
   });
 
@@ -491,8 +499,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [sampleStudentPaywallStatus, setSampleStudentPaywallStatusState] = useState<'locked' | 'pending' | 'verified'>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SAMPLE_STUDENT_STATUS);
-    return (saved as 'locked' | 'pending' | 'verified') || 'locked';
+    return 'locked';
   });
 
   const [sampleStudentTutorialStep, setSampleStudentTutorialStepState] = useState<number>(() => {
@@ -501,6 +508,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [isSyncingSubmissions, setIsSyncingSubmissions] = useState<boolean>(false);
+
+  // Play subtle audio alert when student submits payment to Admin
+  const playNotificationChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // A5
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
+    } catch {}
+  };
 
   // Cross-device synchronization effect for payment submissions and updates
   useEffect(() => {
@@ -528,7 +555,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             hasChanges = true;
           }
         }
-        return hasChanges ? Array.from(prevMap.values()) : prev;
+        if (!hasChanges) return prev;
+        const sorted = Array.from(prevMap.values()).sort((a, b) => {
+          if (a.status === 'pending' && b.status !== 'pending') return -1;
+          if (a.status !== 'pending' && b.status === 'pending') return 1;
+          return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+        });
+        return sorted;
       });
 
       // Auto-unlock current student if any submission matching their phone, email, reference, or submissionId is verified
@@ -654,15 +687,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Global Multi-Device Real-time SSE Push (receives submissions from any phone/PC in <20ms)
     const unsubscribeRemote = subscribeToRemoteSubmissions((payload: any) => {
       if (payload && payload.type === 'SUBMISSION' && payload.data) {
+        playNotificationChime();
         applyRemoteSubmissions([payload.data]);
       } else if (payload && (payload.type === 'UPDATE_SUBMISSION' || payload.type === 'update') && payload.data) {
         const updateData = payload.data;
         setPaymentSubmissions((prev) => {
           const exists = prev.some((s) => s.id === updateData.id);
-          if (exists) {
-            return prev.map((s) => (s.id === updateData.id ? { ...s, ...updateData } : s));
-          }
-          return [updateData, ...prev];
+          const updated = exists
+            ? prev.map((s) => (s.id === updateData.id ? { ...s, ...updateData } : s))
+            : [updateData, ...prev];
+          return updated.sort((a, b) => {
+            if (a.status === 'pending' && b.status !== 'pending') return -1;
+            if (a.status !== 'pending' && b.status === 'pending') return 1;
+            return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+          });
         });
         if (updateData.status === 'verified') {
           setStudentProfile((prevProfile) => {
@@ -1482,9 +1520,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (savedRaw) {
             try { localList = JSON.parse(savedRaw); } catch {}
           }
-          const allLocal = [...videos];
+          const allLocal = [...videos].filter(v => v.id !== 'vid-loct-1');
           for (const item of localList) {
-            if (!allLocal.some(v => v.id === item.id)) {
+            if (item.id !== 'vid-loct-1' && !allLocal.some(v => v.id === item.id)) {
               allLocal.push(item);
             }
           }
@@ -1771,24 +1809,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [studentProfile.email]);
 
   const isUnlockedEffective = useMemo(() => {
-    // 1. If Admin, ALL questions, past exams, solutions, and masterclasses are unconditionally 100% UNLOCKED!
+    // 1. If Admin (gudurualemayehu29@gmail.com), ALL questions, past exams, solutions, and masterclasses are unconditionally 100% UNLOCKED!
     if (isEffectiveAdmin) return true;
+    if (studentProfile.email && studentProfile.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) return true;
 
-    // 2. Explicit unlocked profile or persistent unlock flag
+    // 2. Direct studentProfile flag or verified storage
     if (studentProfile.isUnlocked) return true;
     if (typeof window !== 'undefined' && localStorage.getItem('smart_study_full_access_unlocked') === 'true') return true;
 
-    // 3. Admin email
-    if (studentProfile.email && studentProfile.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) return true;
-
-    // 4. Sample student explicit verified status
-    if (sampleStudentPaywallStatus === 'verified') return true;
-
-    // 5. Direct check against ALL payment submissions: If ANY submission matching this student is verified, UNLOCK!
+    // 3. Direct check against verified payment submissions: ONLY unlock if this student has an approved submission!
     const currentEmail = studentProfile.email?.trim().toLowerCase();
-    const currentPhone = studentProfile.phone;
+    const currentPhone = studentProfile.phone?.trim();
     const currentSubId = studentProfile.submissionId || (typeof window !== 'undefined' ? localStorage.getItem('smart_study_last_submission_id') : null);
-    const savedPhone = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_phone') : null;
+    const savedPhone = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_phone')?.trim() : null;
     const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_email')?.trim().toLowerCase() : null;
     const savedRef = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_ref')?.trim().toLowerCase() : null;
 
@@ -1797,35 +1830,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (currentSubId && s.id === currentSubId) return true;
       if (savedRef && s.transactionRef && s.transactionRef.trim().toLowerCase() === savedRef) return true;
       if (savedRef && s.syncCode && s.syncCode.trim().toLowerCase() === savedRef) return true;
-      if (currentEmail && s.studentEmail && s.studentEmail.trim().toLowerCase() === currentEmail) return true;
-      if (savedEmail && s.studentEmail && s.studentEmail.trim().toLowerCase() === savedEmail) return true;
+      if (currentEmail && currentEmail !== 'student@university.edu.et' && s.studentEmail && s.studentEmail.trim().toLowerCase() === currentEmail) return true;
+      if (savedEmail && savedEmail !== 'student@university.edu.et' && s.studentEmail && s.studentEmail.trim().toLowerCase() === savedEmail) return true;
       if (currentPhone && s.studentPhone && matchEthiopianPhones(currentPhone, s.studentPhone)) return true;
       if (savedPhone && s.studentPhone && matchEthiopianPhones(savedPhone, s.studentPhone)) return true;
       return false;
     });
 
-    if (hasVerified) {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('smart_study_full_access_unlocked', 'true');
-      }
-      return true;
-    }
-
-    // 6. If user switched to sample-student specifically to test locked state
-    if (currentAccount.id === 'sample-student' && sampleStudentPaywallStatus === 'locked') {
-      return false;
-    }
-
-    return false;
+    return hasVerified;
   }, [
     isEffectiveAdmin,
-    studentProfile.isUnlocked,
     studentProfile.email,
     studentProfile.phone,
+    studentProfile.isUnlocked,
     studentProfile.submissionId,
-    paymentSubmissions,
-    currentAccount.id,
-    sampleStudentPaywallStatus
+    paymentSubmissions
   ]);
 
   return (
