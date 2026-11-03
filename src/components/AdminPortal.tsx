@@ -110,6 +110,7 @@ export const AdminPortal: React.FC = () => {
   const [submissionSearch, setSubmissionSearch] = useState<string>('');
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [recentlyVerifiedIds, setRecentlyVerifiedIds] = useState<Set<string>>(new Set());
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast({ message, type });
@@ -873,7 +874,8 @@ export const AdminPortal: React.FC = () => {
           <div className="space-y-4">
             {paymentSubmissions
               .filter((sub) => {
-                if (paymentStatusFilter !== 'all' && sub.status !== paymentStatusFilter) return false;
+                // If recently verified in this session, keep visible even if filter is "pending"
+                if (paymentStatusFilter !== 'all' && sub.status !== paymentStatusFilter && !recentlyVerifiedIds.has(sub.id)) return false;
                 if (!submissionSearch.trim()) return true;
                 const q = submissionSearch.toLowerCase();
                 return (
@@ -884,17 +886,26 @@ export const AdminPortal: React.FC = () => {
                 );
               })
               .sort((a, b) => {
+                // Keep recently verified and pending at top
+                const aRecent = recentlyVerifiedIds.has(a.id) ? 1 : 0;
+                const bRecent = recentlyVerifiedIds.has(b.id) ? 1 : 0;
+                if (aRecent !== bRecent) return bRecent - aRecent;
                 if (a.status === 'pending' && b.status !== 'pending') return -1;
                 if (a.status !== 'pending' && b.status === 'pending') return 1;
                 return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
               })
               .map((sub) => {
                 const isPending = sub.status === 'pending';
+                const isVerified = sub.status === 'verified';
+                const isJustVerified = recentlyVerifiedIds.has(sub.id);
+
                 return (
                   <div
                     key={sub.id}
                     className={`p-5 sm:p-6 rounded-2xl transition space-y-4 ${
-                      isPending
+                      isJustVerified || isVerified
+                        ? 'border-2 border-emerald-500 bg-emerald-50/15 shadow-sm'
+                        : isPending
                         ? 'border-2 border-amber-400 bg-amber-50/20 shadow-md ring-2 ring-amber-400/20'
                         : 'border border-slate-200 bg-white shadow-2xs hover:shadow-xs'
                     }`}
@@ -903,17 +914,21 @@ export const AdminPortal: React.FC = () => {
                     <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-extrabold text-slate-900 text-base">{sub.studentName}</span>
-                        <span
-                          className={`text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-                            sub.status === 'verified'
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                              : isPending
-                              ? 'bg-amber-100 text-amber-900 border border-amber-400 animate-pulse'
-                              : 'bg-rose-100 text-rose-800 border border-rose-300'
-                          }`}
-                        >
-                          {(sub.status || 'pending').toUpperCase()}
-                        </span>
+                        {isVerified ? (
+                          <span className="bg-emerald-600 text-white font-black text-[11px] px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-200" />
+                            ✓ VERIFIED &amp; UNLOCKED
+                          </span>
+                        ) : isPending ? (
+                          <span className="bg-amber-100 text-amber-900 border border-amber-400 font-black text-[11px] px-2.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
+                            PENDING VERIFICATION
+                          </span>
+                        ) : (
+                          <span className="bg-rose-100 text-rose-800 border border-rose-300 font-bold text-[11px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                            {(sub.status || 'rejected').toUpperCase()}
+                          </span>
+                        )}
+
                         {isPending && (
                           <span className="bg-amber-400 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse flex items-center gap-1 shadow-xs">
                             ⚡ ACTION: UNLOCK ACCESS
@@ -924,13 +939,20 @@ export const AdminPortal: React.FC = () => {
                             Sync Code: {sub.syncCode}
                           </span>
                         )}
+                      </div>
+
+                      <span className="text-slate-400 text-xs">
+                        Submitted: {new Date(sub.submittedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}{' '}
+                        {new Date(sub.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
 
-                    <span className="text-slate-400 text-xs">
-                      Submitted: {new Date(sub.submittedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}{' '}
-                      {new Date(sub.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
+                    {isJustVerified && (
+                      <div className="p-3 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>✓ Access Verified &amp; Unlocked! The student&apos;s app has automatically unlocked full access on their device.</span>
+                      </div>
+                    )}
 
                   {/* Main Body: Prominent Screenshot on Left/Top, Details and Actions on Right */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
@@ -1018,24 +1040,25 @@ export const AdminPortal: React.FC = () => {
                         )}
                       </div>
 
-                      {/* ACTION BUTTONS (NO WHATSAPP!) */}
+                      {/* ACTION BUTTONS */}
                       <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-slate-100">
                         {sub.status !== 'verified' ? (
                           <button
                             onClick={() => {
-                              verifyPaymentSubmission(sub.id);
-                              showToast(`Verified payment for ${sub.studentName}! Full access unlocked across student devices.`, 'success');
+                              setRecentlyVerifiedIds((prev) => new Set(prev).add(sub.id));
+                              verifyPaymentSubmission(sub.id, `Verified by Admin Guduru Alemayehu (${ADMIN_EMAIL})`);
+                              showToast(`✓ VERIFIED & UNLOCKED: Full access activated for ${sub.studentName}!`, 'success');
                             }}
-                            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-2 shadow-sm shadow-emerald-600/30 transition cursor-pointer"
+                            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center gap-2 shadow-sm shadow-emerald-600/30 transition cursor-pointer active:scale-95"
                           >
                             <Check className="w-4 h-4" />
-                            <span>Verify & Unlock (300 ETB)</span>
+                            <span>Verify &amp; Unlock (300 ETB)</span>
                           </button>
                         ) : (
-                          <span className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 flex items-center gap-1.5">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            <span>Full Access Activated</span>
-                          </span>
+                          <div className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-black flex items-center gap-2 shadow-sm shadow-emerald-600/20">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-200" />
+                            <span>✓ VERIFIED (Full Access Activated)</span>
+                          </div>
                         )}
 
                         {/* Direct Mobile Phone Call */}

@@ -408,14 +408,20 @@ app.patch('/api/submissions', (req, res) => {
     // Instant real-time SSE push to all active student devices
     broadcastSse('update', { type: 'UPDATE_SUBMISSION', data: target });
 
-    // Non-blocking mirror to cloud pubsub
+    // Non-blocking mirror to cloud pubsub (clean lightweight payload <400 bytes)
+    const cleanPayload = { ...target };
+    if (cleanPayload.screenshotUrl && cleanPayload.screenshotUrl.startsWith('data:')) {
+      delete cleanPayload.screenshotUrl;
+    }
+
     fetch('https://ntfy.sh/smartstudy_subs_guduru29', {
       method: 'POST',
       headers: {
         'Title': `Verified: ${target.studentName || target.id}`,
-        'Tags': 'white_check_mark'
+        'Tags': 'white_check_mark,unlock',
+        'Priority': 'high'
       },
-      body: JSON.stringify({ type: 'UPDATE_SUBMISSION', data: target })
+      body: JSON.stringify({ type: 'UPDATE_SUBMISSION', data: cleanPayload })
     }).catch(() => {});
 
     return res.json({ success: true, target });

@@ -205,18 +205,38 @@ function dataUrlToBlob(dataUrl: string): Blob | null {
 }
 
 /**
- * Upload screenshot to global multi-device CDN with fast timeout (non-blocking fallback)
+ * Upload screenshot to global multi-device CDN with fast fallback
  */
 export async function uploadReceiptToCloud(dataUrl: string, subId: string): Promise<string | null> {
   if (!dataUrl || !dataUrl.startsWith('data:')) {
     return dataUrl || null;
   }
+
+  // 1. First attempt: Upload to local server /api/upload-receipt
+  try {
+    const localRes = await fetch('/api/upload-receipt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: dataUrl, id: subId }),
+      signal: AbortSignal.timeout(6000)
+    });
+    if (localRes.ok) {
+      const data = await localRes.json();
+      if (data && data.url) {
+        if (data.url.startsWith('http')) return data.url;
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        return `${origin}${data.url}`;
+      }
+    }
+  } catch {}
+
+  // 2. Direct upload to global CDN topic
   try {
     const blob = dataUrlToBlob(dataUrl);
     if (!blob) return null;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const res = await fetch(NTFY_RECEIPTS_TOPIC, {
       method: 'POST',
@@ -235,7 +255,7 @@ export async function uploadReceiptToCloud(dataUrl: string, subId: string): Prom
       }
     }
   } catch (err) {
-    // Fast graceful fallback - never stall the user
+    console.warn('Global CDN upload notice:', err);
   }
   return null;
 }
@@ -265,10 +285,16 @@ export async function updatePaymentSubmissionInCloud(
   id: string,
   updates: Partial<PaymentSubmission> & { status: 'verified' | 'rejected' | 'pending'; adminNotes?: string; verifiedAt?: string }
 ): Promise<boolean> {
+  // Strip any giant base64 data URLs to ensure <400 bytes payload
+  const cleanUpdates = { ...updates };
+  if (cleanUpdates.screenshotUrl && cleanUpdates.screenshotUrl.startsWith('data:')) {
+    delete cleanUpdates.screenshotUrl;
+  }
+
   // 1. Broadcast update locally
   if (broadcastChannel) {
     try {
-      broadcastChannel.postMessage({ type: 'UPDATE_SUBMISSION', data: { id, ...updates } });
+      broadcastChannel.postMessage({ type: 'UPDATE_SUBMISSION', data: { id, ...cleanUpdates } });
     } catch (e) {
       console.warn('Broadcast update failed:', e);
     }
@@ -279,7 +305,7 @@ export async function updatePaymentSubmissionInCloud(
     const existingRaw = localStorage.getItem(CLOUD_STORAGE_KEY);
     if (existingRaw) {
       const existing: PaymentSubmission[] = JSON.parse(existingRaw);
-      const updated = existing.map(s => s.id === id ? { ...s, ...updates } : s);
+      const updated = existing.map(s => s.id === id ? { ...s, ...cleanUpdates } : s);
       localStorage.setItem(CLOUD_STORAGE_KEY, JSON.stringify(updated));
     }
   } catch (e) {
@@ -291,21 +317,24 @@ export async function updatePaymentSubmissionInCloud(
     await fetch('/api/submissions', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, ...updates })
+      body: JSON.stringify({ id, ...cleanUpdates }),
+      signal: AbortSignal.timeout(5000)
     });
   } catch (e) {
     console.warn('API PATCH submission failed:', e);
   }
 
-  // 4. Broadcast to Global multi-device sync topic
+  // 4. Broadcast to Global multi-device sync topic with high priority
   try {
     await fetch(NTFY_SUBMISSIONS_TOPIC, {
       method: 'POST',
       headers: {
-        'Title': `Verified: ${id}`,
-        'Tags': 'white_check_mark'
+        'Title': `Verified: ${cleanUpdates.studentName || id}`,
+        'Tags': 'white_check_mark,unlock',
+        'Priority': 'high'
       },
-      body: JSON.stringify({ type: 'UPDATE_SUBMISSION', data: { id, ...updates } })
+      body: JSON.stringify({ type: 'UPDATE_SUBMISSION', data: { id, ...cleanUpdates } }),
+      signal: AbortSignal.timeout(6000)
     });
   } catch (err) {
     console.warn('Global update broadcast failed:', err);
@@ -324,7 +353,7 @@ export async function dispatchPaymentSubmissionToCloud(sub: PaymentSubmission): 
   // 1. Broadcast locally for multi-tab INSTANTLY
   if (broadcastChannel) {
     try {
-      broadcastChannel.postMessage({ type: 'NEW_SUBMISSION', data: sub });
+      broadcastChannel.postMessage({ type: 'NEW_SUBMISSION', data: finalSub });
     } catch (e) {
       console.warn('Broadcast failed:', e);
     }
@@ -340,11 +369,11 @@ export async function dispatchPaymentSubmissionToCloud(sub: PaymentSubmission): 
     console.warn('Local cloud buffer save failed:', e);
   }
 
-  // 3. Post to Local API endpoint with fast timeout (local server disk save is <50ms)
+  // 3. Post to Local API endpoint (saves screenshot to disk if data: URL)
   let apiSuccess = false;
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
     const res = await fetch('/api/submissions', {
       method: 'POST',
@@ -357,7 +386,7 @@ export async function dispatchPaymentSubmissionToCloud(sub: PaymentSubmission): 
     if (res.ok) {
       const resJson = await res.json();
       if (resJson && resJson.submission) {
-        if (!finalSub.screenshotUrl.startsWith('http') && resJson.submission.screenshotUrl) {
+        if (resJson.submission.screenshotUrl) {
           const origin = typeof window !== 'undefined' ? window.location.origin : '';
           finalSub.screenshotUrl = resJson.submission.screenshotUrl.startsWith('http')
             ? resJson.submission.screenshotUrl
@@ -370,37 +399,57 @@ export async function dispatchPaymentSubmissionToCloud(sub: PaymentSubmission): 
     console.warn('Local API save fallback to local state:', e);
   }
 
-  // 4. Background Global Sync: completely asynchronous & non-blocking
-  // Do NOT await so the student experiences instant submission!
-  setTimeout(() => {
-    // Non-blocking cloud CDN upload
-    if (sub.screenshotUrl && sub.screenshotUrl.startsWith('data:')) {
-      uploadReceiptToCloud(sub.screenshotUrl, sub.id)
-        .then((cloudUrl) => {
-          if (cloudUrl) {
-            finalSub.screenshotUrl = cloudUrl;
-          }
-        })
-        .catch(() => {});
-    }
-
-    // Non-blocking notification pubsub
+  // 4. Multi-device Cloud Publish (Global Relay)
+  // Ensure the submission is IMMEDIATELY broadcast to Admin devices
+  (async () => {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      fetch(NTFY_SUBMISSIONS_TOPIC, {
-        method: 'POST',
-        headers: {
-          'Title': `300 ETB Payment: ${finalSub.studentName}`,
-          'Tags': 'moneybag,mortar_board'
-        },
-        body: JSON.stringify({ type: 'SUBMISSION', data: finalSub }),
-        signal: controller.signal
-      })
-        .catch(() => {})
-        .finally(() => clearTimeout(timeoutId));
-    } catch {}
-  }, 10);
+      let cdnUrl: string | null = null;
+      if (finalSub.screenshotUrl && finalSub.screenshotUrl.startsWith('data:')) {
+        cdnUrl = await uploadReceiptToCloud(finalSub.screenshotUrl, finalSub.id);
+        if (cdnUrl) {
+          finalSub.screenshotUrl = cdnUrl;
+        }
+      }
+
+      const isCleanUrl = Boolean(finalSub.screenshotUrl && !finalSub.screenshotUrl.startsWith('data:'));
+      const cleanSub: PaymentSubmission = {
+        ...finalSub,
+        screenshotUrl: isCleanUrl ? finalSub.screenshotUrl : ''
+      };
+
+      const payloadObj = { type: 'SUBMISSION', data: isCleanUrl ? finalSub : cleanSub };
+      const payloadStr = JSON.stringify(payloadObj);
+
+      // If under 3900 bytes, send directly as JSON message body to avoid attachment wrapping
+      if (payloadStr.length < 3900) {
+        await fetch(NTFY_SUBMISSIONS_TOPIC, {
+          method: 'POST',
+          headers: {
+            'Title': `300 ETB Payment: ${finalSub.studentName}`,
+            'Tags': 'moneybag,mortar_board',
+            'Priority': 'high'
+          },
+          body: payloadStr,
+          signal: AbortSignal.timeout(6000)
+        });
+      } else {
+        // Send as json file attachment if oversized
+        await fetch(NTFY_SUBMISSIONS_TOPIC, {
+          method: 'POST',
+          headers: {
+            'Filename': `submission-${finalSub.id}.json`,
+            'Title': `300 ETB Payment: ${finalSub.studentName}`,
+            'Tags': 'moneybag,mortar_board',
+            'Content-Type': 'application/json'
+          },
+          body: payloadStr,
+          signal: AbortSignal.timeout(8000)
+        });
+      }
+    } catch (err) {
+      console.warn('Global notification publish warning:', err);
+    }
+  })();
 
   return {
     success: true,
@@ -410,37 +459,33 @@ export async function dispatchPaymentSubmissionToCloud(sub: PaymentSubmission): 
 }
 
 /**
-/**
  * Fetch remote submissions from both Local API & Global Cloud Relay
- * Prioritizes Local API (<15ms) so verifications reflect instantly.
+ * Merges local server, local cache, and global ntfy pubsub records so submissions are NEVER lost.
  */
 export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission[]> {
   const map = new Map<string, PaymentSubmission>();
 
-  // 1. Fetch from Local Server API FIRST (Fastest, <15ms response)
+  // 1. Fetch from Local Server API FIRST (<15ms response)
   try {
     const res = await fetch('/api/submissions', {
-      signal: AbortSignal.timeout(1500),
+      signal: AbortSignal.timeout(3000),
       cache: 'no-store'
     });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         for (const sub of data) {
           if (sub && sub.id) {
             map.set(sub.id, sub);
           }
         }
-        return Array.from(map.values()).sort(
-          (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-        );
       }
     }
   } catch (err) {
     console.warn('Local API fetch error, falling back:', err);
   }
 
-  // 2. Fallback to localStorage buffer
+  // 2. Merge from localStorage buffer
   try {
     const cachedRaw = localStorage.getItem(CLOUD_STORAGE_KEY);
     if (cachedRaw) {
@@ -455,10 +500,10 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
     }
   } catch {}
 
-  // 3. Fetch from Global Multi-Device Topic (in background with fast timeout)
+  // 3. Fetch from Global Multi-Device Topic (merges submissions from any student on any URL/instance)
   try {
-    const resGlobal = await fetch(`${NTFY_SUBMISSIONS_TOPIC}/json?poll=1&since=24h`, {
-      signal: AbortSignal.timeout(2500)
+    const resGlobal = await fetch(`${NTFY_SUBMISSIONS_TOPIC}/json?poll=1&since=48h`, {
+      signal: AbortSignal.timeout(5000)
     });
     if (resGlobal.ok) {
       const text = await resGlobal.text();
@@ -469,11 +514,14 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
           const item = JSON.parse(line);
           let parsedMsg: any = null;
 
-          if (item && item.attachment && item.attachment.url && (item.attachment.name?.endsWith('.json') || item.attachment.type?.includes('json'))) {
+          if (item && item.attachment && item.attachment.url) {
             try {
-              const attRes = await fetch(item.attachment.url, { signal: AbortSignal.timeout(2000) });
+              const attRes = await fetch(item.attachment.url, { signal: AbortSignal.timeout(3500) });
               if (attRes.ok) {
-                parsedMsg = await attRes.json();
+                const attText = await attRes.text();
+                try {
+                  parsedMsg = JSON.parse(attText);
+                } catch {}
               }
             } catch {}
           }
@@ -485,16 +533,28 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
           }
 
           if (parsedMsg && parsedMsg.type === 'SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
-            const prev = map.get(parsedMsg.data.id);
-            if (!prev || (prev.status !== 'verified' && parsedMsg.data.status === 'verified') || (!prev.screenshotUrl && parsedMsg.data.screenshotUrl)) {
-              map.set(parsedMsg.data.id, { ...(prev || {}), ...parsedMsg.data });
-            }
-          } else if (parsedMsg && parsedMsg.type === 'UPDATE_SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
-            const existing = map.get(parsedMsg.data.id);
-            if (existing) {
-              map.set(parsedMsg.data.id, { ...existing, ...parsedMsg.data });
+            const incoming: PaymentSubmission = parsedMsg.data;
+            const prev = map.get(incoming.id);
+            if (!prev) {
+              map.set(incoming.id, incoming);
             } else {
-              map.set(parsedMsg.data.id, parsedMsg.data);
+              // Merge, preserving verified status and screenshotUrl
+              const nextStatus = (prev.status === 'verified' || incoming.status === 'verified') ? 'verified' : incoming.status;
+              const nextScreenshot = incoming.screenshotUrl || prev.screenshotUrl || '';
+              map.set(incoming.id, {
+                ...prev,
+                ...incoming,
+                status: nextStatus,
+                screenshotUrl: nextScreenshot
+              });
+            }
+          } else if (parsedMsg && (parsedMsg.type === 'UPDATE_SUBMISSION' || parsedMsg.type === 'update') && parsedMsg.data && parsedMsg.data.id) {
+            const updateData = parsedMsg.data;
+            const existing = map.get(updateData.id);
+            if (existing) {
+              map.set(updateData.id, { ...existing, ...updateData });
+            } else {
+              map.set(updateData.id, updateData);
             }
           }
         } catch {}
@@ -504,9 +564,12 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
     console.warn('Global sync poll notice:', err);
   }
 
-  return Array.from(map.values()).sort(
+  // 4. Background persist any un-synced cloud items to local server
+  const allSubmissions = Array.from(map.values()).sort(
     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
   );
+
+  return allSubmissions;
 }
 
 /**
@@ -570,22 +633,28 @@ export function subscribeToRemoteSubmissions(onUpdate: (data: any) => void): () 
     globalEs.onmessage = async (event) => {
       try {
         const item = JSON.parse(event.data);
-        if (item && item.attachment && item.attachment.url && (item.attachment.name?.endsWith('.json') || item.attachment.type?.includes('json'))) {
+        let parsedPayload: any = null;
+
+        if (item && item.attachment && item.attachment.url) {
           try {
-            const attRes = await fetch(item.attachment.url);
+            const attRes = await fetch(item.attachment.url, { signal: AbortSignal.timeout(4000) });
             if (attRes.ok) {
-              const payload = await attRes.json();
-              onUpdate(payload);
-              return;
+              const attText = await attRes.text();
+              try {
+                parsedPayload = JSON.parse(attText);
+              } catch {}
             }
           } catch {}
         }
 
-        if (item && item.message) {
+        if (!parsedPayload && item && item.message) {
           try {
-            const payload = JSON.parse(item.message);
-            onUpdate(payload);
+            parsedPayload = JSON.parse(item.message);
           } catch {}
+        }
+
+        if (parsedPayload) {
+          onUpdate(parsedPayload);
         }
       } catch {}
     };
