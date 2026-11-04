@@ -92,7 +92,7 @@ export const PRESET_ACCOUNTS: UserAccount[] = [
 
 const STORAGE_KEYS = {
   COURSES: 'smart_study_courses_v5',
-  QUESTIONS: 'smart_study_questions_v26',
+  QUESTIONS: 'smart_study_questions_v27',
   VIDEOS: 'smart_study_videos_v4',
   PAYMENTS: 'smart_study_payments_v4',
   STUDENT: 'smart_study_student_v4',

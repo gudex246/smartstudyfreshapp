@@ -639,12 +639,12 @@ export const QuestionsTab: React.FC = () => {
                   </>
                 ) : selectedExamType === 'model' ? (
                   <>
-                    <option value="all">All Model Exams (2025 Model • 30 Questions)</option>
-                    <option value="2025">2025 Smart Study Model Exam (30 Questions)</option>
+                    <option value="all">All Model Exams (2025 Model • 50 Questions)</option>
+                    <option value="2025">2025 Smart Study Model Exam (Units 1 - 3 • 50 Questions)</option>
                   </>
                 ) : (
                   <>
-                    <option value="all">All Logic & Critical Thinking Exams (134 Questions)</option>
+                    <option value="all">All Logic & Critical Thinking Exams (154 Questions)</option>
                     <optgroup label="📝 Mid Terms Exam (Haramaya University)">
                       <option value="midterm-all">All Mid Terms (2018, 2016, 2015 & 2014 • 104 Questions)</option>
                       <option value="midterm-2018">2018 Midterm Exam (2018 E.C. Haramaya • 30 Questions)</option>
@@ -653,7 +653,7 @@ export const QuestionsTab: React.FC = () => {
                       <option value="midterm-2014">2014 Midterm Exam (2014 E.C. Haramaya • 30 Questions)</option>
                     </optgroup>
                     <optgroup label="⚡ Smart Study Model Exam">
-                      <option value="model-2025">2025 Smart Study Model Exam (30 Questions)</option>
+                      <option value="model-2025">2025 Smart Study Model Exam (Units 1 - 3 • 50 Questions)</option>
                     </optgroup>
                   </>
                 )
@@ -762,7 +762,7 @@ export const QuestionsTab: React.FC = () => {
                 ) : selectedExamType === 'model' ? (
                   <>
                     <option value="all">All Model Exams (2026 Model • 50 Questions)</option>
-                    <option value="2026">2026 Smart Study Model Exam (General Psychology • 50 Questions)</option>
+                    <option value="2026">2026 Smart Study Model Exam (Units 1 - 3 • 50 Questions)</option>
                   </>
                 ) : (
                   <>
@@ -775,7 +775,7 @@ export const QuestionsTab: React.FC = () => {
                       <option value="midterm-2013">2013 Midterm Exam (2013 E.C. Haramaya • 20 Questions)</option>
                     </optgroup>
                     <optgroup label="⚡ Smart Study Model Exam">
-                      <option value="model-2026">2026 Smart Study Model Exam (General Psychology • 50 Questions)</option>
+                      <option value="model-2026">2026 Smart Study Model Exam (Units 1 - 3 • 50 Questions)</option>
                     </optgroup>
                   </>
                 )

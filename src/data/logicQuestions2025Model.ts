@@ -2,7 +2,7 @@ import { ExamQuestion } from '../types';
 
 export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
   // =========================================================================
-  // UNIT 1: LOGIC AND PHILOSOPHY (Questions 1 - 10)
+  // UNIT 1: LOGIC AND PHILOSOPHY (Questions 1 - 16)
   // =========================================================================
   {
     id: 'loct-2025-model-q1',
@@ -58,20 +58,20 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     examType: 'model',
     questionType: 'multiple_choice',
     difficulty: 'easy',
-    topic: 'Features of Philosophy: Informal vs Formal Sense',
+    topic: 'Socratic Wisdom & Meaning of Wisdom',
     points: 1,
-    question: 'When an ordinary person casually remarks "my philosophy is that money cannot buy happiness," they are using the term philosophy in which sense?',
+    question: 'Socrates famously stated at his trial that "The unexamined life is not worth living." In philosophical terms, what does "wisdom" essentially entail according to Socrates and the logic module?',
     options: [
-      'The formal sense of "doing" philosophy',
-      'The informal sense of "having" a philosophy',
-      'The rigorous analytic sense of linguistic philosophy',
-      'The meta-ethical sense of normative inquiry'
+      'Having vast memorized knowledge of empirical data without questioning',
+      'A deep awareness of the boundaries of one\'s knowledge and an active commitment to pursue truth',
+      'The ability to win any debate regardless of logical validity or factual truth',
+      'Strict conformity to established institutional authority and dogma'
     ],
     correctAnswer: 1,
-    hint: 'Distinguish between an uncritical personal attitude versus a formal critical reflection.',
-    explanation: 'In Chapter 1 (Lesson 2, Page 15), the module draws a distinction between "having" a philosophy (the informal sense, referring to an informal personal attitude or set of beliefs held uncritically) and "doing" philosophy (the formal sense, reflecting on and criticizing deeply held beliefs). "My philosophy is..." reflects the informal sense.',
-    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 2፣ ገጽ 15) መሠረት፣ አንድ ሰው "የኔ ፍልስፍና ይሄ ነው..." ሲል መደበኛ ያልሆነውን ወይም ግላዊ አመለካከትን ("having" a philosophy / informal sense) መጠቀሙ ነው። መደበኛው ፍልስፍና ("doing" philosophy) ግን እምነቶችን በጥልቀት መርምሮና ተችቶ የመያዝ ሂሳዊ ሂደት ነው። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 2, Fuula 15) irratti, falaasama qabaachuu ("having" a philosophy - ilaalcha dhuunfaa al-idilee) fi falaasama hojjechuu ("doing" philosophy - yaada gad-fageenyaan xiinxaluu idilee) adda baasa. Namni tokko "falaasamni koo..." yoo jedhu ilaalcha al-idilee (informal sense) agarsiisa. Deebiin B dha.'
+    hint: 'Socrates considered himself wise because he recognized what he did not know.',
+    explanation: 'According to Chapter 1 (Lesson 1, Page 13-14), Socrates argued that true wisdom consists of recognizing the limits of one\'s own understanding ("I know that I know nothing") and living a reflective, self-critical life in relentless pursuit of moral integrity and truth.',
+    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 1፣ ገጽ 13-14) ላይ እንደተገለጸው፣ ሶቅራጥስ "ያልተመረመረ ህይወት ዋጋ የለውም" ሲል እውነተኛ ጥበብ ማለት የራስን የዕውቀት ገደብ ማወቅ እና ሁልጊዜ እውነትንና የሞራል ንጽህናን ለመፈለግ ራስንና ዓለምን በሂሳዊ መንገድ መመርመር እንደሆነ አስረድቷል። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 1, Fuula 13-14) irratti, Sooqiraaxis "Jireenyi hin qoratamne jiraachuun gatii hin qabu" yoo jedhu, ogummaan dhugaa daangaa beekumsa ofii beekuu fi jireenya of-qorannoo qabuun dhugaa fi naamusummaa barbaaduu akka ta\'e ibseera. Deebiin sirriin B dha.'
   },
   {
     id: 'loct-2025-model-q4',
@@ -81,20 +81,20 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     examType: 'model',
     questionType: 'multiple_choice',
     difficulty: 'medium',
-    topic: 'Metaphysics: Etymology & Origin',
+    topic: 'Basic Features of Philosophy',
     points: 1,
-    question: 'Etymologically, "metaphysics" means "after/beyond physics" (meta physika). Who coined this term when editing Aristotle\'s works on first philosophy?',
+    question: 'The module outlines five core characteristics that distinguish philosophy from other academic disciplines. Which of the following is NOT one of the basic features of philosophy?',
     options: [
-      'Andronicus of Rhodes',
-      'Pythagoras of Samos',
-      'Gorgias the Sophist',
-      'John Locke'
+      'Philosophy is a broad and comprehensive inquiry that searches for an integrated view of reality',
+      'Philosophy is primarily a closed system of dogmatic beliefs that rejects critical questioning',
+      'Philosophy examines our most basic, foundational beliefs about knowledge, morality, and reality',
+      'Philosophy is both critical (questioning assumptions) and constructive (building worldviews)'
     ],
-    correctAnswer: 0,
-    hint: 'Name the editor of Aristotle\'s works who placed his treatises on ultimate reality directly after his treatises on physics.',
-    explanation: 'According to Chapter 1 (Lesson 3, Page 20), Aristotle called this field "first philosophy." Because his writings on first philosophy came after his treatise on physics, Aristotle\'s editor, Andronicus of Rhodes, named them "metaphysics" (literally "those things after the physics").',
-    explanationAmharic: 'በሞጁሉ ምዕራፍ 1 (ትምህርት 3፣ ገጽ 20) መሠረት አሪስቶትል የመጀመሪያ ፍልስፍና (first philosophy) ብሎ ይጠራው የነበረ ሲሆን፣ የአሪስቶትል ጽሑፎች አርታዒ የነበረው አንድሮኒከስ ኦፍ ሮድስ (Andronicus of Rhodes) ጽሑፎቹ ከፊዚክስ ቀጥለው ስለተቀመጡ "ሜታፊዚክስ" (metaphysics - ከፊዚክስ ቀጥሎ ያሉ) የሚለውን ስም ሰጥቷቸዋል። ስለዚህ ትክክለኛው መልስ A ነው።',
-    explanationAfaanOromo: 'Akka moojulicha Boqonnaa 1 (Barnoota 3, Fuula 20)tti, Aristootil damee kana "falaasama duraa" jedhee ture. Haa ta\'u malee, gulaalaan barreeffamoota Aristootil Andiroonikas kan Roodees (Andronicus of Rhodes) barreeffamoota fiiziksii booda waan kaa\'eef "metaphysics" (wanta fiiziksiin boodaa) jedhee moggase. Deebiin sirriin A dha.'
+    correctAnswer: 1,
+    hint: 'Philosophy is fundamentally anti-dogmatic and critical.',
+    explanation: 'According to Chapter 1 (Lesson 2, Page 17-19), the 5 basic features of philosophy are: (1) broad field/comprehensive, (2) search for integration, (3) critical and constructive, (4) examination of basic beliefs, and (5) deals with ultimate questions. It is never a closed dogmatic system; dogmatism is the antithesis of philosophy.',
+    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 2፣ ገጽ 17-19) መሠረት፣ የፍልስፍና 5ቱ መሰረታዊ ባህሪያት፡ ሰፊ ጥናት መሆኑ፣ የተዋሃደ አመለካከት መፈለጉ፣ ሂሳዊና ገንቢ መሆኑ፣ መሰረታዊ እምነቶችን መመርመሩና የመጨረሻ ጥያቄዎችን መመለሱ ናቸው። ፍልስፍና በጭራሽ ዶግማቲክ (የታሸገ አመለካከት) አይደለም። ስለዚህ B የፍልስፍና ባህሪ አይደለም።',
+    explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 2, Fuula 17-19) irratti, amalli bu\'uuraa falaasamaa shanan: bal\'aa ta\'uu, ilaalcha wal-makaa barbaaduu, xiinxalaa fi ijaaraa ta\'uu, amantii bu\'uuraa qorachuu fi gaaffilee dhumaa gaafachuudha. Falaasamni matumaa amantii cufamaa (dogmatic) miti. Kanaafuu B deebii sirriidha.'
   },
   {
     id: 'loct-2025-model-q5',
@@ -104,20 +104,20 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     examType: 'model',
     questionType: 'multiple_choice',
     difficulty: 'medium',
-    topic: 'Metaphysics: Four Subsets',
+    topic: 'Core Fields of Philosophy: Metaphysics',
     points: 1,
-    question: 'Which subset of metaphysical inquiry asks questions such as: "What is the relation between mind and body? Do individuals possess free will or are actions predetermined? Does each person have an immortal soul?"',
+    question: 'Metaphysics investigates the ultimate nature of reality and existence. Which sub-branch of metaphysics studies the origin, evolution, and general structure of the physical universe as an orderly cosmos?',
     options: [
-      'Cosmological Aspect',
-      'Theological Aspect',
-      'Anthropological Aspect',
-      'Ontological Aspect'
+      'Theology',
+      'Cosmology',
+      'Ontology',
+      'Anthropology'
     ],
-    correctAnswer: 2,
-    hint: 'Look for the aspect of metaphysics that specifically deals with the nature and existence of human beings.',
-    explanation: 'According to Chapter 1 (Lesson 3, Page 21), the Anthropological Aspect of metaphysics deals with the philosophical study of human beings, specifically addressing the mind-body problem, moral status of humans, free will vs determinism, and the existence of the human soul.',
-    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 3፣ ገጽ 21) መሠረት የሜታፊዚክስ አንትሮፖሎጂካል ገጽታ (Anthropological Aspect) ስለ ሰው ልጅ ተፈጥሮ፣ የአእምሮና የአካል ግንኙነት (mind-body relation)፣ የሰው ልጅ ነፃ ፍላጎት (free will) እና የነፍስ ህልውና የሚያጠና ንዑስ ክፍል ነው። ስለዚህ መልሱ C ነው።',
-    explanationAfaanOromo: 'Akka Boqonnaa 1 (Barnoota 3, Fuula 21)tti, koodiin Xiin-namaa (Anthropological Aspect) kan meetaafiiziksii waa\'ee uumama dhala namaa, hariiroo sammuu fi qaamaa (mind-body), fedhii bilisaa fi lubbuu dhala namaa irratti kan xiyyeeffatuudha. Deebiin sirriin C dha.'
+    correctAnswer: 1,
+    hint: 'Cosmos refers to the ordered universe or world.',
+    explanation: 'Chapter 1 (Lesson 3, Page 22-23) defines the 4 main subfields of metaphysics: (1) Cosmology (study of the origin, nature, and structure of the universe), (2) Theology (study of God and the divine), (3) Philosophical Anthropology (study of human nature), and (4) Ontology (study of being or existence as such).',
+    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 3፣ ገጽ 22-23) መሠረት፣ ሜታፊዚክስ 4 ንዑሳን ዘርፎች አሉት፡ ኮስሞሎጂ (Cosmology - ስለ አጽናፈ ዓለም አመጣጥ፣ ተፈጥሮና መዋቅር የሚያጠና)፣ ቲኦሎጂ (ስለ እግዚአብሔር የሚያጠና)፣ አንትሮፖሎጂ (ስለ ሰው ልጅ ተፈጥሮ የሚያጠና) እና ኦንቶሎጂ (ስለ ህልውና የሚያጠና) ናቸው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 3, Fuula 22-23) keessatti, kutaaleen Meetaafiiziksii arfan keessaa "Kozmooloojiin" (Cosmology) qaama uumama, guddinaa fi caasaa waliigalaa uumama cufa (universe) qorata. Kanaafuu deebiin B dha.'
   },
   {
     id: 'loct-2025-model-q6',
@@ -126,21 +126,21 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     year: '2025 Model',
     examType: 'model',
     questionType: 'multiple_choice',
-    difficulty: 'hard',
-    topic: 'Epistemology: Skepticism & Gorgias',
+    difficulty: 'medium',
+    topic: 'Core Fields of Philosophy: Epistemology',
     points: 1,
-    question: 'The Greek Sophist Gorgias famously asserted that "Nothing exists, and that if it did, we could not know it; and if we could know it, we could not communicate it." In epistemology, this extreme position is classified as:',
+    question: 'Epistemology is the philosophical theory of knowledge. Philosophers who hold that genuine knowledge is primarily acquired through sensory observation and perceptual experience (such as John Locke and David Hume) are classified as:',
     options: [
-      'Extreme Rationalism',
-      'Radical Skepticism',
-      'Authoritarianism',
-      'Religious Revelation'
+      'Rationalists',
+      'Empiricists',
+      'Skeptics',
+      'Idealists'
     ],
     correctAnswer: 1,
-    hint: 'It is the philosophical position claiming that genuine, reliable knowledge is impossible to attain.',
-    explanation: 'In Chapter 1 (Lesson 3, Page 23), the module states that Skepticism in its narrow/radical sense claims that people cannot acquire reliable knowledge and that any search for truth is in vain, as famously expressed by the Greek Sophist Gorgias.',
-    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 3፣ ገጽ 23) ላይ እንደተገለጸው፣ የግሪኩ ሶፊስት ጎርጊያስ (Gorgias) "ምንም ነገር የለም፣ ቢኖርም እንኳ ልናውቀው አንችልም..." በማለት የተናገረው አቋም በኤፒስቲሞሎጂ ውስጥ ጽኑ ተጠራጣሪነት ወይም ስኬፕቲሲዝም (Radical Skepticism) ይባላል። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 3, Fuula 23) keessatti, soofistiin Giriik Goorjiyaas (Gorgias) "Wanti tokkoyyuu hin jiru, yoo jiraatellee beekuu hin dandeenyu..." jechuun kan dhiyeesse kun falaasama beekumsaa keessatti shakkitummaa cimaa (Radical Skepticism) jedhama. Deebiin B dha.'
+    hint: 'Empirical refers to sensory experience, observation, and experimentation.',
+    explanation: 'Chapter 1 (Lesson 3, Page 24-25) explains the two primary epistemological traditions: Empiricism asserts that sensory experience is the primary source of all human knowledge (Locke, Berkeley, Hume). Rationalism asserts that reason and innate intellectual principles are the ultimate source of knowledge (Descartes, Spinoza, Leibniz).',
+    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 3፣ ገጽ 24-25) መሠረት፣ እውነተኛ ዕውቀት የሚገኘው በስሜት ህዋሳት ምልከታና በተጨባጭ ተሞክሮ ነው ብለው የሚያምኑ ፈላስፎች (እንደ ጆን ሎክና ዴቪድ ሂዩም) "ኤምፔሪሲስቶች" (Empiricists) ይባላሉ። ምክንያታዊነትን (Reason) የሚያስቀድሙት ደግሞ ራሽናሊስቶች ይባላሉ። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 3, Fuula 24-25) irratti, beekumsi kan argamu muuxannoo fi qaamolee miiraatiin jedhanii warri amanan (kan akka John Locke fi David Hume) "Empiricists" jedhamu. Sammuu fi sababa kan dursan immoo "Rationalists" jedhamu. Deebiin sirriin B dha.'
   },
   {
     id: 'loct-2025-model-q7',
@@ -150,20 +150,20 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     examType: 'model',
     questionType: 'multiple_choice',
     difficulty: 'medium',
-    topic: 'Epistemology: Sources of Knowledge',
+    topic: 'Epistemological Positions: Skepticism & Agnosticism',
     points: 1,
-    question: 'Which epistemological source of knowledge claims that human senses provide only raw material, and that reason/intellect alone possesses the power to organize these sensations into universal, certain, and valid judgments?',
+    question: 'In epistemology, what is the key distinction between "Skepticism" and "Agnosticism"?',
     options: [
-      'Empiricism',
-      'Rationalism',
-      'Intuition',
-      'Tradition'
+      'Skepticism claims absolute certainty is effortless, while Agnosticism denies human reason exists.',
+      'Skepticism questions or doubts whether genuine, certain knowledge is possible, while Agnosticism claims that ultimate reality (like God) is unknown and unknowable.',
+      'Skepticism accepts religious authority unconditionally, while Agnosticism relies exclusively on mathematical deduction.',
+      'Skepticism deals only with ethics, while Agnosticism deals exclusively with logic.'
     ],
     correctAnswer: 1,
-    hint: 'Think of the school that emphasizes human reasoning, thought, and formal logic over sensory experience.',
-    explanation: 'Chapter 1 (Lesson 3, Page 24) explains that Rationalism is the view that reason and thought are the central factors in knowledge. Rationalists argue that senses alone cannot provide universal valid judgments and that sensations must be organized by the active mind into a meaningful system.',
-    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 3፣ ገጽ 24) መሠረት፣ ራሽናሊዝም (Rationalism) አእምሮ ወይም አመክንዮ (reason) ዋነኛው የዕውቀት ምንጭ እንደሆነና የስሜት ሕዋሳት ጥሬ ዕቃዎችን ብቻ እንደሚያቀርቡ፣ አእምሮ ግን እነዚህን አደራጅቶ ወደ ትክክለኛ ዕውቀት እንደሚቀይር የሚያስተምር ነው። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 3, Fuula 24) irratti, Raashinaalizimiin (Rationalism) sammuun ykn xiinxalli sababaa (reason) madda beekumsaa isa ijoodha jedha. Miirawwan keenya odeeffannoo bu\'uuraa qofa kennu, sammuun immoo kanneen qindeessuun beekumsa guutuu taasisa. Deebiin B dha.'
+    hint: 'Skepticism doubts knowledge claims; Agnosticism states that ultimate truths/God cannot be known by human beings.',
+    explanation: 'According to Chapter 1 (Lesson 3, Page 25-26), Skepticism holds that genuine certainty in knowledge is impossible or doubtful. Agnosticism specifically maintains that God, ultimate realities, or the absolute nature of things cannot be known by the human mind.',
+    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 3፣ ገጽ 25-26) መሠረት፣ ስኬፕቲሲዝም (Skepticism) እርግጠኛ ዕውቀትን ማግኘት ይቻላል ወይ በሚለው ላይ ጥርጣሬ የሚያነሳ ሲሆን፤ አግኖስቲሲዝም (Agnosticism) ደግሞ እንደ እግዚአብሔር ያሉ የመጨረሻ እውነታዎች በሰው አዕምሮ ሊታወቁ የማይችሉ (unknowable) ናቸው የሚል አቋም ነው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 3, Fuula 25-26) irratti, Iskeeptiisiizimiin (Skepticism) beekumsi dhugaa mirkanaa\'aa ta\'e argamuu danda\'uu isaa shakkiin kan ilaalu yoo ta\'u, Agnoostisiizimiin (Agnosticism) immoo wantoota uumamaa ol ta\'an (akka Waaqayyoo) sammuun namaa baruu hin danda\'u jedha. Deebiin B dha.'
   },
   {
     id: 'loct-2025-model-q8',
@@ -173,20 +173,20 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     examType: 'model',
     questionType: 'multiple_choice',
     difficulty: 'medium',
-    topic: 'Axiology: Branches of Ethics',
+    topic: 'Core Fields of Philosophy: Axiology (Ethics)',
     points: 1,
-    question: 'Ethics is divided into three branches. Which branch investigates the technical meaning of ethical terms like "right", "good", and "duty", and examines how ethical statements can be logically verified?',
+    question: 'Axiology is the philosophical study of values. Ethics, a primary branch of axiology, is subdivided into three domains. Which domain investigates the foundational meaning of ethical terms (e.g., "What does \'good\' mean?") and the metaphysical nature of moral facts?',
     options: [
-      'Normative Ethics',
+      'Normative ethics',
+      'Descriptive ethics',
       'Meta-ethics',
-      'Applied Ethics',
-      'Descriptive Sociology'
+      'Applied ethics'
     ],
-    correctAnswer: 1,
-    hint: 'It is the second-order, highly analytical branch concerned with the meaning of moral language rather than formulating moral rules.',
-    explanation: 'In Chapter 1 (Lesson 4, Page 28), Meta-ethics is defined as the highly technical philosophical discipline that deals with the investigation of the meaning of ethical terms (such as good, bad, right, wrong) and the critical study of how ethical statements can be verified.',
-    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 4፣ ገጽ 28) መሠረት ሜታ-ኢቲክስ (Meta-ethics) እንደ "ጥሩ"፣ "መጥፎ"፣ "ትክክል" ያሉ የሥነ-ምግባር ቃላትን ትርጉም እና የስነ-ምግባር አረፍተ-ነገሮች እንዴት እንደሚረጋገጡ የሚያጠና ከፍተኛ ቴክኒካል የፍልስፍና ዘርፍ ነው። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 4, Fuula 28) irratti, Meetaa-eetiksii (Meta-ethics) hiika jechoota safuu kanneen akka "gaarii", "badaa", "sirrii" fi akkamitti himoonni safuu akka mirkanaa\'an kan qoratu damee og-falaasamaati. Deebiin sirriin B dha.'
+    correctAnswer: 2,
+    hint: 'Prefix "meta-" indicates analyzing the foundational meaning and assumptions behind concepts.',
+    explanation: 'Chapter 1 (Lesson 4, Page 27-28) explains: Normative ethics formulates moral guidelines/principles (what ought to be done). Descriptive ethics describes what people actually believe and practice. Meta-ethics studies the meaning of moral terms, the logic of moral reasoning, and whether moral facts are objective or subjective.',
+    explanationAmharic: 'በምዕራፍ 1 (ትምህርት 4፣ ገጽ 27-28) መሠረት፣ ሜታ-ኢቲክስ (Meta-ethics) የስነ-ምግባር ፅንሰ-ሀሳቦችን መነሻ ፍቺ (ለምሳሌ "ጥሩ" ወይም "ፍትሃዊ" ማለት ምን ማለት ነው?) እና የሞራል እውነታዎችን ህልውና የሚመረምር የስነ-ምግባር ንዑስ ዘርፍ ነው። ስለዚህ መልሱ C ነው።',
+    explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 4, Fuula 27-28) irratti, Meetaa-eetiksiin (Meta-ethics) hiika bu\'uuraa jechoota naamusaa (fkn "gaariin" maali?) fi dhugummaa yaada naamusaa qorata. Kanaafuu deebiin sirriin C dha.'
   },
   {
     id: 'loct-2025-model-q9',
@@ -196,7 +196,7 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     examType: 'model',
     questionType: 'multiple_choice',
     difficulty: 'easy',
-    topic: 'Axiology: Aesthetics',
+    topic: 'Core Fields of Philosophy: Aesthetics',
     points: 1,
     question: 'Which core branch of Axiology deals with the philosophy of art, beauty, aesthetic experiences, and criteria of taste and sensory enjoyment?',
     options: [
@@ -234,12 +234,150 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     explanationAmharic: 'በምዕራፍ 1 (ትምህርት 5፣ ገጽ 33) ላይ በበርትራንድ ራስል (Bertrand Russell) የተጻፈው እንደሚያስረዳው፣ የፍልስፍና ዋና እሴት የሚገኘው እርግጠኛ ባለመሆኑ (in its very uncertainty) ውስጥ ነው። ይህም ሰዎችን ከልማድ አምባገነንነት ነፃ በማውጣትና አዳዲስ አማራጮችን በማሳየት የሰውን ልጅ የመደነቅ ስሜት ህያው ያደርገዋል። ስለዚህ መልሱ B ነው።',
     explanationAfaanOromo: 'Boqonnaa 1 (Barnoota 5, Fuula 33) irratti, Baartiraand Raasiil (Bertrand Russell) akka jedhutti, gatiin falaasamaa harka caalu qabiyyee isaa isa hin mirkanoofne (uncertainty) keessatti argama. Kunis namoota garbummaa aadaa fi yaada barame jalaa bilisa baasuun dinqisiifannaa isaanii jiraachisa. Deebiin B dha.'
   },
-
-  // =========================================================================
-  // UNIT 2: BASIC CONCEPTS OF LOGIC (Questions 11 - 20)
-  // =========================================================================
   {
     id: 'loct-2025-model-q11',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'easy',
+    topic: 'Wonder as the Origin of Philosophy',
+    points: 1,
+    question: 'According to both Plato and Aristotle, what fundamental human experience serves as the starting point and "mother of all philosophy"?',
+    options: [
+      'Fear of the unknown and superstition',
+      'Wonder (the feeling of awe and curiosity about existence)',
+      'The desire to gain political domination over others',
+      'Economic competition for scarce resources'
+    ],
+    correctAnswer: 1,
+    hint: 'Recall the classic Greek philosophical dictum that philosophy begins with awe and curiosity about why things exist.',
+    explanation: 'According to Chapter 1 of the MoSHE logic module, Plato and Aristotle maintained that wonder is the beginning of all philosophy. When human beings observe the wonders of nature and human consciousness, curiosity drives them to seek foundational explanations beyond mere myth.',
+    explanationAmharic: 'በትምህርት ሚኒስቴር የሎጂክ ሞጁል ምዕራፍ 1 መሠረት፣ ፕላቶ እና አሪስቶትል "የመደነቅ ስሜት" (Wonder/awe) የፍልስፍና ሁሉ መጀመሪያና ምንጭ እንደሆነ ተናግረዋል። የሰው ልጅ ስለ ተፈጥሮና ስለ ህልውናው ሲደነቅ እውነተኛውን ምክንያት ለመፈለግ መፈላሰፍ ይጀምራል። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Akka moojulii Loojiikii MoSHE Boqonnaa 1tti, Pilaatoo fi Arisxoxil "Dinqisiifannaan" (Wonder) jalqaba falaasama hundaati jedhanii barsiisaniiru. Dhalli namaa yeroo uumama dinqisiifatu gaaffilee bu\'uuraa gaafachuu fi falaasamuutti ka\'a. Deebiin sirriin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q12',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Sources of Knowledge in Epistemology',
+    points: 1,
+    question: 'In addition to reason and sensory experience, epistemology identifies other sources of human knowledge. Which source refers to an immediate, direct cognitive flash of insight that occurs without any conscious discursive reasoning?',
+    options: [
+      'Empirical observation',
+      'Intuition',
+      'Authority',
+      'Revelation'
+    ],
+    correctAnswer: 1,
+    hint: 'A direct, gut-level apprehension of truth that bypasses step-by-step rational argumentation.',
+    explanation: 'In Chapter 1, epistemology studies various sources of knowledge: Intuition is defined as direct, immediate apprehension or knowing of something without the intervention of conscious reasoning or external sensory observation. Option B is correct.',
+    explanationAmharic: 'በምዕራፍ 1 የዕውቀት ምንጮች ትንተና መሠረት፣ "ኢንቱሽን" (Intuition) የሚባለው ያለ ምንም ደረጃ በደረጃ አመክንዮ ወይም የስሜት ህዋሳት ምልከታ በቀጥታና በቅጽበት ወደ አዕምሮ የሚመጣ ውስጣዊ የማወቅ ስሜት ነው። ስለዚህ ትክክለኛው መልስ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 1 keessatti maddoota beekumsaa yeroo ibsamu, "Intuition" jechuun adeemsa sababa himuu ifa ta\'e tokko malee battalatti beekumsa sammuu keessatti uumamuudha. Kanaafuu deebiin sirriin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q13',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Philosophical Anthropology & Mind-Body Problem',
+    points: 1,
+    question: 'Philosophical anthropology, as a subfield of metaphysics, investigates the essential nature of human existence. The famous philosophical debate regarding whether the human mind is distinct and separable from the physical brain is known as:',
+    options: [
+      'The Cosmological problem',
+      'The Mind-Body problem (Dualism vs. Monism)',
+      'The Problem of Induction',
+      'The Value-judgment dispute'
+    ],
+    correctAnswer: 1,
+    hint: 'Think of René Descartes arguing that immaterial mind (res cogitans) and physical body (res extensa) interact.',
+    explanation: 'In metaphysics, philosophical anthropology addresses the Mind-Body problem: Dualism (asserted famously by Descartes) maintains that mind and body are two distinct substances, while Monism/Physicalism maintains that mental events are simply brain states. Option B is correct.',
+    explanationAmharic: 'በሜታፊዚክስ ውስጥ "የአዕምሮና የአካል ችግር" (Mind-Body problem) የሚባለው አዕምሮና አካል ሁለት የተለያዩ ነገሮች ናቸው ወይስ አንድ? (Dualism vs Monism) በሚለው ላይ የሚካሄደው ጥልቅ የፍልስፍና ክርክር ነው። ስለዚህ ትክክለኛው መልስ B ነው።',
+    explanationAfaanOromo: 'Meetaafiiziksii keessatti gaaffiin sammuun namaa qaama dhibee irraa adda moo tokkuma (Dualism vs Monism) jedhu "Mind-Body problem" jedhama. Kanaafuu deebiin sirriin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q14',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Social and Political Philosophy',
+    points: 1,
+    question: 'As a subdivision of Axiology, Social and Political Philosophy deals primarily with questions concerning:',
+    options: [
+      'The physiological processes governing neurological synapses',
+      'The legitimate source of political authority, social justice, rights, and the optimal organization of society',
+      'Mathematical proofs for geometric theorems',
+      'The classification of extinct biological specimens'
+    ],
+    correctAnswer: 1,
+    hint: 'Political philosophy examines governance, rights, state power, and distributive justice.',
+    explanation: 'Social and political philosophy examines the moral justification for state power, the nature of rights and liberties, social justice, and the legitimate foundations of political institutions. Option B is correct.',
+    explanationAmharic: 'ማህበራዊና ፖለቲካዊ ፍልስፍና የሚያጠናው የመንግስትን ህጋዊ ስልጣን፣ ማህበራዊ ፍትህን፣ የዜጎችን መብትና ነፃነት እንዲሁም ህብረተሰብ እንዴት በተሻለ ሁኔታ መዋቀር እንዳለበት ነው። ስለዚህ ትክክለኛው መልስ B ነው።',
+    explanationAfaanOromo: 'Falaasamni hawaasaa fi siyaasaa maddoota aangoo seera qabeessaa, haqa hawaasummaa, mirgoota lammiilee fi akkataa hawaasni itti ijaaramuu qabu qorata. Deebiin sirriin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q15',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'easy',
+    topic: 'Practical Benefits of Studying Logic & Philosophy',
+    points: 1,
+    question: 'How does studying logic and philosophy provide students with "intellectual self-defense" in everyday life?',
+    options: [
+      'It teaches physical martial arts techniques for campus safety.',
+      'It equips individuals to detect fallacies, resist manipulation from deceptive advertising, and evaluate arguments objectively.',
+      'It guarantees automatic employment in government without taking civil service exams.',
+      'It forces everyone around you to agree with your personal political opinions.'
+    ],
+    correctAnswer: 1,
+    hint: 'Critical thinking protects the mind against emotional persuasion, propaganda, and flawed reasoning.',
+    explanation: 'Studying logic and philosophy builds intellectual self-defense by equipping students with analytical tools to detect deceptive rhetoric, evaluate evidence critically, unmask logical fallacies, and avoid manipulative dogmas. Option B is correct.',
+    explanationAmharic: 'ሎጂክና ፍልስፍናን ማጥናት ለተማሪዎች "የአዕምሮ ራስን መከላከያ" (intellectual self-defense) ይሰጣል፤ ይህም የተሳሳቱ ክርክሮችን (fallacies) እንዲለዩ፣ በማስታወቂያና በፖለቲካ ፕሮፓጋንዳ እንዳይታለሉ እና ማስረጃዎችን በነፃ አዕምሮ እንዲመዝኑ ይረዳቸዋል። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Loojikii fi falaasama baruun "ittisa sammuu" (intellectual self-defense) namaaf kenna; kunis soba fi dogoggora falmii baruuf, yaada gowwoomsaa mormuu fi ragaa qabatamaadhaan madaaluuf nama dandeessisa. Deebiin sirriin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q16',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Critical vs Constructive Nature of Philosophy',
+    points: 1,
+    question: 'The module notes that philosophy possesses a dual dynamic character: it is both "critical" and "constructive." What characterizes the "constructive" side of philosophy?',
+    options: [
+      'Demolishing outdated historical traditions through cynical skepticism',
+      'Synthesizing insights from science, arts, and ethics into a coherent, comprehensive worldview',
+      'Memorizing chemical formulas to construct laboratory materials',
+      'Accepting contradictory statements without resolving their logical clash'
+    ],
+    correctAnswer: 1,
+    hint: 'While the critical side analyzes and deconstructs assumptions, the constructive side builds a unified understanding of life.',
+    explanation: 'In Chapter 1 (Lesson 2), philosophy is described as critical and constructive. The critical side dismantles flawed assumptions and unexamined dogmas, while the constructive side actively builds and synthesizes an integrated, coherent interpretation of reality and human life. Option B is correct.',
+    explanationAmharic: 'የፍልስፍና ሂሳዊ (critical) ገጽታ የተሳሳቱ አመለካከቶችን ሲመረምርና ሲያፈርስ፤ ገንቢ (constructive) ገጽታው ደግሞ ከተለያዩ የሳይንስና የዕውቀት ዘርፎች የተገኙ እውነታዎችን በማቀናጀት የተሟላና ወጥ የሆነ የዓለም አመለካከት (comprehensive worldview) ይገነባል። ስለዚህ ትክክለኛው መልስ B ነው።',
+    explanationAfaanOromo: 'Kutaan falaasamaa inni ijaaraa (constructive) jedhamu beekumsa saayinsii fi aartii adda addaa walitti qindeessuudhaan ilaalcha addunyaa guutuu fi walsimataa ta\'e ijaara. Kanaafuu deebiin sirriin B dha.'
+  },
+
+  // =========================================================================
+  // UNIT 2: BASIC CONCEPTS OF LOGIC (Questions 17 - 33)
+  // =========================================================================
+  {
+    id: 'loct-2025-model-q17',
     courseId: 'loct-1011',
     courseCode: 'LoCT 1011',
     year: '2025 Model',
@@ -258,146 +396,8 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     correctAnswer: 2,
     hint: 'A statement is a declarative sentence that possesses a truth-value (either true or false).',
     explanation: 'According to Chapter 2 (Lesson 1, Page 42), a statement is a declarative sentence that has a truth-value (truth or falsity). Questions, proposals, exclamations, and commands do not assert anything that can be evaluated as true or false, and therefore cannot serve as premises or conclusions.',
-    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 1፣ ገጽ 42) መሠረት፣ አረፍተ-ነገር (statement) የሚባለው እውነት ወይም ሀሰት ሊሆን የሚችል ገላጭ አረፍተ-ነገር (declarative sentence) ነው። ጥያቄ፣ ትእዛዝ፣ ወይም ጥያቄያዊ ሀሳብ እውነት ወይም ሀሰት ሊባሉ አይችሉም። ስለዚህ C ትክክለኛ አረፍተ-ነገር ነው።',
-    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 1, Fuula 42) keessatti, himni beekumsaa (statement) hima ibsaa dhugaa ykn soba ta\'uu danda\'uudha. Gaaffiin, ajajni fi yaada dhiyeessuun dhugaa/soba hin qaban. Kanaafuu C qofti statement dha.'
-  },
-  {
-    id: 'loct-2025-model-q12',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'medium',
-    topic: 'Premise vs Conclusion Indicators',
-    points: 1,
-    question: 'Unlike most indicators, the phrase "for this reason" is unique because:',
-    options: [
-      'The statement following it is the premise, while the statement preceding it is irrelevant',
-      'The statement coming before "for this reason" is the premise, and the statement coming after it is the conclusion',
-      'It can only be used in non-argumentative conditional statements',
-      'It always indicates an inductive generalization based on signs'
-    ],
-    correctAnswer: 1,
-    hint: 'Pay close attention to the special rule on page 46 regarding "for this reason" versus "for the reason that".',
-    explanation: 'In Chapter 2 (Lesson 1, Page 46), the module highlights that "for this reason" is special: the statement that comes before "for this reason" is the premise, and the statement that comes after "for this reason" is the conclusion.',
-    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 1፣ ገጽ 46) ላይ እንደተገለጸው፣ "for this reason" የሚለው ጠቋሚ ቃል የተለየ ነው፤ ምክንያቱም ከቃሉ በፊት የሚመጣው አረፍተ-ነገር መነሻ (premise) ሲሆን፣ ከቃሉ በኋላ የሚመጣው ደግሞ መደምደሚያ (conclusion) ነው። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 1, Fuula 46) irratti, jechi "for this reason" jedhu addadha; jecha kanaan dura kan jiru ragaa (premise) yoo ta\'u, jecha kana booda kan dhufu immoo murtoo (conclusion) dha. Deebiin sirriin B dha.'
-  },
-  {
-    id: 'loct-2025-model-q13',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'medium',
-    topic: 'Non-argumentative Passages: Warnings vs Advice',
-    points: 1,
-    question: 'Consider the passage: "Whatever you promise to tell, never confide political secrets to your wife." According to the module, this passage is NOT an argument because it is an example of:',
-    options: [
-      'An explanation',
-      'A warning',
-      'An expository passage',
-      'A conditional statement'
-    ],
-    correctAnswer: 1,
-    hint: 'It is intended to put someone on guard against a dangerous or detrimental situation without claiming to prove anything.',
-    explanation: 'According to Chapter 2 (Lesson 2, Page 52), a warning is a form of expression intended to put someone on guard against a dangerous or detrimental situation. It provides no evidence to prove that a statement is true, and thus lacks an inferential claim.',
-    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 2፣ ገጽ 52) መሠረት፣ ይህ አረፍተ-ነገር ማስጠንቀቂያ (warning) ነው፤ ማስጠንቀቂያ ሰውን ከአደጋ ለመጠበቅ የሚነገር እንጂ ምንም ዓይነት ማስረጃ አቅርቦ ለማስረዳት (prove ለማድረግ) የሚሞክር ባለመሆኑ ክርክር (argument) አይደለም። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 2, Fuula 52) irratti, himni kun akeekkachiisa (warning) jedhama. Akeekkachiisni balaa irraa of eeggachiisuuf dhiyaata malee ragaa dhiyeessee wanta tokko mirkaneessuuf waan hin yaalleef argumentii miti. Deebiin B dha.'
-  },
-  {
-    id: 'loct-2025-model-q14',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'hard',
-    topic: 'Non-argumentative Passages: Explanations',
-    points: 1,
-    question: 'In the explanation: "Cows digest grass while humans cannot, because cows\' digestive systems contain an enzyme not found in humans," the statement "Cows digest grass while humans cannot" is technically called the:',
-    options: [
-      'Explanans',
-      'Explanandum',
-      'Antecedent',
-      'Consequent'
-    ],
-    correctAnswer: 1,
-    hint: 'It is the accepted fact describing the event or phenomenon to be explained.',
-    explanation: 'In Chapter 2 (Lesson 2, Page 57), an explanation consists of two components: the explanandum (the statement that describes the event or phenomenon to be explained / accepted fact) and the explanans (the statement or group of statements that purports to do the explaining). "Cows digest grass while humans cannot" is the explanandum.',
-    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 2፣ ገጽ 57) መሠረት፣ ማብራሪያ (explanation) በሁለት ይከፈላል፡ ኤክስፕላናንደም (explanandum - የሚብራራው የታወቀ እውነታ) እና ኤክስፕላናንስ (explanans - ማብራሪያ ሰጪው ምክንያት)። "ላሞች ሳር ያደቅቃሉ ሰዎች ግን አይችሉም" የሚለው የታወቀው እውነታ Explanandum ነው። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 2, Fuula 57) irratti, ibsi bakka lamatti qoodama: explanandum (wanta ibsamuuf dhiyaate/dhugaa beekamaa) fi explanans (hima ibsa kennaa jiru). Kanaafuu himni kun Explanandum dha. Deebiin B dha.'
-  },
-  {
-    id: 'loct-2025-model-q15',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'medium',
-    topic: 'Conditional Statements: Necessary & Sufficient Conditions',
-    points: 1,
-    question: 'In logic, how do sufficient and necessary conditions relate in the conditional statement "If X is a dog, then X is an animal"?',
-    options: [
-      'Being a dog is necessary for being an animal, and being an animal is sufficient for being a dog',
-      'Being a dog is sufficient for being an animal, and being an animal is necessary for being a dog',
-      'Being a dog and being an animal are both sufficient conditions for each other',
-      'Neither condition is necessary or sufficient because the statement is not an argument'
-    ],
-    correctAnswer: 1,
-    hint: 'If X is a dog, that is enough (sufficient) to know it is an animal. But an entity must be an animal (necessary) to be a dog.',
-    explanation: 'Chapter 2 (Lesson 2, Page 62-63) clarifies that A is a sufficient condition for B whenever the occurrence of A is all that is needed for B (being a dog is sufficient for being an animal). B is a necessary condition for A whenever A cannot occur without B (being an animal is necessary for being a dog).',
-    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 2፣ ገጽ 62-63) መሠረት፣ ውሻ መሆን እንስሳ ለመሆን በቂ ቅድመ-ሁኔታ (sufficient condition) ነው፤ ነገር ግን እንስሳ መሆን ውሻ ለመሆን የግድ አስፈላጊ ቅድመ-ሁኔታ (necessary condition) ነው። ስለዚህ ትክክለኛው መልስ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 2, Fuula 62-63) irratti, saree ta\'uun bineensa ta\'uuf ulaagaa ga\'aadha (sufficient condition), garuu bineensa ta\'uun saree ta\'uuf ulaagaa dirqamaati (necessary condition). Kanaafuu deebiin B dha.'
-  },
-  {
-    id: 'loct-2025-model-q16',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'medium',
-    topic: 'Deductive Argument Forms: Syllogisms',
-    points: 1,
-    question: 'Consider the argument:\n"Rewina is either Ethiopian or Eritrean.\nRewina is not Eritrean.\nTherefore, Rewina is Ethiopian."\nThis deductive argument is an instance of which specific form?',
-    options: [
-      'Categorical syllogism',
-      'Disjunctive syllogism',
-      'Hypothetical syllogism',
-      'Argument from analogy'
-    ],
-    correctAnswer: 1,
-    hint: 'Notice the "either ... or" disjunction in the first premise.',
-    explanation: 'According to Chapter 2 (Lesson 3, Page 70), a disjunctive syllogism is a syllogism having a disjunctive ("either ... or") statement as one of its premises. Eliminating one disjunct guarantees the truth of the remaining disjunct.',
-    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 3፣ ገጽ 70) መሠረት፣ አንዱ መነሻ ሀሳብ "ወይም ... ወይም" (either ... or) የያዘ ሲሎጂዝም ዲዝጃንክቲቭ ሲሎጂዝም (Disjunctive syllogism) ይባላል። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 3, Fuula 70) irratti, silloojiizimiin hima "yookiin ... yookiin" (either ... or) of keessaa qabu Disjunctive Syllogism jedhama. Deebiin B dha.'
-  },
-  {
-    id: 'loct-2025-model-q17',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'medium',
-    topic: 'Deductive vs Inductive: Mathematics & Statistics',
-    points: 1,
-    question: 'While arguments based on pure mathematics (arithmetic and geometry) are always deductive, the module notes an important exception. Arguments depending on which mathematical field are best interpreted as INDUCTIVE?',
-    options: [
-      'Calculus',
-      'Linear Algebra',
-      'Statistics',
-      'Analytic Geometry'
-    ],
-    correctAnswer: 2,
-    hint: 'Think of the field that draws probabilistic generalizations from samples to populations.',
-    explanation: 'Chapter 2 (Lesson 3, Page 69 & 71) explicitly highlights that while all arguments in pure mathematics (arithmetic/geometry) are deductive, "a noteworthy exception, however, is arguments that depend on statistics are usually best interpreted as inductive" because sample-to-population generalizations are probabilistic.',
-    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 3፣ ገጽ 69 እና 71) ላይ እንደተገለጸው፣ ንጹህ ሂሳብ (አርቲሜቲክ እና ጂኦሜትሪ) ተቀናሽ (deductive) ሲሆን፣ ከናሙና ተነስቶ የመላምታዊ መደምደሚያ የሚያቀርበው የስታቲስቲክስ (Statistics) ክርክር ግን ሁልጊዜ እንደ ኢንዳክቲቭ (Inductive) ይወሰዳል። ስለዚህ መልሱ C ነው።',
-    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 3, Fuula 69 fi 71) irratti, herregni qulqulluun deductive yoo ta\'u, herregni dhimma Istaatiistiksii (Statistics) irratti hundaa\'u garuu qorannoo saamudaa irratti waan hundaa\'uuf akka Inductive tti ilaalama. Deebiin C dha.'
+    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 1፣ ገጽ 42) መሠረት፣ በሎጂክ ውስጥ "አረፍተ-ነገር/ስቴትመንት" የሚባለው እውነት ወይም ሐሰት ሊባል የሚችል ገላጭ አረፍተ-ነገር ብቻ ነው። ጥያቄ፣ ትዕዛዝ፣ ወይም ጥሪ እውነት/ሐሰት ሊባሉ ስለማይችሉ ስቴትመንት አይደሉም። ስለዚህ C ብቻ ስቴትመንት ነው።',
+    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 1, Fuula 42) irratti, loojikii keessatti "Hima" (statement) kan jedhamu hima himamsaa kan dhugaa ykn soba ta\'uu danda\'u qofaadha. Gaaffiin, ajajni fi wamichi hima loojikii ta\'uu hin danda\'an. Kanaafuu C qofatu statement dha.'
   },
   {
     id: 'loct-2025-model-q18',
@@ -406,21 +406,21 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     year: '2025 Model',
     examType: 'model',
     questionType: 'multiple_choice',
-    difficulty: 'hard',
-    topic: 'Evaluating Deductive Arguments: Validity and Truth',
+    difficulty: 'easy',
+    topic: 'Premise vs Conclusion Indicators',
     points: 1,
-    question: 'Which of the following combinations of truth-values of premises and conclusion is absolutely IMPOSSIBLE in a valid deductive argument?',
+    question: 'Consider the argument: "No democratic government permits arbitrary detention without trial. Ethiopia is a constitutional democracy; therefore, Ethiopia does not permit arbitrary detention without trial." Which word serves as the conclusion indicator?',
     options: [
-      'Premises are True, Conclusion is True',
-      'Premises are False, Conclusion is True',
-      'Premises are False, Conclusion is False',
-      'Premises are True, Conclusion is False'
+      'No',
+      'Permits',
+      'Therefore',
+      'Without'
     ],
-    correctAnswer: 3,
-    hint: 'By definition, a valid deductive argument is one where it is impossible for the premises to be true and the conclusion false.',
-    explanation: 'Chapter 2 (Lesson 4, Page 76 & Table 1.1 on Page 78) underscores that any deductive argument having actually true premises and an actually false conclusion is necessarily invalid. A valid argument with True premises and a False conclusion can NEVER exist.',
-    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 4፣ ገጽ 76 እና 78) መሠረት፣ በአንድ ትክክለኛ ተቀናሽ ክርክር (valid deductive argument) ውስጥ መነሻዎቹ እውነት (True) ሆነው መደምደሚያው ሀሰት (False) ሊሆን በፍጹም አይችልም። ይህ ጥምረት ካለ ክርክሩ ወዲያውኑ invalid ይሆናል። ስለዚህ መልሱ D ነው።',
-    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 4, Fuula 76 fi 78) irratti, ragaan (premises) dhugaa ta\'ee murtoon (conclusion) soba kan ta\'u qabatama falmii deductive valid ta\'e keessatti matumaa hin danda\'amu. Qindoominni kun yoo jiraate falmichis invalid ta\'a. Deebiin D dha.'
+    correctAnswer: 2,
+    hint: 'Look for the keyword that signals that what immediately follows is the main claim supported by the premises.',
+    explanation: 'According to Chapter 2 (Lesson 2, Page 47), "therefore" is a standard conclusion indicator. Other conclusion indicators include hence, thus, so, consequently, and it follows that.',
+    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 2፣ ገጽ 47) መሠረት፣ "therefore" (ስለዚህ) የሚለው ቃል የመደምደሚያ ጠቋሚ (Conclusion indicator) ነው። ሌሎች ጠቋሚዎች hence, thus, so, consequently ናቸው። ስለዚህ መልሱ C ነው።',
+    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 2, Fuula 47) irratti, jechi "therefore" (kanaafuu) jedhu mallattoo xumuraati (conclusion indicator). Kanaafuu deebiin C dha.'
   },
   {
     id: 'loct-2025-model-q19',
@@ -430,13 +430,151 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     examType: 'model',
     questionType: 'multiple_choice',
     difficulty: 'medium',
-    topic: 'Soundness of Deductive Arguments',
+    topic: 'Recognizing Arguments: Explanations',
     points: 1,
-    question: 'A deductive argument is said to be "sound" if and only if it fulfills which of the following requirements?',
+    question: 'In the passage: "The engine stopped running because the fuel line was completely blocked by dirt," what role does "The engine stopped running" play, and why is this passage an explanation rather than an argument?',
     options: [
-      'It is strong and all its premises are true',
+      'It is the premise; it tries to prove that the fuel line is clogged.',
+      'It is the explanandum; it is an accepted fact, and the passage aims to shed light on why it happened, not to prove that it occurred.',
+      'It is an inductive prediction about future mechanical failures.',
+      'It is a categorical syllogism with a suppressed premise.'
+    ],
+    correctAnswer: 1,
+    hint: 'In an explanation, the event described by the explanandum is already known to have occurred.',
+    explanation: 'Chapter 2 (Lesson 3, Page 57-58) clarifies that in an explanation, the explanandum (the engine stopping) describes an accepted event or fact, and the explanans (fuel line blocked) explains why it occurred. In an argument, by contrast, premises provide evidence to prove that the conclusion is true.',
+    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 3፣ ገጽ 57-58) መሠረት፣ ይሄ "ማብራሪያ" (Explanation) እንጂ ክርክር አይደለም። ምክንያቱም ሞተሩ ማቆሙ ቀድሞውኑ የታወቀ ሀቅ (explanandum) ሲሆን፣ ጥቅሱ ያቀረበው ለምን እንደቆመ ምክንያት ለማብራራት (explanans) እንጂ ሞተሩ ማቆሙን ለማረጋገጥ ስላልሆነ ነው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 3, Fuula 57-58) irratti, kun ibsa (explanation) malee falmii (argument) miti. Motarri dhaabbachuun isaa wanta beekamu (explanandum) yoo ta\'u, himichi maaliif akka inni dhaabbate ibsa (explanans). Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q20',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Conditional Statements',
+    points: 1,
+    question: 'Given the conditional statement: "If a geometric polygon is a square, then it has four sides," what is the logical relationship between being a square and having four sides?',
+    options: [
+      'Being a square is a necessary condition for having four sides.',
+      'Being a square is a sufficient condition for having four sides, and having four sides is a necessary condition for being a square.',
+      'Having four sides is a sufficient condition for being a square.',
+      'The statement represents a valid deductive syllogism on its own.'
+    ],
+    correctAnswer: 1,
+    hint: 'If P then Q: P is sufficient for Q, while Q is necessary for P.',
+    explanation: 'According to Chapter 2 (Lesson 3, Page 60-61), in a conditional statement "If P, then Q", the antecedent (P) is a sufficient condition for the consequent (Q), and the consequent (Q) is a necessary condition for the antecedent (P). A square guarantees four sides (sufficient), but having four sides does not guarantee being a square (could be a rectangle or trapezoid).',
+    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 3፣ ገጽ 60-61) መሠረት፣ "If P then Q" በሚል አረፍተ ነገር ውስጥ P ለ Q በቂ ቅድመ ሁኔታ (Sufficient condition) ሲሆን፤ Q ደግሞ ለ P አስፈላጊ ቅድመ ሁኔታ (Necessary condition) ነው። ስለዚህ ስኩዌር መሆን ባለ 4 ጎን ለመሆን በቂ ነው፤ ባለ 4 ጎን መሆን ግን ስኩዌር ለመሆን የግድ አስፈላጊ ነው። መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 2, Fuula 60-61) irratti, hima conditional "If P, then Q" keessatti, Pn Q\'f sufficient yoo ta\'u, Qn immoo P\'f necessary dha. Iskuweeriin ta\'uun cinaa 4 qabaachuuf gahaadha (sufficient); cinaa 4 qabaachuun immoo iskuweerii ta\'uuf dirqama (necessary). Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q21',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Deductive vs Inductive Arguments',
+    points: 1,
+    question: 'What is the fundamental difference in the inferential claim made by a deductive argument compared to an inductive argument?',
+    options: [
+      'Deductive premises claim that the conclusion is probable, while inductive premises claim the conclusion is certain.',
+      'Deductive arguments claim that it is impossible for the premises to be true and the conclusion false at the same time, whereas inductive arguments claim only that it is improbable.',
+      'Deductive arguments always move from particular to general, while inductive arguments always move from general to particular.',
+      'Deductive arguments are evaluated as strong or weak, while inductive arguments are evaluated as valid or invalid.'
+    ],
+    correctAnswer: 1,
+    hint: 'Deduction deals with strict necessity and certainty; induction deals with probability.',
+    explanation: 'Chapter 2 (Lesson 4, Page 67-68) emphasizes that the difference rests on the strength of the inferential claim: deductive arguments claim that the conclusion follows with strict necessity (certainty), while inductive arguments claim that the conclusion follows with probability.',
+    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 4፣ ገጽ 67-68) መሠረት፣ ዲዳክቲቭ (ተቀናሽ) ክርክር መነሻዎቹ እውነት ከሆኑ መደምደሚያው የግድ (100% እርግጠኛ ሆኖ) እውነት ይሆናል የሚል ጥያቄ ያቀርባል፤ ኢንዳክቲቭ ግን መደምደሚያው ምናልባት እውነት የመሆን እድሉ ከፍተኛ (probable) ነው የሚል ጥያቄ ያቀርባል። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 4, Fuula 67-68) irratti, falmiin deductive ragaan isaa dhugaa yoo ta\'e xumurri isaa dirqama (certainty) dhugaa ta\'a jedha. Falmiin inductive immoo carraan xumurri isaa dhugaa ta\'uu danda\'uu ol\'aanaadha (probable) jedha. Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q22',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Deductive Argument Forms',
+    points: 1,
+    question: 'Which of the following is an example of a Disjunctive Syllogism?',
+    options: [
+      'All primates are mammals. All chimpanzees are primates. Therefore, all chimpanzees are mammals.',
+      'If it rains, the football pitch will get muddy. It is raining. Therefore, the pitch will get muddy.',
+      'Either the university library is open, or the students are studying in the dormitory. The library is not open. Therefore, the students are studying in the dormitory.',
+      'Eighty percent of surveyed Ethiopian farmers use organic compost; therefore, the next farmer we meet will likely use organic compost.'
+    ],
+    correctAnswer: 2,
+    hint: 'Disjunctive syllogisms contain an "either... or..." statement in their premises.',
+    explanation: 'Chapter 2 (Lesson 4, Page 69-70) identifies standard deductive forms: (1) Argument from mathematics, (2) Argument from definition, (3) Categorical syllogism (All/No/Some), (4) Hypothetical syllogism (If... then), and (5) Disjunctive syllogism (Either... or). Option C is a textbook disjunctive syllogism.',
+    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 4፣ ገጽ 69-70) መሠረት፣ ዲስጃንክቲቭ ሲሎጂዝም (Disjunctive Syllogism) በመነሻው ላይ "Either... or" (ወይ ይሄ... ወይም ያ) የሚል አረፍተ ነገር የያዘ ተቀናሽ ክርክር ነው። ስለዚህ መልሱ C ነው።',
+    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 4, Fuula 69-70) irratti, "Disjunctive Syllogism" falmii ragaan isaa "Either... or" (yookiin... yookiin) of keessaa qabuudha. Kanaafuu filannoon C fakkeenya sirriidha.'
+  },
+  {
+    id: 'loct-2025-model-q23',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Inductive Argument Forms: Analogy',
+    points: 1,
+    question: 'A doctor observes that Drug X cured 95% of test mice infected with a viral disease, and since human physiology is biologically analogous to mice physiology, Drug X will probably cure humans as well. What type of inductive argument is this?',
+    options: [
+      'Inductive generalization',
+      'Argument from analogy',
+      'Argument from authority',
+      'Argument based on mathematics'
+    ],
+    correctAnswer: 1,
+    hint: 'This argument depends on a perceived similarity or likeness between two distinct entities.',
+    explanation: 'Chapter 2 (Lesson 4, Page 72-73) defines an argument from analogy as an inductive argument that depends on the existence of a similarity or likeness between two things or states of affairs to conclude that a further property applies to both.',
+    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 4፣ ገጽ 72-73) መሠረት፣ በሁለት ነገሮች መካከል ያለውን ተመሳሳዮሽ መሠረት በማድረግ የሚደረግ የኢንዳክቲቭ ክርክር "Argument from analogy" (የማነፃፀሪያ ክርክር) ይባላል። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 4, Fuula 72-73) irratti, falmiin walfakkeenya wantoota lamaa irratti hundaa\'uun xumura irra ga\'u "Argument from analogy" jedhama. Deebiin sirriin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q24',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'hard',
+    topic: 'Evaluating Deductive Arguments: Validity',
+    points: 1,
+    question: 'Which of the following combinations of premise-truth and conclusion-truth is IMPOSSIBLE for a valid deductive argument to possess?',
+    options: [
+      'True premises and True conclusion',
+      'False premises and True conclusion',
+      'False premises and False conclusion',
+      'True premises and False conclusion'
+    ],
+    correctAnswer: 3,
+    hint: 'By definition, a valid argument guarantees that true premises can NEVER lead to a false conclusion.',
+    explanation: 'According to Chapter 2 (Lesson 4, Page 75-77), a valid deductive argument is one where it is impossible for the premises to be true and the conclusion false at the same time. Therefore, having True Premises and a False Conclusion is the ONLY combination that absolutely proves an argument is INVALID.',
+    explanationAmharic: 'በምዕራፍ 2 (ትምህርት 4፣ ገጽ 75-77) መሠረት፣ በቫሊድ (Valid) ክርክር ውስጥ መነሻዎቹ (premises) እውነት ሆነው መደምደሚያው (conclusion) ግን ሐሰት መሆን በፍፁም አይችልም። ይህ ጥምረት (True premises + False conclusion) ክርክሩ Invalid መሆኑን ያረጋግጣል። ስለዚህ መልሱ D ነው።',
+    explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 4, Fuula 75-77) irratti, falmii deductive valid ta\'e keessatti ragaaleen (premises) dhugaa ta\'anii xumurri (conclusion) soba ta\'uun matumaa hin danda\'amu. Kanaafuu filannoon D deebii sirriidha.'
+  },
+  {
+    id: 'loct-2025-model-q25',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Evaluating Deductive Arguments: Soundness',
+    points: 1,
+    question: 'A deductive argument is defined as "sound" if and only if:',
+    options: [
+      'It is strong and possesses true premises',
       'It is valid and all of its premises are actually true',
-      'Its conclusion is acceptable to the majority of listeners',
+      'Its conclusion is true regardless of the truth of its premises',
       'Its premises contain no informal fallacies even if invalid'
     ],
     correctAnswer: 1,
@@ -446,7 +584,7 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 4, Fuula 78-79) irratti, falmiin deductive tokko "Sound" kan jedhamu yoo inni duraan valid ta\'ee fi ragaaleen (premises) isaa hundi dhugaa ta\'an qofaadha. Deebiin B dha.'
   },
   {
-    id: 'loct-2025-model-q20',
+    id: 'loct-2025-model-q26',
     courseId: 'loct-1011',
     courseCode: 'LoCT 1011',
     year: '2025 Model',
@@ -468,148 +606,6 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     explanationAmharic: 'በምዕራፍ 2 (ትምህርት 4፣ ገጽ 83) ላይ እንደተገለጸው፣ አንድ የኢንዳክቲቭ ክርክር "Cogent" ለመሆን ጠንካራ (strong) እና መነሻዎቹ እውነት መሆን ብቻ ሳይሆን፣ የተለየ መደምደሚያ ሊያስከትል የሚችል ወሳኝ ተጨባጭ ማስረጃን ቸል ያላለ (suppressed evidence የሌለው) መሆን አለበት። ስለዚህ መልሱ B ነው።',
     explanationAfaanOromo: 'Boqonnaa 2 (Barnoota 4, Fuula 83) irratti, falmiin inductive tokko "Cogent" ta\'uuf cimaa (strong) ta\'uu fi ragaan isaa dhugaa ta\'uu qofa osoo hin taane, ragaa murteessaa bu\'aa biraatti geessu kamiyyuu kan dhokse ta\'uu hin qabu. Deebiin B dha.'
   },
-
-  // =========================================================================
-  // UNIT 3: LOGIC AND LANGUAGE (Questions 21 - 30)
-  // =========================================================================
-  {
-    id: 'loct-2025-model-q21',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'easy',
-    topic: 'Functions of Language: Cognitive vs Emotive',
-    points: 1,
-    question: 'Terminology that is used primarily to convey objective factual information is said to have ________ meaning, while terminology that expresses or evokes feelings is said to have ________ meaning.',
-    options: [
-      'Emotive; Cognitive',
-      'Cognitive; Emotive',
-      'Extensional; Intensional',
-      'Denotative; Connotative'
-    ],
-    correctAnswer: 1,
-    hint: 'Think of logic\'s primary focus: information vs feelings.',
-    explanation: 'According to Chapter 3 (Lesson 2, Page 94), terminology that conveys factual information has cognitive meaning, whereas terminology that expresses or evokes feelings has emotive meaning. Logic is chiefly concerned with cognitive meaning.',
-    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 2፣ ገጽ 94) መሠረት፣ ተጨባጭ መረጃን የሚያስተላልፍ ቋንቋ ኮግኒቲቭ (Cognitive) ትርጉም ሲኖረው፣ ስሜትን የሚቀሰቅስ ወይም የሚገልጽ ቋንቋ ደግሞ ኢሞቲቭ (Emotive) ትርጉም አለው። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 2, Fuula 94) keessatti, jechoonni odeeffannoo dhugaa dabarsan hiika "Cognitive" qabu; jechoonni miira kakaasan ykn ibsan immoo hiika "Emotive" qabu. Deebiin sirriin B dha.'
-  },
-  {
-    id: 'loct-2025-model-q22',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'medium',
-    topic: 'Deficiencies of Cognitive Meaning: Vagueness vs Ambiguity',
-    points: 1,
-    question: 'What is the precise logical difference between vagueness and ambiguity as discussed in Chapter 3?',
-    options: [
-      'Vagueness involves multiple clearly distinct meanings, while ambiguity involves a blur with borderline cases',
-      'Vague terminology allows for a relatively continuous range of interpretations (a blur of meaning), whereas ambiguous terminology allows for multiple discrete interpretations (a mix-up of distinct meanings)',
-      'Vagueness affects only single words, whereas ambiguity affects only full syllogistic arguments',
-      'Ambiguity is purely emotional, while vagueness is strictly mathematical'
-    ],
-    correctAnswer: 1,
-    hint: 'Remember the distinction: a blur of meaning (continuous range) vs a mix-up of meanings (discrete interpretations).',
-    explanation: 'In Chapter 3 (Lesson 2, Page 97-98), the module explains: "In a vague expression there is a blur of meaning (continuous range of borderline cases, e.g., \'poor\', \'rich\'), whereas in an ambiguous expression there is a mix-up of otherwise clear meanings (multiple discrete interpretations, e.g., \'bank\', \'light\')."',
-    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 2፣ ገጽ 97-98) ላይ እንደተገለጸው፣ ቬግነስ (Vagueness) የትርጉም ድብዝዝነት ያለበትና ወሰኑ በግልጽ የማይታወቅ (a blur of meaning) ሲሆን፣ አምቢጊዊቲ (Ambiguity) ደግሞ ሁለት ወይም ከዚያ በላይ የተለያዩ ግልጽ ትርጉሞች ተደባልቀው ሲገኙ (a mix-up of meanings) ነው። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 2, Fuula 97-98) irratti, "Vagueness" jechuun daangaan hiikaa ifa ta\'uu dhabuu (blur of meaning) yoo ta\'u, "Ambiguity" jechuun immoo jechi tokko hiika adda addaa beekamoo qabaatee wal-faana dhiyaachuu (mix-up of meanings) dha. Deebiin B dha.'
-  },
-  {
-    id: 'loct-2025-model-q23',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'medium',
-    topic: 'Forms of Disputes: Verbal vs Factual Disputes',
-    points: 1,
-    question: 'Consider the following exchange:\nKassa: "Mrs. Zenebech abuses her children. I saw her spank her child the other day."\nJemal: "Don\'t be silly. Kids need discipline, and by disciplining her children she is showing love."\nThis disagreement is best classified as a:',
-    options: [
-      'Factual dispute over whether the spanking occurred',
-      'Verbal dispute arising from the vagueness of words like "abuse" and "discipline"',
-      'Verbal dispute arising from syntactic amphiboly',
-      'Fallacy of illicit conversion'
-    ],
-    correctAnswer: 1,
-    hint: 'Both individuals agree on the factual event, but conflict over where discipline ends and abuse begins.',
-    explanation: 'In Chapter 3 (Lesson 2, Page 99, Example 1), the module analyzes this exact dispute: Kassa and Jemal agree on what physically happened, but disagree on whether spanking constitutes "discipline" or "abuse." This is a verbal dispute centering on the vagueness of those terms.',
-    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 2፣ ገጽ 99፣ ምሳሌ 1) መሠረት፣ ካሳ እና ጀማል በተፈጸመው ድርጊት ላይ አልተለያዩም፤ አለመግባባቱ የተፈጠረው "ዲሲፕሊን" እና "ማሰቃየት/abuse" የሚሉትን ቃላት ባላቸው የትርጉም ወሰን (vagueness) ላይ በመሆኑ የቃላት አለመግባባት (Verbal dispute) ነው። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 2, Fuula 99) irratti, Kaasaa fi Jamaal gocha raawwatame irratti wal hin mormine; wal-dhabiin isaanii jechoota "discipline" fi "abuse" jedhaman daangaa hiika isaanii (vagueness) irratti waan ta\'eef mormii afaanii (Verbal dispute) dha. Deebiin B dha.'
-  },
-  {
-    id: 'loct-2025-model-q24',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'easy',
-    topic: 'Logic and Terms: Non-terms and Mention vs Use',
-    points: 1,
-    question: 'In logic, a "term" is any word or arrangement of words that can serve as the subject of a statement. Which of the following CANNOT serve as a term unless placed in quotation marks (mentioned)?',
-    options: [
-      'Proper names (e.g., "Abebe")',
-      'Common names (e.g., "Animal")',
-      'Descriptive phrases (e.g., "First Prime Minister of Ethiopia")',
-      'Prepositions, adverbs, and verbs (e.g., "moreover", "runs quickly", "above and beyond")'
-    ],
-    correctAnswer: 3,
-    hint: 'Words that cannot serve as the subject of a declarative statement are non-terms.',
-    explanation: 'According to Chapter 3 (Lesson 2, Page 100-101), terms consist of proper names, common names, and descriptive phrases. Words that are NOT terms include verbs, adverbs, prepositions, conjunctions, and non-syntactic arrangements of words (such as "moreover", "craves", "above and beyond").',
-    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 2፣ ገጽ 100-101) መሠረት፣ በሎጂክ ውስጥ ተርም (term) ሊሆኑ የሚችሉት የመጠሪያ ስሞች፣ የጋራ ስሞች እና ገላጭ ሀረጎች ብቻ ናቸው። ግሶች፣ ተውሳከ-ግሶች፣ መስተዋድዶች (እንደ moreover, runs quickly ያሉ) በራሳቸው የዓረፍተ-ነገር ባለቤት መሆን ስለማይችሉ ተርም አይደሉም። ስለዚህ መልሱ D ነው።',
-    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 2, Fuula 100-101) keessatti, maqoonni dhuunfaa, maqoota gamtaa fi gaaleewwan ibsaa qofti "term" ta\'uu danda\'u. Gochibsi, gochima fi wal-qabsiiftonni (fakkeenyaaf moreover, runs quickly) of danda\'anii mata-duree himaa waan hin taaneef term miti. Deebiin D dha.'
-  },
-  {
-    id: 'loct-2025-model-q25',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'medium',
-    topic: 'Intension Determines Extension',
-    points: 1,
-    question: 'Terms such as "currently living dodo bird", "unicorn", and "current king of France" illustrate which fundamental logical principle?',
-    options: [
-      'They have empty intension but infinite extension',
-      'They have empty extension (null class), yet possess a rich and intelligible intension',
-      'Extension determines intension in all empirical contexts',
-      'They are completely meaningless non-terms that cannot be used in logic'
-    ],
-    correctAnswer: 1,
-    hint: 'Do we understand the attributes of a unicorn even though zero physical unicorns exist in reality?',
-    explanation: 'In Chapter 3 (Lesson 2, Page 102), the module states that terms like "unicorn" and "currently living dodo bird" have empty extension (denote the empty/null class with no living members), but they do not have empty intension because they connote intelligible attributes. This proves that intension determines extension, not vice versa.',
-    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 2፣ ገጽ 102) መሠረት፣ እንደ "ዩኒኮርን" (unicorn) ወይም "በአሁኑ ሰዓት በህይወት ያለ ዶዶ ወፍ" ያሉ ተርሞች በአካል የሚገኝ አባል ስለሌላቸው ባዶ ኤክስቴንሽን (empty extension/null class) አላቸው፤ ነገር ግን ትርጉምና ባህሪያት ስላላቸው ኢንቴንሽን (intension) አላቸው። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 2, Fuula 102) irratti, jechoonni akka "unicorn" qaamaan waan hin jirreef miseensa hin qaban (empty extension qabu); garuu amaloota ibsamuu danda\'an waan qabaniif intension qabu. Kunis intension tu extension murteessa kan jedhu mirkaneessa. Deebiin B dha.'
-  },
-  {
-    id: 'loct-2025-model-q26',
-    courseId: 'loct-1011',
-    courseCode: 'LoCT 1011',
-    year: '2025 Model',
-    examType: 'model',
-    questionType: 'multiple_choice',
-    difficulty: 'medium',
-    topic: 'Order of Increasing Intension & Decreasing Extension',
-    points: 1,
-    question: 'Which of the following sequences of terms is correctly arranged in the order of INCREASING INTENSION (and decreasing extension)?',
-    options: [
-      'Tiger, feline, mammal, animal',
-      'Animal, mammal, feline, tiger',
-      'Feline, tiger, animal, mammal',
-      'Animal, tiger, feline, mammal'
-    ],
-    correctAnswer: 1,
-    hint: 'Increasing intension means each successive term connotes more specific attributes and denotes a smaller class.',
-    explanation: 'According to Chapter 3 (Lesson 2, Page 104), a series is in increasing intension when each successive term connotes more attributes (becomes more specific). "Animal" is broad, "mammal" adds attributes, "feline" adds cat family attributes, and "tiger" is the most specific. Thus, Animal -> Mammal -> Feline -> Tiger.',
-    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 2፣ ገጽ 104) መሠረት፣ በኢንቴንሽን ማደግ (increasing intension) ማለት ቃላቱ ይበልጥ ዝርዝር እና ተጨማሪ ባህሪያትን እየያዙ ሲሄዱ ነው (እንስሳ -> አጥቢ -> የድመት አስተኔ -> ነብር)። ስለዚህ ትክክለኛው ቅደም ተከተል B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 2, Fuula 104) irratti, daballiin intension jechuun jechi itti aanu amala dabalataa fi ifa ta\'e qabaachaa deemuudha (Animal -> Mammal -> Feline -> Tiger). Kanaafuu deebiin sirriin B dha.'
-  },
   {
     id: 'loct-2025-model-q27',
     courseId: 'loct-1011',
@@ -618,20 +614,20 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     examType: 'model',
     questionType: 'multiple_choice',
     difficulty: 'medium',
-    topic: 'Types of Definitions: Précising Definition',
+    topic: 'Recognizing Arguments: Illustrations vs Arguments',
     points: 1,
-    question: 'To resolve legal ambiguity during organ transplantation surgeries, the courts established that "moment of death" strictly means "the moment the brain stops functioning, as measured by an electroencephalograph." This is an example of a:',
+    question: 'Examine the passage: "Chemical elements differ markedly in their physical properties. For example, carbon is a brittle black solid, while helium is an invisible lightweight gas." Why is this passage an illustration rather than an argument?',
     options: [
-      'Stipulative definition',
-      'Précising definition',
-      'Theoretical definition',
-      'Persuasive definition'
+      'Because it contains mathematical variables.',
+      'Because the examples simply instantiate or clarify an already stated general claim rather than proving that elements differ.',
+      'Because the passage is emotionally biased.',
+      'Because it is an invalid disjunctive syllogism.'
     ],
     correctAnswer: 1,
-    hint: 'The primary purpose is to reduce the vagueness of a word in a specialized medical or legal context.',
-    explanation: 'In Chapter 3 (Lesson 3, Page 108-109), the module cites this exact example: a précising definition reduces the vagueness of a word so that decisions can be made in specialized systematic contexts such as medicine, law, or science.',
-    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 3፣ ገጽ 108-109) ላይ እንደተገለጸው፣ በህግና በህክምና ዘርፍ የቃላትን ድብዝዝነት (vagueness) በመቀነስ ትክክለኛ ውሳኔ ለመስጠት የሚያገለግል ብያኔ ፕሪሳይሲንግ ዲፊኒሽን (Précising definition) ይባላል። ስለዚህ መልሱ B ነው።',
-    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 3, Fuula 108-109) irratti, seerri ykn ogeessi fayyaa jecha ifa hin taane tokko dhimma murteessaaf akka gargaarutti murteessee yeroo hiiku "Précising definition" jedhama. Deebiin B dha.'
+    hint: 'Illustrations use specific examples to clarify a point, not to provide proof for a disputed claim.',
+    explanation: 'In Chapter 2, illustrations are passages containing statements that exemplify or show how something is done or meant. The examples (carbon and helium) are offered to clarify what it means for elements to differ, not to prove that they differ. Option B is correct.',
+    explanationAmharic: 'በምዕራፍ 2 መሠረት ይህ "ምሳሌያዊ አገላለጽ" (Illustration) እንጂ ክርክር አይደለም። ምክንያቱም የተጠቀሱት ምሳሌዎች (ካርቦንና ሂሊየም) ኬሚካሎች የተለያዩ መሆናቸውን ለማብራራት እንጂ አዲስ ክርክር ለማረጋገጥ ስላልቀረቡ ነው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 2 keessatti kun "fakkeenya" (Illustration) malee falmii miti. Sababni isaas fakkeenyonni kennaman yaadicha ibsuuf malee yaada mormisiisaa tokko ragaadhaan mirkaneessuuf waan hin dhiyaatiniif. Deebiin sirriin B dha.'
   },
   {
     id: 'loct-2025-model-q28',
@@ -640,12 +636,315 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     year: '2025 Model',
     examType: 'model',
     questionType: 'multiple_choice',
-    difficulty: 'easy',
-    topic: 'Definitional Techniques: Extensional (Demonstrative)',
+    difficulty: 'medium',
+    topic: 'Non-argumentative Passages: Reports',
     points: 1,
-    question: 'Pointing directly to actual objects and stating "Chair means this and this and this" is an example of which definitional technique?',
+    question: 'Consider the passage: "The national meteorological agency reported that heavy rain fell across the highlands, causing flash floods in three major valleys. Road transport was temporarily suspended by regional authorities." Why is this passage NOT an argument?',
     options: [
-      'Enumerative definition',
+      'It lacks conclusion indicator words.',
+      'It merely reports a series of factual events without asserting any inferential claim that one statement is logically proved by the others.',
+      'It contains false meteorological premises.',
+      'It is an inductive prediction rather than a deductive argument.'
+    ],
+    correctAnswer: 1,
+    hint: 'A report merely conveys information; it makes no claim that any statement provides logical justification for another.',
+    explanation: 'A report consists of a group of statements that convey information about some topic or event. Because the author does not claim that any statement follows from another as an inference, it lacks an inferential claim and is not an argument. Option B is correct.',
+    explanationAmharic: 'ይህ ጽሑፍ "ሪፖርት" (Report) እንጂ ክርክር አይደለም። ምክንያቱም የተከሰቱ ኩነቶችን በቅደም ተከተል መረጃ ከመስጠት ባለፈ አንዱ አረፍተ-ነገር የሌላው ማረጋገጫ ነው የሚል የአመክንዮ ዝምድና (inferential claim) አያቀርብም። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Barreeffamni kun gabaasa (Report) qofaadha malee falmii miti. Sababni isaas odeeffannoo qofa dhiyeessa malee himni tokko kan biraatiif ragaadha jedhee yaada loojikii (inferential claim) hin dhiyeessu. Deebiin sirriin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q29',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'hard',
+    topic: 'Conditional Statements: Necessary vs Sufficient Conditions',
+    points: 1,
+    question: 'Consider the biological relationship between dogs and mammals. Which statement accurately expresses the necessary and sufficient conditions?',
+    options: [
+      'Being a mammal is a sufficient condition for being a dog.',
+      'Being a dog is a sufficient condition for being a mammal, and being a mammal is a necessary condition for being a dog.',
+      'Being a mammal is both a necessary and sufficient condition for being a dog.',
+      'Being a dog is neither a necessary nor a sufficient condition for being an animal.'
+    ],
+    correctAnswer: 1,
+    hint: 'If something is a dog, it is definitely a mammal (sufficient). But an organism can be a mammal without being a dog (so mammal is necessary, not sufficient).',
+    explanation: 'In logic, condition A is sufficient for B if the occurrence of A guarantees B (being a dog guarantees being a mammal). Condition B is necessary for A if A cannot occur without B (an animal cannot be a dog without being a mammal). Option B is correct.',
+    explanationAmharic: 'በሎጂክ መሠረት፣ ውሻ መሆን አጥቢ እንስሳ ለመሆን በቂ (Sufficient) ነው፤ ምክንያቱም ውሻ የሆነ ሁሉ አጥቢ ነውና። ነገር ግን አጥቢ መሆን ብቻውን ውሻ ለመሆን በቂ አይደለም (ድመት ወይም ላም ሊሆን ይችላል)፤ ስለዚህ አጥቢ መሆን ውሻ ለመሆን የግድ አስፈላጊ (Necessary) ቅድመ ሁኔታ ነው። መልሱ B ነው።',
+    explanationAfaanOromo: 'Akka loojikiitti, saree ta\'uun hoosisaa ta\'uuf gahaadha (sufficient); garuu hoosisaa ta\'uun saree ta\'uuf dirqama (necessary) dha malee gahaa miti. Kanaafuu filannoon B sirriidha.'
+  },
+  {
+    id: 'loct-2025-model-q30',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Three Criteria for Distinguishing Deduction from Induction',
+    points: 1,
+    question: 'The MoSHE module specifies three criteria for deciding whether an argument is deductive or inductive. Which of the following is NOT one of these three criteria?',
+    options: [
+      'The occurrence of special indicator words (e.g., "necessarily" vs. "probably")',
+      'The strictness or necessity of the inferential link between premises and conclusion',
+      'The rhetorical charisma and physical volume of the speaker presenting the argument',
+      'The character or form of argumentation (e.g., categorical syllogism, analogy, generalization)'
+    ],
+    correctAnswer: 2,
+    hint: 'Logic evaluates formal and structural features of arguments, not personal characteristics of the speaker.',
+    explanation: 'Chapter 2 specifies three objective criteria to evaluate whether an argument is deductive or inductive: (1) The presence of specific indicator words, (2) The actual strength of the inferential link, and (3) The characteristic form or structure of argumentation. Physical delivery or charisma is completely irrelevant in logic. Option C is correct.',
+    explanationAmharic: 'በምዕራፍ 2 መሠረት አንድን ክርክር ዲዳክቲቭ ወይም ኢንዳክቲቭ ለማለት የምንጠቀምባቸው 3ቱ መስፈርቶች፡ ልዩ ጠቋሚ ቃላት፣ የመነሻና መደምደሚያው የአመክንዮ ጥንካሬ፣ እና የክርክሩ መዋቅር ናቸው። የተናጋሪው የድምፅ ጩኸት ወይም ውበት በሎጂክ ሚና የለውም። ስለዚህ መልሱ C ነው።',
+    explanationAfaanOromo: 'Boqonnaa 2 irratti falmiin tokko deductive moo inductive ta\'uu isaa murteessuuf ulaagaaleen sadan: jechoota agarsiistuu, cimina hidhata loojikii, fi bifa falmiiti. Sagalee ol-kaasuun ykn haalli dubbataa loojikii keessatti gatii hin qabu. Deebiin C dha.'
+  },
+  {
+    id: 'loct-2025-model-q31',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'hard',
+    topic: 'Evaluating Arguments: Impact of Additional Evidence',
+    points: 1,
+    question: 'What happens to the validity of a deductive argument when new premises containing additional true factual evidence are added to it, compared to the strength of an inductive argument?',
+    options: [
+      'A valid deductive argument can easily become invalid, while an inductive argument never changes.',
+      'A valid deductive argument remains strictly valid no matter what additional premises are introduced, whereas an inductive argument can be significantly strengthened or weakened by new premises.',
+      'Both deductive validity and inductive strength immediately collapse whenever new facts are introduced.',
+      'Deductive arguments become inductive once new premises are added.'
+    ],
+    correctAnswer: 1,
+    hint: 'Deductive validity is an absolute mathematical property; induction is non-monotonic and sensitive to new information.',
+    explanation: 'Deductive logic is monotonic: if an argument is valid, adding new premises cannot make it invalid. In contrast, inductive logic is non-monotonic: discovering new evidence can turn a strong inductive argument into a weak one (or vice versa). Option B is correct.',
+    explanationAmharic: 'አንድ የዲዳክቲቭ ክርክር አንዴ Valid ከሆነ ምንም ያህል አዳዲስ መረጃዎች ቢጨመሩበት ቫሊዲቲው አይለወጥም። ነገር ግን የኢንዳክቲቭ ክርክር አዲስ መረጃ ሲጨመርበት በቀላሉ ሊጠነክር ወይም ሊዳከም ይችላል። ስለዚህ ትክክለኛው መልስ B ነው።',
+    explanationAfaanOromo: 'Falmii deductive valid ta\'e irratti ragaan haaraan yoo dabalame illee validity\'n isaa hin jijjiiramu. Garuu falmiin inductive ragaa haaraatiin cิมachuu ykn laafachuu danda\'a. Kanaafuu deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q32',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Inductive Forms: Causal Inference',
+    points: 1,
+    question: 'A food safety inspector notices that every customer who ate the raw oysters at a banquet fell severely ill with salmonella poisoning, while those who avoided the oysters showed no symptoms. The inspector concludes that the raw oysters caused the illness. What type of inductive reasoning is this?',
+    options: [
+      'Argument from mathematics',
+      'Causal inference',
+      'Categorical syllogism',
+      'Argument from definition'
+    ],
+    correctAnswer: 1,
+    hint: 'Reasoning that proceeds from knowledge of an effect to its underlying cause.',
+    explanation: 'A causal inference is an inductive argument that proceeds from knowledge of a cause to a claim about an effect, or from knowledge of an effect to a claim about its cause. Because empirical causation can never be established with mathematical certainty, it is classified as inductive. Option B is correct.',
+    explanationAmharic: 'ይህ "Causal inference" (የምክንያትና ውጤት ድምዳሜ) የሚባል የኢንዳክቲቭ ክርክር ነው። በምልከታ ላይ ተመስርቶ የበሽታውን ምልክት ከምግቡ ምክንያት ጋር በማያያዝ የተደረገ ድምዳሜ በመሆኑ ነው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Kun "Causal inference" (falmii sababa fi bu\'aa) kan jedhamu gosa inductive reasoning ti. Dhukkubni mudate sababa nyaata sanaatiin akka ta\'e tilmaamuu irratti hundaa\'a. Deebiin sirriin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q33',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'hard',
+    topic: 'Counterexample Method for Testing Invalidity',
+    points: 1,
+    question: 'The counterexample method tests the invalidity of a deductive argument by isolating its form and constructing a substitution instance that has:',
+    options: [
+      'False premises and an admittedly false conclusion',
+      'True premises and a notoriously, undeniably FALSE conclusion',
+      'Inductive probability rather than deductive certainty',
+      'Emotively neutral terminology'
+    ],
+    correctAnswer: 1,
+    hint: 'If a form allows all true premises to produce an obviously false conclusion, that form is proven invalid.',
+    explanation: 'The counterexample method demonstrates invalidity by creating another argument of the exact same logical form with premises that are well-known to be TRUE and a conclusion that is well-known to be FALSE. This definitively proves the structural form cannot preserve truth. Option B is correct.',
+    explanationAmharic: 'የካውንተር ኤግዛምፕል ዘዴ (Counterexample method) የአንድን ክርክር ህገ-ወጥነት (Invalidity) ለማረጋገጥ የሚጠቀመው፡ ያንኑ ተመሳሳይ ቅርጽ በመጠቀም የታወቁ እውነት መነሻዎችን (True premises) እና በግልጽ ሐሰት የሆነ መደምደሚያ (False conclusion) በማዋቀር ነው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Tooftaan counterexample jedhamu falmiin tokko invalid ta\'uu mirkaneessuuf bifa falmii sana qabatee ragaalee dhugaa ta\'anii fi xumura soba ta\'e uumuudhaan agarsiisa. Deebiin sirriin B dha.'
+  },
+
+  // =========================================================================
+  // UNIT 3: LOGIC AND LANGUAGE (Questions 34 - 50)
+  // =========================================================================
+  {
+    id: 'loct-2025-model-q34',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'easy',
+    topic: 'Functions of Language: Cognitive vs Emotive',
+    points: 1,
+    question: 'Language performs multiple functions. In logic, statements that communicate objective factual information and convey verifiable truth-claims are said to possess:',
+    options: [
+      'Emotive meaning',
+      'Cognitive (informative) meaning',
+      'Directival meaning',
+      'Expressive meaning'
+    ],
+    correctAnswer: 1,
+    hint: 'Cognitive meaning conveys facts and objective claims that can be true or false.',
+    explanation: 'According to Chapter 3 (Lesson 1, Page 92), cognitive meaning is the terminology that conveys factual information. Emotive meaning, in contrast, expresses feelings, attitudes, or attempts to evoke emotional reactions in the listener.',
+    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 1፣ ገጽ 92) መሠረት፣ በሎጂክ ውስጥ ተጨባጭ መረጃዎችንና ሀቆችን የሚያስተላልፉ ቃላት "ኮግኒቲቭ ፍቺ" (Cognitive/informative meaning) አላቸው ይባላል። ስሜትን የሚገልጹ ደግሞ "ኢሞቲቭ" ይባላሉ። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 1, Fuula 92) irratti, loojikii keessatti jechoonni odeeffannoo qabatamaa fi dhugaa dabarsan hiika "Cognitive meaning" qabu jedhamu. Miira kan dabarsan immoo "Emotive" jedhamu. Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q35',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Defects in Cognitive Meaning: Vagueness vs Ambiguity',
+    points: 1,
+    question: 'A word is "vague" if there are borderline cases where it is impossible to tell whether the word applies or not, whereas a word is "ambiguous" if:',
+    options: [
+      'It has no emotional meaning whatsoever',
+      'It can be interpreted as having more than one clearly distinct meaning in a given context',
+      'It is a term invented in foreign languages without Greek etymology',
+      'It has an empty extension in physical reality'
+    ],
+    correctAnswer: 1,
+    hint: 'Ambiguity occurs when a word or phrase has multiple distinct interpretations, while vagueness involves an indistinct blurred boundary.',
+    explanation: 'Chapter 3 (Lesson 2, Page 97-98) distinguishes the two linguistic defects: Vagueness involves a continuum or blurriness where application is indeterminate (e.g., "rich", "tall", "excessive"). Ambiguity involves having two or more distinctly different meanings (e.g., "bank", "light", "crane").',
+    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 2፣ ገጽ 97-98) መሠረት፣ "ድብዝዝ" (Vague) የሚባለው ቃሉ ወሰን የሌለውና ድንበሩ የማይታወቅ ሲሆን (ለምሳሌ ሀብታም፣ ረጅም)፤ "አሻሚ" (Ambiguous) የሚባለው ግን በአንድ አውድ ውስጥ ከአንድ በላይ የሆኑ ግልጽና የተለያዩ ፍቺዎችን ሲይዝ ነው (ለምሳሌ bank/ባንክ)። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 2, Fuula 97-98) irratti, jechi tokko "Vague" kan jedhamu yoo daangaan isaa ifa hin taane (fkn sooressa) yoo ta\'u; "Ambiguous" kan jedhamu immoo yoo inni hiika adda addaa lamaa fi isaa ol qabaatedha. Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q36',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Disputes in Logic: Verbal vs Factual',
+    points: 1,
+    question: 'Two students argue intensely about whether a professional boxer is an "athlete." Abebe says: "Yes, boxing requires extreme cardio and muscular endurance." Chala says: "No, athletes play sports that do not involve intentionally battering a human face." What kind of dispute are they having?',
+    options: [
+      'A factual dispute over biological measurements of blood pressure',
+      'A purely verbal dispute arising from conflicting definitions and ambiguity of the term "athlete"',
+      'A religious theological dispute',
+      'A deductive disjunctive fallacy'
+    ],
+    correctAnswer: 1,
+    hint: 'The disagreement is not over empirical facts about boxing, but over the definition of the word "athlete".',
+    explanation: 'According to Chapter 3 (Lesson 2, Page 100), this is a classic verbal dispute. The parties agree on all the physical facts of boxing; their disagreement stems solely from differing definitions or linguistic interpretations of the term "athlete".',
+    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 2፣ ገጽ 100) መሠረት፣ ይሄ "የቃላት ክርክር" (Verbal dispute) ይባላል። ሁለቱም ተማሪዎች ስለ ቦክስ ምንነት ሀቁን ያውቃሉ፤ አለመስማማታቸው የመጣው "አትሌት" የሚለውን ቃል በተለያየ መንገድ ስለበየኑት ብቻ ነው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 2, Fuula 100) irratti, kun "falmii jechaa" (Verbal dispute) jedhama. Isaan lenuu dhugaa saayinsii irratti wal hin dhabne; garuu jecha "athlete" jedhuuf hiika adda addaa waan kennaniif falmu. Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q37',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Terms: Intension vs Extension',
+    points: 1,
+    question: 'In the philosophy of language, what is the crucial distinction between the "intension" (connotation) and the "extension" (denotation) of a term?',
+    options: [
+      'Intension refers to the physical objects in the world, while extension refers to emotional sentiments.',
+      'Intension refers to the qualities or attributes that the term connotes, while extension refers to the members of the class that the term denotes.',
+      'Intension only applies to proper names, while extension only applies to pronouns.',
+      'Intension is determined by mathematical calculus, while extension is determined by grammar.'
+    ],
+    correctAnswer: 1,
+    hint: 'Intension = Attributes/Qualities (connotation); Extension = Actual members of the class (denotation).',
+    explanation: 'In Chapter 3 (Lesson 3, Page 103-104), the module explains: Intension (connotation) consists of the qualities or attributes that the term connotes. Extension (denotation) consists of the actual individual objects or class members that the term denotes.',
+    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 3፣ ገጽ 103-104) መሠረት፣ "ኢንቴንሽን" (Intension / connotation) ማለት ቃሉ የሚያመለክታቸው ውስጣዊ ባህሪያትና መገለጫዎች ሲሆን፤ "ኤክስቴንሽን" (Extension / denotation) ማለት ደግሞ ቃሉ በአካል የሚያመለክታቸው ተጨባጭ ነገሮች ወይም የመደቡ አባላት ናቸው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 3, Fuula 103-104) irratti, "Intension" kan jedhamu amaloota jechi sun of keessatti qabatu yoo ta\'u, "Extension" kan jedhamu immoo miseensota ykn wantoota qabatamaa jechi sun bakka bu\'udha. Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q38',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Terms with Empty Extension',
+    points: 1,
+    question: 'Which of the following terms possesses a meaningful intension (connotation) but has an "empty extension" (null class) in physical reality?',
+    options: [
+      'African elephant',
+      'Unicorn',
+      'Addis Ababa University',
+      'Freshman textbook'
+    ],
+    correctAnswer: 1,
+    hint: 'An entity that has clear descriptive mental attributes (a horse with a spiral horn) but zero living physical members.',
+    explanation: 'Chapter 3 (Lesson 3, Page 105) explains that terms like "unicorn", "flying horse", or "current emperor of Ethiopia" have an empty extension (denote zero members in reality) even though they possess a perfectly clear and rich intension (we understand the attributes that would define them).',
+    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 3፣ ገጽ 105) መሠረት፣ "ዩኒኮርን" (unicorn) ግልጽ የሆነ ውስጣዊ ባህሪ (intension) አለው፤ በአካላዊው ዓለም ውስጥ ግን አንድም በህይወት ያለ አባል ስለሌለው ባዶ ኤክስቴንሽን (empty extension / null class) አለው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 3, Fuula 105) irratti, "Unicorn" amala beekamaa (intension) qabaatus, addunyaa qabatamaa keessatti miseensa tokkollee waan hin qabneef "empty extension" qaba jedhama. Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q39',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'easy',
+    topic: 'Types of Definition: Stipulative Definition',
+    points: 1,
+    question: 'When scientists coined the word "Byte" to represent eight adjacent bits of digital memory, or when the term "Selfie" was first invented, what type of definition was introduced?',
+    options: [
+      'Lexical definition',
+      'Stipulative definition',
+      'Precising definition',
+      'Theoretical definition'
+    ],
+    correctAnswer: 1,
+    hint: 'This type of definition assigns a brand new meaning to a newly coined word for the first time.',
+    explanation: 'According to Chapter 3 (Lesson 4, Page 108), a stipulative definition assigns a meaning to a word for the first time. It often involves coining a new word or giving a new meaning to an existing symbol, and cannot be evaluated as true or false.',
+    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 4፣ ገጽ 108) መሠረት፣ ለአንድ አዲስ ለተፈጠረ ቃል ለመጀመሪያ ጊዜ ትርጉም መስጠት "ስቲፑላቲቭ ዲፊኒሽን" (Stipulative definition) ይባላል። አዳዲስ ቃላት ሲፈጠሩ (እንደ Byte ወይም Selfie) እውነት ወይም ሐሰት ሊባሉ አይችሉም። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 4, Fuula 108) irratti, jecha haaraa uumameef yeroo jalqabaatiif hiika kennuun "Stipulative definition" jedhama. Kun dhugaa ykn soba jedhamee hin madaalamu. Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q40',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Types of Definition: Precising Definition',
+    points: 1,
+    question: 'The penal code specifies that for legal prosecution, "an individual is legally intoxicated if blood alcohol concentration (BAC) reaches or exceeds 0.08 grams per deciliter." What type of definition is this?',
+    options: [
+      'Stipulative definition',
+      'Precising definition',
+      'Persuasive definition',
+      'Etymological definition'
+    ],
+    correctAnswer: 1,
+    hint: 'Its primary purpose is to reduce vagueness and establish a sharp threshold in law or medicine.',
+    explanation: 'Chapter 3 (Lesson 4, Page 109-110) states that a precising definition is designed to reduce the vagueness of a word. By setting a precise numerical threshold (0.08% BAC), it eliminates borderline cases for legal or scientific adjudication.',
+    explanationAmharic: 'በምዕራፍ 3 (ትምህርት 4፣ ገጽ 109-110) መሠረት፣ በህግ ወይም በህክምና ውስጥ የአንድን ቃል ድብዝዝነት (vagueness) ለማስወገድ ግልጽ ወሰን ማበጀት (ለምሳሌ የአልኮል መጠን 0.08 ሲደርስ) "ፕሪሳይሲንግ ዲፊኒሽን" (Precising definition) ይባላል። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 4, Fuula 109-110) irratti, seera ykn yaala keessatti daangaa ifaa taasisanii jecha ifa hin taane daangessuun "Precising definition" jedhama. Deebiin sirriin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q41',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Extensional Techniques: Demonstrative Definition',
+    points: 1,
+    question: 'A mother teaches her toddler the meaning of the word "Chair" by physically pointing to the dining chair, the armchair, and the wooden stool while saying "chair." What definitional technique is being used?',
+    options: [
+      'Synonymous definition',
       'Demonstrative (ostensive) definition',
       'Definition by subclass',
       'Operational definition'
@@ -657,7 +956,7 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 4, Fuula 111-112) irratti, meeshaa tokkotti quba qabuun "Barcuma jechuun kana, kana fi kana..." jedhanii hiikuun Demonstrative (ostensive) definition jedhama. Deebiin B dha.'
   },
   {
-    id: 'loct-2025-model-q29',
+    id: 'loct-2025-model-q42',
     courseId: 'loct-1011',
     courseCode: 'LoCT 1011',
     year: '2025 Model',
@@ -680,7 +979,7 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 4, Fuula 116-117) irratti, hiika kanaan "Offspring" (dhala) garee bal\'aa (Genus) yoo ta\'u, "Female" (dhalaa) immoo amala addaa isa daangessu (Specific Difference) dha. Deebiin C dha.'
   },
   {
-    id: 'loct-2025-model-q30',
+    id: 'loct-2025-model-q43',
     courseId: 'loct-1011',
     courseCode: 'LoCT 1011',
     year: '2025 Model',
@@ -701,5 +1000,166 @@ export const LOGIC_2025_MODEL_QUESTIONS: ExamQuestion[] = [
     explanation: 'According to Chapter 3 (Lesson 5, Page 121), Rule 6 states that a lexical definition should avoid figurative, obscure, vague, or ambiguous language. Defining "Camel" as "a ship of the desert" is figurative because it uses a metaphor rather than stating the essential attributes of the animal.',
     explanationAmharic: 'በምዕራፍ 3 (ትምህርት 5፣ ገጽ 121) መሠረት፣ ህግ 6 (Rule 6) የቃላት ብያኔ ዘይቤያዊ፣ ግልጽ ያልሆነ ወይም ድብዝዝ ቋንቋን ማስወገድ አለበት ይላል። "ግመል የበረሃ መርከብ ነው" ብሎ መበየን ዘይቤያዊ (figurative/metaphor) አነጋገር በመሆኑ ህግ 6ን ይጥሳል። ስለዚህ መልሱ D ነው።',
     explanationAfaanOromo: 'Boqonnaa 3 (Barnoota 5, Fuula 121) irratti, Seerri 6ffaan (Rule 6) hiikni jechaa afaan fakkoommii (figurative), kan hin beekamne ykn ifa hin taane irraa bilisa ta\'uu qaba jedha. "Gaalli doonii gammoojjiiti" jechuun fakkoommii waan ta\'eef Seera 6ffaa cabsa. Deebiin D dha.'
+  },
+  {
+    id: 'loct-2025-model-q44',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Semiotics: Three Dimensions of Language',
+    points: 1,
+    question: 'Semiotics is the general philosophical study of signs and language. Which branch of semiotics investigates the relation of linguistic signs to their real-world referents and truth conditions (meaning)?',
+    options: [
+      'Syntax',
+      'Semantics',
+      'Pragmatics',
+      'Phonology'
+    ],
+    correctAnswer: 1,
+    hint: 'Syntax studies grammar; Semantics studies meaning and truth; Pragmatics studies contextual usage.',
+    explanation: 'Semiotics comprises three classical divisions: (1) Syntax (formal relations between linguistic signs), (2) Semantics (relation of signs to the objects they denote and their literal meanings), and (3) Pragmatics (relation of signs to their human users and conversational contexts). Option B is correct.',
+    explanationAmharic: 'በቋንቋ ፍልስፍና (Semiotics) ውስጥ፣ በቃላት እና በትርጉማቸው (በሚወክሏቸው ተጨባጭ ነገሮች) መካከል ያለውን ትስስር የሚያጠናው ዘርፍ "ሴማንቲክስ" (Semantics) ይባላል። ሰዋሰዋዊ ቅርጻቸውን የሚያጠናው ሲንታክስ ሲሆን ተግባራዊ አጠቃቀማቸውን የሚያጠናው ፕራግማቲክስ ይባላል። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Seemi\'ootiksiin kutaalee sadii qaba: Syntax (caaslugaa), Semantics (hiika jechootaa fi wantoota isaan bakka bu\'an), fi Pragmatics (fayyadama qabatamaa). Kanaafuu deebiin sirriin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q45',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'hard',
+    topic: 'Increasing Intension (Connotation)',
+    points: 1,
+    question: 'Consider the series of terms arranged in order of INCREASING INTENSION (increasing specificity and attributes):',
+    options: [
+      'Tiger, Feline, Mammal, Animal, Organism',
+      'Organism, Animal, Mammal, Feline, Tiger',
+      'Animal, Organism, Tiger, Feline, Mammal',
+      'Mammal, Organism, Feline, Animal, Tiger'
+    ],
+    correctAnswer: 1,
+    hint: 'Increasing intension means adding more defining attributes, which moves from the most general category to the most specific.',
+    explanation: 'In Chapter 3 (Lesson 3), increasing intension occurs when each subsequent term has more attributes than the preceding term. An organism has basic living traits; an animal adds movement; a mammal adds milk glands and hair; a feline adds cat-like anatomy; a tiger adds stripes. Thus: Organism -> Animal -> Mammal -> Feline -> Tiger. Option B is correct.',
+    explanationAmharic: 'በምዕራፍ 3 መሠረት "Increasing intension" (የባህሪ መጨመር) ማለት ከአጠቃላይ ወደ በጣም ዝርዝርና ጥብቅ መደብ መሄድ ነው። ስለዚህ፡ ሕያው አካል (Organism) -> እንስሳ (Animal) -> አጥቢ (Mammal) -> የድመት ዘር (Feline) -> ነብር (Tiger)። እያንዳንዱ ደረጃ አዲስ ባህሪ ይጨምራል። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Boqonnaa 3 irratti "Increasing intension" jechuun amala bal\'aa irraa gara amala murtaa\'aatti deemuudha: Organism -> Animal -> Mammal -> Feline -> Tiger. Kanaafuu filannoon B sirriidha.'
+  },
+  {
+    id: 'loct-2025-model-q46',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'hard',
+    topic: 'Increasing Extension (Denotation)',
+    points: 1,
+    question: 'Which of the following sequences is arranged in order of INCREASING EXTENSION (encompassing a progressively larger number of denoted physical members)?',
+    options: [
+      'African elephant, Elephant, Herbivore, Mammal, Animal',
+      'Animal, Mammal, Herbivore, Elephant, African elephant',
+      'Mammal, African elephant, Elephant, Animal, Herbivore',
+      'Herbivore, Animal, Mammal, Elephant, African elephant'
+    ],
+    correctAnswer: 0,
+    hint: 'Increasing extension moves from the smallest class size to the largest class size.',
+    explanation: 'Increasing extension requires each term to denote a class containing more members than the preceding one: "African elephant" (fewest) -> "Elephant" -> "Herbivore" -> "Mammal" -> "Animal" (most members). Notice that increasing extension is the exact reverse of increasing intension. Option A is correct.',
+    explanationAmharic: '"Increasing extension" (የአባላት ቁጥር መጨመር) የሚያመለክተው አባላቱ በቁጥር እያደጉ ከጠባብ መደብ ወደ ሰፊ መደብ መሄድን ነው፡ የአፍሪካ ዝሆን (አነስተኛ ቁጥር) -> ዝሆን -> ዕፅዋት በሊዕ -> አጥቢ -> እንስሳ (ከፍተኛ ቁጥር)። ስለዚህ ትክክለኛው መልስ A ነው።',
+    explanationAfaanOromo: '"Increasing extension" jechuun miseensonni jechi sun bakka bu\'u lakkoofsaan baay\'achaa deemuudha: African elephant -> Elephant -> Herbivore -> Mammal -> Animal. Deebiin sirriin A dha.'
+  },
+  {
+    id: 'loct-2025-model-q47',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Types of Definition: Theoretical Definition',
+    points: 1,
+    question: 'Defining "Force" in physics as "the product of mass and acceleration (F = ma)," or defining "Water" as "a chemical substance whose molecules consist of two hydrogen atoms bonded to one oxygen atom (H2O)," is classified as what type of definition?',
+    options: [
+      'Lexical definition',
+      'Theoretical definition',
+      'Persuasive definition',
+      'Stipulative definition'
+    ],
+    correctAnswer: 1,
+    hint: 'These definitions assign meaning based on a coherent scientific theory or conceptual model.',
+    explanation: 'According to Chapter 3 (Lesson 4), a theoretical definition assigns meaning to a term by providing an understanding of the entities within the conceptual framework of a scientific or philosophical theory. Defining water as H2O or force as mass times acceleration are standard theoretical definitions. Option B is correct.',
+    explanationAmharic: 'በምዕራፍ 4 መሠረት፣ በሳይንሳዊ ፅንሰ-ሀሳብ ላይ ተመስርቶ የሚሰጥ ብያኔ "ቲዎሬቲካል ዲፊኒሽን" (Theoretical definition) ይባላል። ለምሳሌ ውሃን "H2O" ወይም ሀይልን "F = ma" ብሎ መበየን በሳይንስ ፅንሰ-ሀሳብ ውስጥ ያለውን ሚና የሚያሳይ ነው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Tiyooriin saayinsii irratti hundaa\'uun jecha tokkoof hiika kennuun "Theoretical definition" jedhama. Fakkeenyaaf bishaan jechuun H2O dha jedhanii hiikuun Theoretical definition dha. Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q48',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Types of Definition: Persuasive Definition',
+    points: 1,
+    question: 'Defining "Taxation" as "the legalized armed robbery of hard-working citizens by an oppressive bureaucratic government" is an obvious example of:',
+    options: [
+      'A precising definition to aid tax collectors',
+      'A persuasive definition loaded with emotive terminology to sway attitudes',
+      'An extensional definition by subclass',
+      'An operational definition'
+    ],
+    correctAnswer: 1,
+    hint: 'Persuasive definitions use emotionally charged language to influence the listener\'s feelings and value judgments.',
+    explanation: 'A persuasive definition attempts to influence people\'s feelings, value judgments, and attitudes by using emotionally charged and biased language masquerading as an objective definition. Option B is correct.',
+    explanationAmharic: 'ይህ "ፐርሱዌሲቭ ዲፊኒሽን" (Persuasive definition) ይባላል። አላማው ተጨባጭ ፍቺ መስጠት ሳይሆን፣ ስሜትን በሚቀሰቅሱና ወገንተኛ ቃላት በመጠቀም የአድማጩን አመለካከትና ስሜት ወደ ራስ ፍላጎት ማዘንበል ነው። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Kun "Persuasive definition" jedhama. Kaayyoon isaa hiika qabatamaa kennuu osoo hin taane, jechoota miira kakaasaniin fayyadamuun ilaalcha namaa gara barbaadanitti jallisuudha. Deebiin B dha.'
+  },
+  {
+    id: 'loct-2025-model-q49',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'medium',
+    topic: 'Intensional Techniques: Operational Definition',
+    points: 1,
+    question: 'A psychologist defines "Academic Anxiety" as "a measured heart rate exceeding 100 beats per minute combined with a score above 40 on the standardized Spielberg Anxiety Scale administered before an exam." What definitional technique is utilized here?',
+    options: [
+      'Etymological definition',
+      'Synonymous definition',
+      'Operational definition',
+      'Demonstrative definition'
+    ],
+    correctAnswer: 2,
+    hint: 'Operational definitions define a concept by specifying the experimental measurement or test procedure.',
+    explanation: 'Chapter 3 (Lesson 4) explains that an operational definition assigns meaning to a term by specifying experimental procedures or operations that determine whether or not the term applies to a given case. Specifying physiological heart rate tests and standardized scale scores is a classic operational definition. Option C is correct.',
+    explanationAmharic: 'በምዕራፍ 3 መሠረት፣ አንድን ረቂቅ ፅንሰ-ሀሳብ የሚለካበትን ሳይንሳዊ ወይም የሙከራ ሂደት (procedure/measurement) በማስቀመጥ ትርጉም መስጠት "ኦፕሬሽናል ዲፊኒሽን" (Operational definition) ይባላል። ስለዚህ መልሱ C ነው።',
+    explanationAfaanOromo: 'Boqonnaa 3 irratti adeemsa qorannoo ykn safartuu qabatamaa teessisuun jecha tokko hiikuun "Operational definition" jedhama. Kanaafuu filannoon C deebii sirriidha.'
+  },
+  {
+    id: 'loct-2025-model-q50',
+    courseId: 'loct-1011',
+    courseCode: 'LoCT 1011',
+    year: '2025 Model',
+    examType: 'model',
+    questionType: 'multiple_choice',
+    difficulty: 'hard',
+    topic: 'Rules for Lexical Definitions: Too Broad vs Too Narrow',
+    points: 1,
+    question: 'If a dictionary author defines "Bird" as "a feathered, egg-laying warm-blooded animal that flies through the air," why is this lexical definition defective according to Rule 3 of lexical definitions?',
+    options: [
+      'It is too broad because it includes bats and insects.',
+      'It is too narrow because flightless birds like ostriches, penguins, and kiwis are excluded from the definition.',
+      'It violates grammar by using passive voice.',
+      'It is a circular definition.'
+    ],
+    correctAnswer: 1,
+    hint: 'Rule 3 states that a definition should be neither too broad nor too narrow. Do all birds fly?',
+    explanation: 'Rule 3 for lexical definitions requires that the definiens must be neither too broad nor too narrow. Defining a bird as an animal that flies makes it too narrow because it improperly excludes birds that cannot fly, such as ostriches, emus, penguins, and kiwis. Option B is correct.',
+    explanationAmharic: 'በምዕራፍ 3 ህግ 3 (Rule 3) መሠረት፣ ብያኔ በጣም የሰፋ (too broad) ወይም በጣም የጠበበ (too narrow) መሆን የለበትም። ወፍን "በአየር ላይ የሚበር..." ብሎ መበየን መብረር የማይችሉ እንደ ሰጎንና ፔንግዊን ያሉትን ወፎች ስለሚያስቀር ብያኔው በጣም የጠበበ (too narrow) ነው ያሰኘዋል። ስለዚህ መልሱ B ነው።',
+    explanationAfaanOromo: 'Seera 3ffaa (Rule 3) hiika jechaa irratti hiikni tokko baay\'ee bal\'aa ykn baay\'ee dhiphaa ta\'uu hin qabu. Simbira jechuun "kan balali\'u..." jedhanii hiikuun simbira akka guchii fi peenguwiin kan hin balaliine waan dhabamsiisuuf "too narrow" (baay\'ee dhiphaa) jedhama. Deebiin B dha.'
   }
 ];
