@@ -29,7 +29,8 @@ export const UnlockAccessTab: React.FC = () => {
     addPaymentSubmission,
     setActiveTab,
     adminEmail,
-    checkAndActivateUnlock
+    checkAndActivateUnlock,
+    unlockFullAccess
   } = useApp();
 
   // Form State
@@ -46,6 +47,25 @@ export const UnlockAccessTab: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [isEditingOrReuploading, setIsEditingOrReuploading] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 5-Minute Auto-Unlock Countdown Calculation (300 seconds)
+  const getInitialSecondsRemaining = (): number => {
+    if (isUnlocked) return 0;
+    const savedTimeStr = typeof window !== 'undefined' ? localStorage.getItem('smart_study_submission_time') : null;
+    let timestamp = 0;
+    if (savedTimeStr) {
+      timestamp = Number(savedTimeStr);
+    } else if (mySubmission?.submittedAt) {
+      timestamp = new Date(mySubmission.submittedAt).getTime();
+    } else if (lastSubmitted?.submittedAt) {
+      timestamp = new Date(lastSubmitted.submittedAt).getTime();
+    }
+    if (!timestamp) return 300;
+    const elapsed = Math.floor((Date.now() - timestamp) / 1000);
+    return Math.max(0, 300 - elapsed);
+  };
+
+  const [countdownSeconds, setCountdownSeconds] = useState<number>(300);
 
   // Status check state
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
@@ -72,6 +92,8 @@ export const UnlockAccessTab: React.FC = () => {
 
     return false;
   }) || (lastSubmitted ? lastSubmitted : undefined);
+
+  const isPendingVerification = !isEditingOrReuploading && (submitSuccess || (mySubmission && mySubmission.status === 'pending')) && !isUnlocked;
 
   // Instant Manual check trigger
   const handleManualCheck = async () => {
@@ -131,6 +153,21 @@ export const UnlockAccessTab: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [isUnlocked, mySubmission?.id, studentPhone, studentProfile.phone, savedSubId, savedPhone, savedEmail, savedRef, checkAndActivateUnlock]);
+
+  // Active 1-second interval for 5-minute auto-unlock countdown
+  useEffect(() => {
+    if (isUnlocked) return;
+    const updateCountdown = () => {
+      const remaining = getInitialSecondsRemaining();
+      setCountdownSeconds(remaining);
+      if (remaining <= 0 && isPendingVerification) {
+        unlockFullAccess('Auto-activated after 5-minute verification window completed');
+      }
+    };
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, [isUnlocked, isPendingVerification, mySubmission?.submittedAt, lastSubmitted?.submittedAt, unlockFullAccess]);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -239,8 +276,6 @@ export const UnlockAccessTab: React.FC = () => {
       setIsEditingOrReuploading(false);
     }
   };
-
-  const isPendingVerification = !isEditingOrReuploading && (submitSuccess || (mySubmission && mySubmission.status === 'pending')) && !isUnlocked;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -359,22 +394,62 @@ export const UnlockAccessTab: React.FC = () => {
         </div>
       )}
 
-      {/* 2. STATE: PAYMENT SCREENSHOT SUBMITTED & AWAITING ADMIN UNLOCK (NO EXTRA PROCESS!) */}
+      {/* 2. STATE: PAYMENT SCREENSHOT SUBMITTED & 5-MINUTE AUTO-UNLOCK COUNTDOWN ACTIVE */}
       {isPendingVerification && (
         <div className="bg-white rounded-3xl border-2 border-emerald-400 p-6 sm:p-8 shadow-md space-y-6 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-blue-500 via-emerald-400 to-indigo-500 animate-pulse" />
+          <div className="absolute top-0 right-0 left-0 h-2 bg-gradient-to-r from-amber-400 via-emerald-400 to-blue-500 animate-pulse" />
 
-          <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center shadow-xs">
-            <CheckCircle2 className="w-10 h-10" />
+          {/* Top Status Header */}
+          <div className="flex flex-wrap items-center justify-between gap-2 max-w-xl mx-auto pt-2">
+            <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+              ⚡ 5-Minute Auto-Activation Active
+            </span>
+            <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              Screenshot Delivered to Admin
+            </span>
           </div>
 
-          <div className="space-y-1.5">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900">
-              Payment Screenshot Submitted!
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto">
-              Your payment receipt of <strong>300 ETB</strong> has been successfully submitted to Admin <strong>Guduru Alemayehu</strong>.
+          {/* Big Digital Countdown Clock Display */}
+          <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white rounded-2xl p-6 max-w-xl mx-auto shadow-lg border border-slate-800 space-y-3">
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-amber-400">
+              <Clock className="w-4 h-4 animate-spin" />
+              <span>AUTOMATIC ACCESS UNLOCK COUNTDOWN</span>
+            </div>
+
+            <div className="text-5xl sm:text-6xl font-black font-mono tracking-tight text-white flex items-center justify-center gap-2 drop-shadow-md">
+              <span className="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+                {Math.floor(countdownSeconds / 60).toString().padStart(2, '0')}
+              </span>
+              <span className="text-amber-400 animate-pulse">:</span>
+              <span className="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700 text-emerald-400">
+                {(countdownSeconds % 60).toString().padStart(2, '0')}
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+              When this 5-minute timer reaches <strong className="text-emerald-400 font-mono">00:00</strong>, your app will <strong>automatically unlock full access</strong> without waiting! (Or immediately when Admin Guduru taps approve).
             </p>
+
+            {/* Smooth Progress Bar */}
+            <div className="space-y-1.5 pt-2">
+              <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                <div
+                  className="bg-gradient-to-r from-amber-400 via-blue-500 to-emerald-400 h-full rounded-full transition-all duration-1000 ease-linear shadow-xs"
+                  style={{
+                    width: `${Math.min(100, Math.max(5, Math.round(((300 - countdownSeconds) / 300) * 100)))}%`
+                  }}
+                />
+              </div>
+              <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                <span>Submitted</span>
+                <span className="text-emerald-400 font-bold">
+                  {Math.min(100, Math.round(((300 - countdownSeconds) / 300) * 100))}% Processed
+                </span>
+                <span>Auto-Unlock (5:00)</span>
+              </div>
+            </div>
           </div>
 
           {/* Student & Payment Summary Capsule */}
@@ -385,9 +460,9 @@ export const UnlockAccessTab: React.FC = () => {
             <span className="text-slate-300">•</span>
             <span>Channel: <strong className="text-blue-700">{mySubmission?.paymentMethod || paymentMethod} (300 ETB)</strong></span>
             <span className="text-slate-300">•</span>
-            <span className="text-amber-700 font-bold flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-amber-500 animate-spin" />
-              Awaiting Admin Unlock
+            <span className="text-emerald-700 font-bold flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              Proof Sent to Admin Guduru
             </span>
           </div>
 
@@ -398,27 +473,24 @@ export const UnlockAccessTab: React.FC = () => {
                 <img
                   src={mySubmission?.screenshotUrl || screenshotPreview || ''}
                   alt="Uploaded Payment Receipt"
-                  className="max-h-52 rounded-xl object-contain mx-auto shadow-xs bg-white"
+                  className="max-h-48 rounded-xl object-contain mx-auto shadow-xs bg-white"
                 />
               </div>
               <span className="text-[11px] text-emerald-700 font-semibold block flex items-center justify-center gap-1">
                 <Check className="w-3.5 h-3.5 text-emerald-600" />
-                Screenshot received on admin portal
+                Screenshot confirmed on Administrator Portal
               </span>
             </div>
           )}
 
-          {/* Live Stream Notice */}
+          {/* Reassurance Notice */}
           <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 max-w-lg mx-auto space-y-1">
             <div className="flex items-center justify-center gap-2 font-bold">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
-              <span>Live stream listening for unlock signal</span>
+              <Zap className="w-4 h-4 text-emerald-600" />
+              <span>Full Access Guaranteed</span>
             </div>
             <p className="text-[11px] text-emerald-800">
-              No extra step is needed! The exact second Admin Guduru Alemayehu taps <strong>&ldquo;Verify &amp; Unlock&rdquo;</strong>, your app will open and unlock all video lectures and CBT questions automatically.
+              Admin <strong>Guduru Alemayehu</strong> ({adminEmail}, 0953201048) tracks all screenshot submissions. You can also tap <strong>&ldquo;Check Status Now&rdquo;</strong> to verify if the admin already clicked approve!
             </p>
           </div>
 
@@ -482,6 +554,8 @@ export const UnlockAccessTab: React.FC = () => {
                   try {
                     localStorage.removeItem('smart_study_last_submission_id');
                     localStorage.removeItem('smart_study_student_ref');
+                    localStorage.removeItem('smart_study_submission_time');
+                    localStorage.removeItem('smart_study_student_submission');
                   } catch {}
                   setLastSubmitted(null);
                   setSubmitSuccess(false);
@@ -500,6 +574,7 @@ export const UnlockAccessTab: React.FC = () => {
           </div>
         </div>
       )}
+
 
       {/* 3. STATE: FORM TO SUBMIT PAYMENT (SHOWN ONLY IF NOT YET SUBMITTED) */}
       {!isUnlocked && !isPendingVerification && (

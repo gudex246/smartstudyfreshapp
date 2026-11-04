@@ -198,7 +198,33 @@ app.get('/api/submissions', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   const subs = loadSubmissions();
-  res.json(subs);
+
+  // Auto-activate any submission older than 5 minutes (300,000 ms)
+  let changed = false;
+  const now = Date.now();
+  const updatedSubs = subs.map((s: any) => {
+    if (s.submittedAt && s.status === 'pending') {
+      const elapsed = now - new Date(s.submittedAt).getTime();
+      if (elapsed >= 5 * 60 * 1000) {
+        changed = true;
+        return {
+          ...s,
+          status: 'verified',
+          verifiedAt: s.verifiedAt || new Date(new Date(s.submittedAt).getTime() + 300000).toISOString(),
+          adminNotes: s.adminNotes && !s.adminNotes.includes('Awaiting')
+            ? s.adminNotes
+            : 'Auto-activated after 5-minute countdown completed'
+        };
+      }
+    }
+    return s;
+  });
+
+  if (changed) {
+    saveSubmissions(updatedSubs);
+  }
+
+  res.json(updatedSubs);
 });
 
 // Real-Time Server-Sent Events stream for instant unlock (<20ms)
@@ -272,10 +298,24 @@ app.get('/api/check-status', (req, res) => {
   });
 
   if (matched) {
+    // Check if 5-minute countdown has completed
+    const elapsed = matched.submittedAt ? Date.now() - new Date(matched.submittedAt).getTime() : 0;
+    const isFiveMinutesElapsed = elapsed >= 5 * 60 * 1000;
+
+    if (isFiveMinutesElapsed && matched.status === 'pending') {
+      matched.status = 'verified';
+      matched.verifiedAt = matched.verifiedAt || new Date().toISOString();
+      matched.adminNotes = 'Auto-activated after 5-minute countdown completed';
+      saveSubmissions(currentSubs);
+      broadcastSse('update', { type: 'UPDATE_SUBMISSION', data: matched });
+    }
+
+    const isUnlockedNow = matched.status === 'verified' || isFiveMinutesElapsed;
+
     return res.json({
       found: true,
-      status: matched.status,
-      isUnlocked: matched.status === 'verified',
+      status: isUnlockedNow ? 'verified' : matched.status,
+      isUnlocked: isUnlockedNow,
       submission: matched
     });
   }

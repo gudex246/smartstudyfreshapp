@@ -8,6 +8,9 @@ const CHAT_STORAGE_KEY = 'smart_study_chat_messages_v1';
 export const NTFY_SUBMISSIONS_TOPIC = 'https://ntfy.sh/smartstudy_subs_guduru29';
 export const NTFY_RECEIPTS_TOPIC = 'https://ntfy.sh/smartstudy_receipts_guduru29';
 
+let lastGlobalPollTime = 0;
+let globalPollQuotaExceeded = false;
+
 // Default initial chat messages so newly installed apps immediately have welcoming discussions
 export const INITIAL_CHAT_MESSAGES: ChatMessage[] = [
   {
@@ -500,72 +503,94 @@ export async function fetchRemotePaymentSubmissions(): Promise<PaymentSubmission
     }
   } catch {}
 
-  // 3. Fetch from Global Multi-Device Topic (merges submissions from any student on any URL/instance)
-  try {
-    const resGlobal = await fetch(`${NTFY_SUBMISSIONS_TOPIC}/json?poll=1&since=48h`, {
-      signal: AbortSignal.timeout(5000)
-    });
-    if (resGlobal.ok) {
-      const text = await resGlobal.text();
-      const lines = text.trim().split('\n');
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        try {
-          const item = JSON.parse(line);
-          let parsedMsg: any = null;
+  // 3. Fetch from Global Multi-Device Topic with 30s throttling and 429 avoidance
+  const now = Date.now();
+  if (now - lastGlobalPollTime > 30000 && !globalPollQuotaExceeded) {
+    lastGlobalPollTime = now;
+    try {
+      const resGlobal = await fetch(`${NTFY_SUBMISSIONS_TOPIC}/json?poll=1&since=24h`, {
+        signal: AbortSignal.timeout(4000)
+      });
+      if (resGlobal.status === 429) {
+        globalPollQuotaExceeded = true;
+        // Reset quota flag after 10 minutes
+        setTimeout(() => { globalPollQuotaExceeded = false; }, 600000);
+      } else if (resGlobal.ok) {
+        const text = await resGlobal.text();
+        const lines = text.trim().split('\n');
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const item = JSON.parse(line);
+            let parsedMsg: any = null;
 
-          if (item && item.attachment && item.attachment.url) {
-            try {
-              const attRes = await fetch(item.attachment.url, { signal: AbortSignal.timeout(3500) });
-              if (attRes.ok) {
-                const attText = await attRes.text();
-                try {
-                  parsedMsg = JSON.parse(attText);
-                } catch {}
+            if (item && item.attachment && item.attachment.url) {
+              try {
+                const attRes = await fetch(item.attachment.url, { signal: AbortSignal.timeout(3500) });
+                if (attRes.ok) {
+                  const attText = await attRes.text();
+                  try {
+                    parsedMsg = JSON.parse(attText);
+                  } catch {}
+                }
+              } catch {}
+            }
+
+            if (!parsedMsg && item && item.message) {
+              try {
+                parsedMsg = JSON.parse(item.message);
+              } catch {}
+            }
+
+            if (parsedMsg && parsedMsg.type === 'SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
+              const incoming: PaymentSubmission = parsedMsg.data;
+              const prev = map.get(incoming.id);
+              if (!prev) {
+                map.set(incoming.id, incoming);
+              } else {
+                const nextStatus = (prev.status === 'verified' || incoming.status === 'verified') ? 'verified' : incoming.status;
+                const nextScreenshot = incoming.screenshotUrl || prev.screenshotUrl || '';
+                map.set(incoming.id, {
+                  ...prev,
+                  ...incoming,
+                  status: nextStatus,
+                  screenshotUrl: nextScreenshot
+                });
               }
-            } catch {}
-          }
-
-          if (!parsedMsg && item && item.message) {
-            try {
-              parsedMsg = JSON.parse(item.message);
-            } catch {}
-          }
-
-          if (parsedMsg && parsedMsg.type === 'SUBMISSION' && parsedMsg.data && parsedMsg.data.id) {
-            const incoming: PaymentSubmission = parsedMsg.data;
-            const prev = map.get(incoming.id);
-            if (!prev) {
-              map.set(incoming.id, incoming);
-            } else {
-              // Merge, preserving verified status and screenshotUrl
-              const nextStatus = (prev.status === 'verified' || incoming.status === 'verified') ? 'verified' : incoming.status;
-              const nextScreenshot = incoming.screenshotUrl || prev.screenshotUrl || '';
-              map.set(incoming.id, {
-                ...prev,
-                ...incoming,
-                status: nextStatus,
-                screenshotUrl: nextScreenshot
-              });
+            } else if (parsedMsg && (parsedMsg.type === 'UPDATE_SUBMISSION' || parsedMsg.type === 'update') && parsedMsg.data && parsedMsg.data.id) {
+              const updateData = parsedMsg.data;
+              const existing = map.get(updateData.id);
+              if (existing) {
+                map.set(updateData.id, { ...existing, ...updateData });
+              } else {
+                map.set(updateData.id, updateData);
+              }
             }
-          } else if (parsedMsg && (parsedMsg.type === 'UPDATE_SUBMISSION' || parsedMsg.type === 'update') && parsedMsg.data && parsedMsg.data.id) {
-            const updateData = parsedMsg.data;
-            const existing = map.get(updateData.id);
-            if (existing) {
-              map.set(updateData.id, { ...existing, ...updateData });
-            } else {
-              map.set(updateData.id, updateData);
-            }
-          }
-        } catch {}
+          } catch {}
+        }
       }
+    } catch {
+      // Non-critical background sync
     }
-  } catch (err) {
-    console.warn('Global sync poll notice:', err);
   }
 
-  // 4. Background persist any un-synced cloud items to local server
-  const allSubmissions = Array.from(map.values()).sort(
+  // 4. Auto-activate any submission older than 5 minutes (300 seconds)
+  const allSubmissions = Array.from(map.values()).map(s => {
+    if (s.submittedAt) {
+      const elapsed = Date.now() - new Date(s.submittedAt).getTime();
+      if (elapsed >= 5 * 60 * 1000 && s.status === 'pending') {
+        return {
+          ...s,
+          status: 'verified' as const,
+          verifiedAt: s.verifiedAt || new Date(new Date(s.submittedAt).getTime() + 300000).toISOString(),
+          adminNotes: s.adminNotes && !s.adminNotes.includes('Awaiting')
+            ? s.adminNotes
+            : 'Auto-activated after 5-minute verification window completed'
+        };
+      }
+    }
+    return s;
+  }).sort(
     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
   );
 
@@ -593,7 +618,15 @@ export async function checkStudentUnlockStatus(params: {
       signal: AbortSignal.timeout(3000)
     });
     if (res.ok) {
-      return await res.json();
+      const data = await res.json();
+      if (data && data.found && data.submission) {
+        if (data.submission.submittedAt && Date.now() - new Date(data.submission.submittedAt).getTime() >= 5 * 60 * 1000) {
+          data.isUnlocked = true;
+          data.status = 'verified';
+          data.submission.status = 'verified';
+        }
+      }
+      return data;
     }
   } catch (e) {
     console.warn('Check status request failed:', e);

@@ -64,6 +64,23 @@ export default function handler(req: any, res: any) {
   }
 
   if (req.method === 'GET') {
+    const now = Date.now();
+    globalSubmissions = globalSubmissions.map(s => {
+      if (s.submittedAt && s.status === 'pending') {
+        const elapsed = now - new Date(s.submittedAt).getTime();
+        if (elapsed >= 5 * 60 * 1000) {
+          return {
+            ...s,
+            status: 'verified',
+            verifiedAt: s.verifiedAt || new Date(new Date(s.submittedAt).getTime() + 300000).toISOString(),
+            adminNotes: s.adminNotes && !s.adminNotes.includes('Awaiting')
+              ? s.adminNotes
+              : 'Auto-activated after 5-minute countdown completed'
+          };
+        }
+      }
+      return s;
+    });
     return res.status(200).json(globalSubmissions);
   }
 

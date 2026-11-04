@@ -221,6 +221,7 @@ interface AppContextType {
   syncRemoteSubmissions: () => Promise<number>;
   isSyncingSubmissions: boolean;
   checkAndActivateUnlock: (phoneOrRef?: string) => Promise<{ unlocked: boolean; status?: string; reason?: string; submission?: PaymentSubmission }>;
+  unlockFullAccess: (reason?: string) => void;
 
   // Video CRUD
   addVideo: (video: VideoTutorial) => void;
@@ -1101,9 +1102,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       localStorage.setItem('smart_study_last_submission_id', newSubmission.id);
+      localStorage.setItem('smart_study_submission_time', String(Date.now()));
+      localStorage.setItem('smart_study_student_submission', JSON.stringify(newSubmission));
       if (data.studentPhone) localStorage.setItem('smart_study_student_phone', data.studentPhone);
       if (data.studentEmail) localStorage.setItem('smart_study_student_email', data.studentEmail);
       if (data.transactionRef) localStorage.setItem('smart_study_student_ref', data.transactionRef);
+      setSampleStudentPaywallStatusState('pending');
+      safeSetItem(STORAGE_KEYS.SAMPLE_STUDENT_STATUS, 'pending');
     } catch {}
 
     // 2. Dispatch to local API and background sync without blocking UI responsiveness
@@ -1119,6 +1124,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
 
     return newSubmission;
+  };
+
+  // 5-Minute Auto-Unlock or Manual Instant Unlock
+  const unlockFullAccess = (reason?: string) => {
+    const verifiedTimestamp = new Date().toISOString();
+    const verifiedNotes = reason || 'Auto-activated after 5-minute countdown completed';
+    safeSetItem('smart_study_full_access_unlocked', 'true');
+    setSampleStudentPaywallStatusState('verified');
+    safeSetItem(STORAGE_KEYS.SAMPLE_STUDENT_STATUS, 'verified');
+    setSampleStudentTutorialStepState(5);
+    safeSetItem(STORAGE_KEYS.SAMPLE_STUDENT_STEP, '5');
+
+    const savedSubId = typeof window !== 'undefined' ? localStorage.getItem('smart_study_last_submission_id') : null;
+    const targetSubId = studentProfile.submissionId || savedSubId;
+
+    setStudentProfile(prev => {
+      const updated = {
+        ...prev,
+        isUnlocked: true,
+        unlockedAt: verifiedTimestamp
+      };
+      safeSetItem(STORAGE_KEYS.STUDENT, JSON.stringify(updated));
+      return updated;
+    });
+
+    if (targetSubId) {
+      setPaymentSubmissions(prev =>
+        prev.map(s => {
+          if (s.id === targetSubId) {
+            return {
+              ...s,
+              status: 'verified' as const,
+              verifiedAt: verifiedTimestamp,
+              adminNotes: verifiedNotes
+            };
+          }
+          return s;
+        })
+      );
+      updatePaymentSubmissionInCloud(targetSubId, {
+        status: 'verified',
+        adminNotes: verifiedNotes,
+        verifiedAt: verifiedTimestamp
+      }).catch(() => {});
+    }
   };
 
   // Manual / On-demand Cloud Sync for Admin
@@ -1817,7 +1867,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (studentProfile.isUnlocked) return true;
     if (typeof window !== 'undefined' && localStorage.getItem('smart_study_full_access_unlocked') === 'true') return true;
 
-    // 3. Direct check against verified payment submissions: ONLY unlock if this student has an approved submission!
+    // 3. 5-Minute Auto-Activation guarantee: if student submitted payment >= 5 minutes ago, grant full access!
+    if (typeof window !== 'undefined') {
+      const subTimeStr = localStorage.getItem('smart_study_submission_time');
+      if (subTimeStr && (Date.now() - Number(subTimeStr)) >= 5 * 60 * 1000) {
+        safeSetItem('smart_study_full_access_unlocked', 'true');
+        return true;
+      }
+    }
+
+    // 4. Direct check against verified payment submissions: ONLY unlock if this student has an approved submission!
     const currentEmail = studentProfile.email?.trim().toLowerCase();
     const currentPhone = studentProfile.phone?.trim();
     const currentSubId = studentProfile.submissionId || (typeof window !== 'undefined' ? localStorage.getItem('smart_study_last_submission_id') : null);
@@ -1826,7 +1885,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const savedRef = typeof window !== 'undefined' ? localStorage.getItem('smart_study_student_ref')?.trim().toLowerCase() : null;
 
     const hasVerified = paymentSubmissions.some(s => {
-      if (s.status !== 'verified') return false;
+      const isElapsed = s.submittedAt && (Date.now() - new Date(s.submittedAt).getTime()) >= 5 * 60 * 1000;
+      if (s.status !== 'verified' && !isElapsed) return false;
+
       if (currentSubId && s.id === currentSubId) return true;
       if (savedRef && s.transactionRef && s.transactionRef.trim().toLowerCase() === savedRef) return true;
       if (savedRef && s.syncCode && s.syncCode.trim().toLowerCase() === savedRef) return true;
@@ -1846,6 +1907,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     studentProfile.submissionId,
     paymentSubmissions
   ]);
+
+  // Active 5-minute countdown watcher: Auto-activates full access when 5 minutes elapse
+  useEffect(() => {
+    const checkCountdownAutoUnlock = () => {
+      if (typeof window === 'undefined') return;
+      if (isUnlockedEffective) return;
+
+      const subTimeStr = localStorage.getItem('smart_study_submission_time');
+      const savedSubId = localStorage.getItem('smart_study_last_submission_id');
+
+      let subTimestamp = subTimeStr ? Number(subTimeStr) : 0;
+      if (!subTimestamp && savedSubId) {
+        const found = paymentSubmissions.find(s => s.id === savedSubId);
+        if (found?.submittedAt) {
+          subTimestamp = new Date(found.submittedAt).getTime();
+        }
+      }
+
+      if (subTimestamp > 0) {
+        const elapsed = Date.now() - subTimestamp;
+        if (elapsed >= 5 * 60 * 1000) {
+          unlockFullAccess('Auto-activated after 5-minute countdown completed');
+        }
+      }
+    };
+
+    checkCountdownAutoUnlock();
+    const interval = setInterval(checkCountdownAutoUnlock, 1000);
+    return () => clearInterval(interval);
+  }, [isUnlockedEffective, paymentSubmissions]);
 
   return (
     <AppContext.Provider
@@ -1896,6 +1987,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         syncRemoteSubmissions,
         isSyncingSubmissions,
         checkAndActivateUnlock,
+        unlockFullAccess,
         addVideo,
         updateVideo,
         deleteVideo,
