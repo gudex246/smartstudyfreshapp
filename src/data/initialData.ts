@@ -26,8 +26,12 @@ import { HISTORY_MODULE_CHAPTERS } from './historyNotes';
 import { INCLUSIVENESS_MODULE_CHAPTERS } from './inclusivenessNotes';
 import { ANTHROPOLOGY_QUESTIONS } from './anthropologyQuestions';
 import { ANTHROPOLOGY_2017_MIDTERM_QUESTIONS } from './anthropologyQuestions2017Midterm';
+import { ANTHROPOLOGY_2016_MIDTERM_QUESTIONS } from './anthropologyQuestions2016Midterm';
+import { ANTHROPOLOGY_2015_MIDTERM_QUESTIONS } from './anthropologyQuestions2015Midterm';
 import { CIVICS_QUESTIONS } from './civicsQuestions';
+import { CIVICS_2017_MIDTERM_QUESTIONS } from './civicsQuestions2017Midterm';
 import { HISTORY_QUESTIONS } from './historyQuestions';
+import { HISTORY_2017_MIDTERM_QUESTIONS } from './historyQuestions2017Midterm';
 import { INCLUSIVENESS_QUESTIONS } from './inclusivenessQuestions';
 
 export const INITIAL_COURSES: Course[] = [
@@ -168,8 +172,12 @@ export const INITIAL_COURSES: Course[] = [
 export const INITIAL_QUESTIONS: ExamQuestion[] = [
   ...ANTHROPOLOGY_QUESTIONS,
   ...ANTHROPOLOGY_2017_MIDTERM_QUESTIONS,
+  ...ANTHROPOLOGY_2016_MIDTERM_QUESTIONS,
+  ...ANTHROPOLOGY_2015_MIDTERM_QUESTIONS,
   ...CIVICS_QUESTIONS,
+  ...CIVICS_2017_MIDTERM_QUESTIONS,
   ...HISTORY_QUESTIONS,
+  ...HISTORY_2017_MIDTERM_QUESTIONS,
   ...INCLUSIVENESS_QUESTIONS,
   ...PHYSICS_2025_MODEL_QUESTIONS,
   ...MATH_2025_MODEL_QUESTIONS,

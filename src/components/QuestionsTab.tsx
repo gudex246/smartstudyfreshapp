@@ -439,7 +439,15 @@ export const QuestionsTab: React.FC = () => {
                   } else {
                     setSelectedYear('all');
                   }
-                } else if (newCourse === 'MCiE 1012' || newCourse === 'Hist 1012' || newCourse === 'SNIE 1012') {
+                } else if (newCourse === 'MCiE 1012' || newCourse === 'Hist 1012') {
+                  if (selectedExamType === 'midterm') {
+                    setSelectedYear('2017');
+                  } else if (selectedExamType === 'model') {
+                    setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
+                } else if (newCourse === 'SNIE 1012') {
                   if (selectedExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
@@ -531,7 +539,15 @@ export const QuestionsTab: React.FC = () => {
                   } else {
                     setSelectedYear('all');
                   }
-                } else if (selectedCourse === 'MCiE 1012' || selectedCourse === 'Hist 1012' || selectedCourse === 'SNIE 1012') {
+                } else if (selectedCourse === 'MCiE 1012' || selectedCourse === 'Hist 1012') {
+                  if (newExamType === 'midterm') {
+                    setSelectedYear('2017');
+                  } else if (newExamType === 'model') {
+                    setSelectedYear('2025');
+                  } else {
+                    setSelectedYear('all');
+                  }
+                } else if (selectedCourse === 'SNIE 1012') {
                   if (newExamType === 'model') {
                     setSelectedYear('2025');
                   } else {
@@ -767,8 +783,10 @@ export const QuestionsTab: React.FC = () => {
                 // Dedicated year & exam options for Social Anthropology (Haramaya University & Model)
                 selectedExamType === 'midterm' ? (
                   <>
-                    <option value="all">All Mid Terms (2017 Midterm • 30 Questions)</option>
+                    <option value="all">All Mid Terms (2017, 2016 & 2015 Midterms • 80 Questions)</option>
                     <option value="2017">2017 Midterm Exam (2017 E.C. Haramaya • 30 Questions)</option>
+                    <option value="2016">2016 Midterm Exam (2016 E.C. Haramaya • 25 Questions)</option>
+                    <option value="2015">2015 Midterm Exam (2015 E.C. Haramaya • 25 Questions)</option>
                   </>
                 ) : selectedExamType === 'model' ? (
                   <>
@@ -777,10 +795,12 @@ export const QuestionsTab: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <option value="all">All Social Anthropology Exams (55 Questions)</option>
+                    <option value="all">All Social Anthropology Exams (105 Questions)</option>
                     <optgroup label="📝 Mid Terms Exam (Haramaya University)">
-                      <option value="midterm-all">All Mid Terms (2017 Midterm • 30 Questions)</option>
+                      <option value="midterm-all">All Mid Terms (2017, 2016 & 2015 • 80 Questions)</option>
                       <option value="midterm-2017">2017 Midterm Exam (2017 E.C. Haramaya • 30 Questions)</option>
+                      <option value="midterm-2016">2016 Midterm Exam (2016 E.C. Haramaya • 25 Questions)</option>
+                      <option value="midterm-2015">2015 Midterm Exam (2015 E.C. Haramaya • 25 Questions)</option>
                     </optgroup>
                     <optgroup label="⚡ Smart Study Model Exam">
                       <option value="model-2025">2025 Smart Study Model Exam (Chapters 1 - 6 • 25 Questions)</option>
@@ -828,14 +848,23 @@ export const QuestionsTab: React.FC = () => {
                 )
               ) : selectedCourse === 'MCiE 1012' ? (
                 // Dedicated year & exam options for Moral & Civic Education
-                selectedExamType === 'model' ? (
+                selectedExamType === 'midterm' ? (
+                  <>
+                    <option value="all">All Mid Terms (2017 Midterm • 30 Questions)</option>
+                    <option value="2017">2017 Midterm Exam (2017 E.C. • 30 Questions)</option>
+                  </>
+                ) : selectedExamType === 'model' ? (
                   <>
                     <option value="all">All Model Exams (2025 Model • 25 Questions)</option>
                     <option value="2025">2025 Smart Study Model Exam (25 Questions)</option>
                   </>
                 ) : (
                   <>
-                    <option value="all">All Moral & Civic Education Exams (25 Questions)</option>
+                    <option value="all">All Moral & Civic Education Exams (55 Questions)</option>
+                    <optgroup label="📝 Mid Terms Exam">
+                      <option value="midterm-all">All Mid Terms (2017 Midterm • 30 Questions)</option>
+                      <option value="midterm-2017">2017 Midterm Exam (2017 E.C. • 30 Questions)</option>
+                    </optgroup>
                     <optgroup label="⚡ Smart Study Model Exam">
                       <option value="model-2025">2025 Smart Study Model Exam (Chapters 1 - 6 • 25 Questions)</option>
                     </optgroup>
@@ -843,14 +872,23 @@ export const QuestionsTab: React.FC = () => {
                 )
               ) : selectedCourse === 'Hist 1012' ? (
                 // Dedicated year & exam options for History of Ethiopia and the Horn
-                selectedExamType === 'model' ? (
+                selectedExamType === 'midterm' ? (
+                  <>
+                    <option value="all">All Mid Terms (2017 Midterm • 20 Questions)</option>
+                    <option value="2017">2017 Midterm Exam (2017 E.C. Haramaya • 20 Questions)</option>
+                  </>
+                ) : selectedExamType === 'model' ? (
                   <>
                     <option value="all">All Model Exams (2025 Model • 25 Questions)</option>
                     <option value="2025">2025 Smart Study Model Exam (25 Questions)</option>
                   </>
                 ) : (
                   <>
-                    <option value="all">All History of Ethiopia & Horn Exams (25 Questions)</option>
+                    <option value="all">All History of Ethiopia & Horn Exams (45 Questions)</option>
+                    <optgroup label="📝 Mid Terms Exam (Haramaya University)">
+                      <option value="midterm-all">All Mid Terms (2017 Midterm • 20 Questions)</option>
+                      <option value="midterm-2017">2017 Midterm Exam (2017 E.C. Haramaya • 20 Questions)</option>
+                    </optgroup>
                     <optgroup label="⚡ Smart Study Model Exam">
                       <option value="model-2025">2025 Smart Study Model Exam (Chapters 1 - 7 • 25 Questions)</option>
                     </optgroup>
